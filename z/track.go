@@ -22,13 +22,23 @@ var trackCmd = &cobra.Command{
     }
 
     newEntry, err := NewEntry("", begin, finish, project, task, user)
-    database.AddEntry(newEntry, true)
-    entries, err := database.ListEntries()
     if err != nil {
       log.Fatal(err)
     }
 
-    fmt.Printf("%+v", entries)
+    entryId, err := database.AddEntry(user, newEntry, true)
+    if err != nil {
+      log.Fatal(err)
+    }
+
+    // entries, err := database.ListEntries()
+    // if err != nil {
+    //   log.Fatal(err)
+    // }
+    // fmt.Printf("%+v", entries)
+
+    log.Printf("Added new entry with ID %s!\n", entryId)
+    return
   },
 }
 
