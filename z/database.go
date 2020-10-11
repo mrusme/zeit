@@ -2,6 +2,7 @@ package z
 
 import (
   "log"
+  "errors"
   "encoding/json"
   "github.com/tidwall/buntdb"
   "github.com/google/uuid"
@@ -32,7 +33,7 @@ func (database *Database) NewID() (string) {
   return id.String()
 }
 
-func (database *Database) AddEntry(entry Entry, setRunning bool) (string, error) {
+func (database *Database) AddEntry(user string, entry Entry, setRunning bool) (string, error) {
   id := database.NewID()
 
   entryJson, jsonerr := json.Marshal(entry)
@@ -42,12 +43,12 @@ func (database *Database) AddEntry(entry Entry, setRunning bool) (string, error)
 
   dberr := database.DB.Update(func(tx *buntdb.Tx) error {
     if setRunning == true {
-      _, _, seterr := tx.Set(entry.User + ":status:running", id, nil)
+      _, _, seterr := tx.Set(user + ":status:running", id, nil)
       if seterr != nil {
         return seterr
       }
     }
-    _, _, seterr := tx.Set(entry.User + ":entry:" + id, string(entryJson), nil)
+    _, _, seterr := tx.Set(user + ":entry:" + id, string(entryJson), nil)
     if seterr != nil {
       return seterr
     }
@@ -58,19 +59,52 @@ func (database *Database) AddEntry(entry Entry, setRunning bool) (string, error)
   return id, dberr
 }
 
-func (database *Database) AddRunningEntryId(user string, id string) (string, error) {
-  var runningId string = ""
+func (database *Database) GetEntry(user string, entryId string) (Entry, error) {
+  var entry Entry
 
   dberr := database.DB.View(func(tx *buntdb.Tx) error {
-    tx.AscendKeys(user + ":running", func(key, value string) bool {
-      runningId = value
+    tx.AscendKeys(user + ":entry:" + entryId, func(key, value string) bool {
+      json.Unmarshal([]byte(value), &entry)
+      entry.ID = key
       return true
     })
 
     return nil
   })
 
-  return runningId, dberr
+  return entry, dberr
+}
+
+func (database *Database) FinishEntry(user string, entry Entry) (string, error) {
+  entryJson, jsonerr := json.Marshal(entry)
+  if jsonerr != nil {
+    return entry.ID, jsonerr
+  }
+
+  dberr := database.DB.Update(func(tx *buntdb.Tx) error {
+    runningEntryId, grerr := tx.Get(user + ":status:running")
+    if grerr != nil {
+      return errors.New("No currently running entry found!")
+    }
+
+    if runningEntryId != entry.ID {
+      return errors.New("Specified entry is not currently running!")
+    }
+
+    _, _, srerr := tx.Set(user + ":status:running", entry.ID, nil)
+    if srerr != nil {
+      return srerr
+    }
+
+    _, _, seerr := tx.Set(user + ":entry:" + entry.ID, string(entryJson), nil)
+    if seerr != nil {
+      return seerr
+    }
+
+    return nil
+  })
+
+  return entry.ID, dberr
 }
 
 func (database *Database) GetRunningEntryId(user string) (string, error) {
