@@ -6,7 +6,14 @@ import (
   "os"
 )
 
-var developer string
+var database *Database
+
+var begin string
+var finish string
+var project string
+var task string
+
+var force bool
 
 var rootCmd = &cobra.Command{
   Use:   "zeit",

@@ -1,18 +1,9 @@
 package z
 
 import (
-  "fmt"
   "log"
   "github.com/spf13/cobra"
 )
-
-var database *Database
-var begin string
-var finish string
-var project string
-var task string
-
-var force bool
 
 var trackCmd = &cobra.Command{
   Use:   "track",
