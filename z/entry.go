@@ -1,7 +1,7 @@
 package z
 
 import (
-  "log"
+  "errors"
   "time"
 )
 
@@ -30,7 +30,6 @@ func NewEntry(
   } else {
     beginTime, err = ParseTime(begin)
     if err != nil {
-      log.Fatalln("Could not parse begin time!")
       return Entry{}, err
     }
   }
@@ -38,7 +37,6 @@ func NewEntry(
   if finish != "" {
     finishTime, err = ParseTime(finish)
     if err != nil {
-      log.Fatalln("Could not parse finish time!")
       return Entry{}, err
     }
   }
