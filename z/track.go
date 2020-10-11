@@ -12,13 +12,26 @@ var finish string
 var project string
 var task string
 
+var force bool
+
 var trackCmd = &cobra.Command{
   Use:   "track",
   Short: "Tracking time",
   Long: "Add a new tracking entry, which can either be kept running until 'finish' is being called or parameterized to be a finished entry.",
   Run: func(cmd *cobra.Command, args []string) {
-    newEntry, err := NewEntry("", begin, finish, project, task, GetCurrentUser())
-    database.AddEntry(newEntry)
+    user := GetCurrentUser()
+
+    runningEntryId, err := database.GetRunningEntryId(user)
+    if err != nil {
+      log.Fatal(err)
+    }
+
+    if runningEntryId != "" {
+      log.Fatal("A task is already running. Please finish that before beginning to track a new task!")
+    }
+
+    newEntry, err := NewEntry("", begin, finish, project, task, user)
+    database.AddEntry(newEntry, true)
     entries, err := database.ListEntries()
     if err != nil {
       log.Fatal(err)
@@ -30,10 +43,11 @@ var trackCmd = &cobra.Command{
 
 func init() {
   rootCmd.AddCommand(trackCmd)
-  trackCmd.Flags().StringVar(&begin, "begin", "", "Time the entry should begin at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now - 15 minutes), +1:30 (now plus 1.5h).")
-  trackCmd.Flags().StringVar(&finish, "finish", "", "Time the entry should finish at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now - 15 minutes), +1:30 (now plus 1.5h).\nMust be after --start time.")
-  trackCmd.Flags().StringVar(&project, "project", "", "Project to be assigned")
-  trackCmd.Flags().StringVar(&task, "task", "", "Task to be assigned")
+  trackCmd.Flags().StringVarP(&begin, "begin", "b", "", "Time the entry should begin at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).")
+  trackCmd.Flags().StringVarP(&finish, "finish", "s", "", "Time the entry should finish at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).\nMust be after --begin time.")
+  trackCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be assigned")
+  trackCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be assigned")
+  trackCmd.Flags().BoolVarP(&force, "force", "f", false, "Force begin tracking of a new task \neven though another one is still running \n(ONLY IF YOU KNOW WHAT YOU'RE DOING!)")
 
   var err error
   database, err = InitDatabase()
