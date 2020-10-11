@@ -41,6 +41,10 @@ func NewEntry(
     }
   }
 
+  if finishTime.Before(beginTime) && finishTime.IsZero() == false {
+    return Entry{}, errors.New("Beginning time of tracking cannot be after the finish time!")
+  }
+
   return Entry{
     id,
     beginTime,
