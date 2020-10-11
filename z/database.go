@@ -32,7 +32,7 @@ func (database *Database) NewID() (string) {
   return id.String()
 }
 
-func (database *Database) AddEntry(entry Entry) (string, error) {
+func (database *Database) AddEntry(entry Entry, setRunning bool) (string, error) {
   id := database.NewID()
 
   entryJson, jsonerr := json.Marshal(entry)
@@ -41,18 +41,58 @@ func (database *Database) AddEntry(entry Entry) (string, error) {
   }
 
   dberr := database.DB.Update(func(tx *buntdb.Tx) error {
-    _, _, seterr := tx.Set(id, string(entryJson), nil)
-    return seterr
+    if setRunning == true {
+      _, _, seterr := tx.Set(entry.User + ":status:running", id, nil)
+      if seterr != nil {
+        return seterr
+      }
+    }
+    _, _, seterr := tx.Set(entry.User + ":entry:" + id, string(entryJson), nil)
+    if seterr != nil {
+      return seterr
+    }
+
+    return nil
   })
 
   return id, dberr
+}
+
+func (database *Database) AddRunningEntryId(user string, id string) (string, error) {
+  var runningId string = ""
+
+  dberr := database.DB.View(func(tx *buntdb.Tx) error {
+    tx.AscendKeys(user + ":running", func(key, value string) bool {
+      runningId = value
+      return true
+    })
+
+    return nil
+  })
+
+  return runningId, dberr
+}
+
+func (database *Database) GetRunningEntryId(user string) (string, error) {
+  var runningId string = ""
+
+  dberr := database.DB.View(func(tx *buntdb.Tx) error {
+    tx.AscendKeys(user + ":status:running", func(key, value string) bool {
+      runningId = value
+      return true
+    })
+
+    return nil
+  })
+
+  return runningId, dberr
 }
 
 func (database *Database) ListEntries() ([]Entry, error) {
   var entries []Entry
 
   dberr := database.DB.View(func(tx *buntdb.Tx) error {
-    tx.Ascend("task", func(key, value string) bool {
+    tx.AscendKeys("*:entry:*", func(key, value string) bool {
       var entry Entry
       json.Unmarshal([]byte(value), &entry)
 
