@@ -1,15 +1,9 @@
 package main
 
 import (
-  // "fmt"
-  "os"
-  // "context"
-  // "time"
-  // "log"
-  // "flag"
+"github.com/mrusme/zeit/z"
 )
 
-
 func main() {
-  os.Exit(0)
+  z.Execute()
 }
