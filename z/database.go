@@ -1,6 +1,7 @@
 package z
 
 import (
+  "os"
   "log"
   "errors"
   "strings"
@@ -14,7 +15,12 @@ type Database struct {
 }
 
 func InitDatabase() (*Database, error) {
-  db, err := buntdb.Open(":memory:") // TODO: Replace with file
+  dbfile, ok := os.LookupEnv("ZEIT_DB")
+  if ok == false || dbfile == "" {
+    return nil, errors.New("please `export ZEIT_DB` to the location the zeit database should be stored at")
+  }
+
+  db, err := buntdb.Open(dbfile)
   if err != nil {
     return nil, err
   }
