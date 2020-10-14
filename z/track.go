@@ -30,19 +30,26 @@ var trackCmd = &cobra.Command{
       log.Fatal(err)
     }
 
-    _, err = database.AddEntry(user, newEntry, true)
+    isRunning := newEntry.Finish.IsZero()
+
+    _, err = database.AddEntry(user, newEntry, isRunning)
     if err != nil {
       log.Fatal(err)
     }
 
+    outputPrefix := "began tracking"
+    if isRunning == false {
+      outputPrefix = "tracked"
+    }
+
     if newEntry.Task != "" && newEntry.Project != "" {
-      fmt.Printf("▷ began tracking %s on %s\n", color.FgLightWhite.Render(newEntry.Task), color.FgLightWhite.Render(newEntry.Project))
+      fmt.Printf("▷ %s %s on %s\n", outputPrefix, color.FgLightWhite.Render(newEntry.Task), color.FgLightWhite.Render(newEntry.Project))
     } else if newEntry.Task != "" && newEntry.Project == "" {
-      fmt.Printf("▷ began tracking %s\n", color.FgLightWhite.Render(newEntry.Task))
+      fmt.Printf("▷ %s %s\n", outputPrefix, color.FgLightWhite.Render(newEntry.Task))
     } else if newEntry.Task == "" && newEntry.Project != "" {
-      fmt.Printf("▷ began tracking task on %s\n", color.FgLightWhite.Render(newEntry.Project))
+      fmt.Printf("▷ %s task on %s\n", outputPrefix, color.FgLightWhite.Render(newEntry.Project))
     } else {
-      fmt.Printf("▷ began tracking task\n")
+      fmt.Printf("▷ %s task\n", outputPrefix)
     }
     return
   },
