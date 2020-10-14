@@ -3,6 +3,7 @@ package z
 import (
   "log"
   "errors"
+  "strings"
   "encoding/json"
   "github.com/tidwall/buntdb"
   "github.com/google/uuid"
@@ -65,7 +66,7 @@ func (database *Database) GetEntry(user string, entryId string) (Entry, error) {
   dberr := database.DB.View(func(tx *buntdb.Tx) error {
     tx.AscendKeys(user + ":entry:" + entryId, func(key, value string) bool {
       json.Unmarshal([]byte(value), &entry)
-      entry.ID = key
+      entry.ID = (strings.Split(key, ":"))[2]
       return true
     })
 
@@ -91,7 +92,7 @@ func (database *Database) FinishEntry(user string, entry Entry) (string, error) 
       return errors.New("Specified entry is not currently running!")
     }
 
-    _, _, srerr := tx.Set(user + ":status:running", entry.ID, nil)
+    _, _, srerr := tx.Set(user + ":status:running", "", nil)
     if srerr != nil {
       return srerr
     }
