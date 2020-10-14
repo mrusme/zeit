@@ -1,8 +1,11 @@
 package z
 
 import (
+  "os"
   "log"
+  "fmt"
   "github.com/spf13/cobra"
+  "github.com/gookit/color"
 )
 
 var trackCmd = &cobra.Command{
@@ -18,7 +21,8 @@ var trackCmd = &cobra.Command{
     }
 
     if runningEntryId != "" {
-      log.Fatal("A task is already running. Please finish that before beginning to track a new task!")
+      fmt.Printf("▷ a task is already running\n")
+      os.Exit(-1)
     }
 
     newEntry, err := NewEntry("", begin, finish, project, task, user)
@@ -26,18 +30,20 @@ var trackCmd = &cobra.Command{
       log.Fatal(err)
     }
 
-    entryId, err := database.AddEntry(user, newEntry, true)
+    _, err = database.AddEntry(user, newEntry, true)
     if err != nil {
       log.Fatal(err)
     }
 
-    // entries, err := database.ListEntries()
-    // if err != nil {
-    //   log.Fatal(err)
-    // }
-    // fmt.Printf("%+v", entries)
-
-    log.Printf("Added new entry with ID %s!\n", entryId)
+    if newEntry.Task != "" && newEntry.Project != "" {
+      fmt.Printf("▷ began tracking %s on %s\n", color.FgLightWhite.Render(newEntry.Task), color.FgLightWhite.Render(newEntry.Project))
+    } else if newEntry.Task != "" && newEntry.Project == "" {
+      fmt.Printf("▷ began tracking %s\n", color.FgLightWhite.Render(newEntry.Task))
+    } else if newEntry.Task == "" && newEntry.Project != "" {
+      fmt.Printf("▷ began tracking task on %s\n", color.FgLightWhite.Render(newEntry.Project))
+    } else {
+      fmt.Printf("▷ began tracking task\n")
+    }
     return
   },
 }
