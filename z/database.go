@@ -130,11 +130,11 @@ func (database *Database) GetRunningEntryId(user string) (string, error) {
   return runningId, dberr
 }
 
-func (database *Database) ListEntries() ([]Entry, error) {
+func (database *Database) ListEntries(user string) ([]Entry, error) {
   var entries []Entry
 
   dberr := database.DB.View(func(tx *buntdb.Tx) error {
-    tx.AscendKeys("*:entry:*", func(key, value string) bool {
+    tx.AscendKeys(user + ":entry:*", func(key, value string) bool {
       var entry Entry
       json.Unmarshal([]byte(value), &entry)
 
