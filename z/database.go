@@ -3,6 +3,7 @@ package z
 import (
   "os"
   "sort"
+  "strings"
   "log"
   "errors"
   "encoding/json"
@@ -150,4 +151,49 @@ func (database *Database) ListEntries(user string) ([]Entry, error) {
 
   sort.Slice(entries, func(i, j int) bool { return entries[i].Begin.Before(entries[j].Begin) })
   return entries, dberr
+}
+
+func (database *Database) GetImportsSHA1List(user string) (map[string]string, error) {
+  var sha1List = make(map[string]string)
+
+  dberr := database.DB.View(func(tx *buntdb.Tx) error {
+    value, err := tx.Get(user + ":imports:sha1", false)
+    if err != nil {
+      return nil
+    }
+
+    sha1Entries := strings.Split(value, ",")
+
+    for _, sha1Entry := range sha1Entries {
+      sha1EntrySplit := strings.Split(sha1Entry, ":")
+      sha1 := sha1EntrySplit[0]
+      id := sha1EntrySplit[1]
+      sha1List[sha1] = id
+    }
+
+    return nil
+  })
+
+  return sha1List, dberr
+}
+
+func (database *Database) UpdateImportsSHA1List(user string, sha1List map[string]string) (error) {
+    var sha1Entries []string
+
+    for sha1, id := range sha1List {
+      sha1Entries = append(sha1Entries, sha1 + ":" + id)
+    }
+
+    value := strings.Join(sha1Entries, ",")
+
+    dberr := database.DB.Update(func(tx *buntdb.Tx) error {
+      _, _, seterr := tx.Set(user + ":imports:sha1", value, nil)
+      if seterr != nil {
+        return seterr
+      }
+
+      return nil
+    })
+
+    return dberr
 }
