@@ -4,7 +4,6 @@ import (
   "os"
   "log"
   "errors"
-  "strings"
   "encoding/json"
   "github.com/tidwall/buntdb"
   "github.com/google/uuid"
@@ -72,7 +71,9 @@ func (database *Database) GetEntry(user string, entryId string) (Entry, error) {
   dberr := database.DB.View(func(tx *buntdb.Tx) error {
     tx.AscendKeys(user + ":entry:" + entryId, func(key, value string) bool {
       json.Unmarshal([]byte(value), &entry)
-      entry.ID = (strings.Split(key, ":"))[2]
+
+      entry.SetIDFromDatabaseKey(key)
+
       return true
     })
 
@@ -137,7 +138,7 @@ func (database *Database) ListEntries() ([]Entry, error) {
       var entry Entry
       json.Unmarshal([]byte(value), &entry)
 
-      entry.ID = key
+      entry.SetIDFromDatabaseKey(key)
 
       entries = append(entries, entry)
       return true
