@@ -15,6 +15,8 @@ type Entry struct {
   Project string      `json:"project,omitempty"`
   Task    string      `json:"task,omitempty"`
   User    string      `json:"user,omitempty"`
+
+  SHA1    string      `json:"-"`
 }
 
 func NewEntry(
