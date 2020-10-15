@@ -85,34 +85,49 @@ func (entry *Entry) IsFinishedAfterBegan() (bool) {
   return (entry.Finish.IsZero() || entry.Begin.Before(entry.Finish))
 }
 
-func (entry *Entry) GetOutputForTrack(isRunning bool) (string) {
-  outputPrefix := "began tracking"
-  if isRunning == false {
+func (entry *Entry) GetOutputForTrack(isRunning bool, wasRunning bool) (string) {
+  var outputPrefix string = ""
+  var outputSuffix string = ""
+
+  now := time.Now()
+  trackDiffNow := now.Sub(entry.Begin)
+  trackDiffNowOut := time.Time{}.Add(trackDiffNow)
+
+  if isRunning == true && wasRunning == false {
+    outputPrefix = "began tracking"
+  } else if isRunning == true && wasRunning == true {
+    outputPrefix = "tracking"
+    outputSuffix = fmt.Sprintf(" for %sh", color.FgLightWhite.Render(trackDiffNowOut.Format("15:04")))
+  } else if isRunning == false && wasRunning == false {
     outputPrefix = "tracked"
   }
 
   if entry.Task != "" && entry.Project != "" {
-    return fmt.Sprintf("▷ %s %s on %s\n", outputPrefix, color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project))
+    return fmt.Sprintf("▷ %s %s on %s%s\n", outputPrefix, color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project), outputSuffix)
   } else if entry.Task != "" && entry.Project == "" {
-    return fmt.Sprintf("▷ %s %s\n", outputPrefix, color.FgLightWhite.Render(entry.Task))
+    return fmt.Sprintf("▷ %s %s%s\n", outputPrefix, color.FgLightWhite.Render(entry.Task), outputSuffix)
   } else if entry.Task == "" && entry.Project != "" {
-    return fmt.Sprintf("▷ %s task on %s\n", outputPrefix, color.FgLightWhite.Render(entry.Project))
-  } else {
-    return fmt.Sprintf("▷ %s task\n", outputPrefix)
+    return fmt.Sprintf("▷ %s task on %s%s\n", outputPrefix, color.FgLightWhite.Render(entry.Project), outputSuffix)
   }
+
+  return fmt.Sprintf("▷ %s task%s\n", outputPrefix, outputSuffix)
 }
 
 func (entry *Entry) GetOutputForFinish() (string) {
+  var outputSuffix string = ""
+
   trackDiff := entry.Finish.Sub(entry.Begin)
   trackDiffOut := time.Time{}.Add(trackDiff)
 
+  outputSuffix = fmt.Sprintf(" for %sh", color.FgLightWhite.Render(trackDiffOut.Format("15:04")))
+
   if entry.Task != "" && entry.Project != "" {
-    return fmt.Sprintf("□ finished tracking %s on %s for %sh\n", color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project), trackDiffOut.Format("15:04"))
+    return fmt.Sprintf("□ finished tracking %s on %s%s\n", color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project), outputSuffix)
   } else if entry.Task != "" && entry.Project == "" {
-    return fmt.Sprintf("□ finished tracking %s for %sh\n", color.FgLightWhite.Render(entry.Task), trackDiffOut.Format("15:04"))
+    return fmt.Sprintf("□ finished tracking %s%s\n", color.FgLightWhite.Render(entry.Task), outputSuffix)
   } else if entry.Task == "" && entry.Project != "" {
-    return fmt.Sprintf("□ finished tracking task on %s for %sh\n", color.FgLightWhite.Render(entry.Project), trackDiffOut.Format("15:04"))
+    return fmt.Sprintf("□ finished tracking task on %s%s\n", color.FgLightWhite.Render(entry.Project), outputSuffix)
   }
 
-  return fmt.Sprintf("□ finished tracking task\n")
+  return fmt.Sprintf("□ finished tracking task%s\n", outputSuffix)
 }

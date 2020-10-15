@@ -9,8 +9,8 @@ import (
 
 var finishCmd = &cobra.Command{
   Use:   "finish",
-  Short: "Finish currently running tracker",
-  Long: "Finishing a currently running tracker.",
+  Short: "Finish currently running activity",
+  Long: "Finishing tracking of currently running activity.",
   Run: func(cmd *cobra.Command, args []string) {
     user := GetCurrentUser()
 
@@ -68,8 +68,8 @@ var finishCmd = &cobra.Command{
 
 func init() {
   rootCmd.AddCommand(finishCmd)
-  finishCmd.Flags().StringVarP(&begin, "begin", "b", "", "Time the entry should begin at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).")
-  finishCmd.Flags().StringVarP(&finish, "finish", "s", "", "Time the entry should finish at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).\nMust be after --begin time.")
+  finishCmd.Flags().StringVarP(&begin, "begin", "b", "", "Time the activity should begin at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).")
+  finishCmd.Flags().StringVarP(&finish, "finish", "s", "", "Time the activity should finish at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).\nMust be after --begin time.")
   finishCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be assigned")
   finishCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be assigned")
 

@@ -9,7 +9,7 @@ import (
 var trackCmd = &cobra.Command{
   Use:   "track",
   Short: "Tracking time",
-  Long: "Add a new tracking entry, which can either be kept running until 'finish' is being called or parameterized to be a finished entry.",
+  Long: "Track new activity, which can either be kept running until 'finish' is being called or parameterized to be a finished activity.",
   Run: func(cmd *cobra.Command, args []string) {
     user := GetCurrentUser()
 
@@ -38,15 +38,15 @@ var trackCmd = &cobra.Command{
       os.Exit(1)
     }
 
-    fmt.Printf(newEntry.GetOutputForTrack(isRunning))
+    fmt.Printf(newEntry.GetOutputForTrack(isRunning, false))
     return
   },
 }
 
 func init() {
   rootCmd.AddCommand(trackCmd)
-  trackCmd.Flags().StringVarP(&begin, "begin", "b", "", "Time the entry should begin at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).")
-  trackCmd.Flags().StringVarP(&finish, "finish", "s", "", "Time the entry should finish at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).\nMust be after --begin time.")
+  trackCmd.Flags().StringVarP(&begin, "begin", "b", "", "Time the activity should begin at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).")
+  trackCmd.Flags().StringVarP(&finish, "finish", "s", "", "Time the activity should finish at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).\nMust be after --begin time.")
   trackCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be assigned")
   trackCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be assigned")
   trackCmd.Flags().BoolVarP(&force, "force", "f", false, "Force begin tracking of a new task \neven though another one is still running \n(ONLY IF YOU KNOW WHAT YOU'RE DOING!)")
