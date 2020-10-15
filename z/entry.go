@@ -21,8 +21,34 @@ func NewEntry(
   project string,
   task string,
   user string) (Entry, error) {
+  var err error
+
+  newEntry := Entry{}
+
+  newEntry.ID = id
+  newEntry.Project = project
+  newEntry.Task = task
+  newEntry.User = user
+
+  _, err = newEntry.SetBeginFromString(begin)
+  if err != nil {
+    return Entry{}, err
+  }
+
+  _, err = newEntry.SetFinishFromString(finish)
+  if err != nil {
+    return Entry{}, err
+  }
+
+  if newEntry.IsFinishedAfterBegan() == false {
+    return Entry{}, errors.New("beginning time of tracking cannot be after finish time")
+  }
+
+  return newEntry, nil
+}
+
+func (entry *Entry) SetBeginFromString(begin string) (time.Time, error) {
   var beginTime time.Time
-  var finishTime time.Time
   var err error
 
   if begin == "" {
@@ -30,27 +56,29 @@ func NewEntry(
   } else {
     beginTime, err = ParseTime(begin)
     if err != nil {
-      return Entry{}, err
+      return beginTime, err
     }
   }
+
+  entry.Begin = beginTime
+  return beginTime, nil
+}
+
+func (entry *Entry) SetFinishFromString(finish string) (time.Time, error) {
+  var finishTime time.Time
+  var err error
 
   if finish != "" {
     finishTime, err = ParseTime(finish)
     if err != nil {
-      return Entry{}, err
+      return finishTime, err
     }
   }
 
-  if finishTime.Before(beginTime) && finishTime.IsZero() == false {
-    return Entry{}, errors.New("Beginning time of tracking cannot be after the finish time!")
-  }
+  entry.Finish = finishTime
+  return finishTime, nil
+}
 
-  return Entry{
-    id,
-    beginTime,
-    finishTime,
-    project,
-    task,
-    user,
-  }, nil
+func (entry *Entry) IsFinishedAfterBegan() (bool) {
+  return (entry.Finish.IsZero() == false && entry.Begin.Before(entry.Finish))
 }
