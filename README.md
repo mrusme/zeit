@@ -13,7 +13,7 @@ make
 
 Please make sure to `export ZEIT_DB=~/.config/zeit.db` (or whatever location you would like to have the zeit database at).
 
-### Start tracking
+### Track activity
 
 ```
 zeit track --help
@@ -25,13 +25,13 @@ Example:
 zeit track --project project --task task --begin -0:15
 ```
 
-### Check currently tracking
+### Show current activity
 
 ```
 zeit tracking
 ```
 
-### Finish tracking
+### Finish tracking activity
 
 ```
 zeit finish --help
@@ -43,3 +43,8 @@ Example:
 zeit finish
 ```
 
+### List tracked activity
+
+```
+zeit list
+```
