@@ -2,6 +2,7 @@ package z
 
 import (
   "errors"
+  "strings"
   "time"
   "fmt"
   "github.com/gookit/color"
@@ -47,6 +48,17 @@ func NewEntry(
   }
 
   return newEntry, nil
+}
+
+func (entry *Entry) SetIDFromDatabaseKey(key string) (error) {
+  splitKey := strings.Split(key, ":")
+
+  if len(splitKey) < 3 || len(splitKey) > 3 {
+    return errors.New("not a valid database key")
+  }
+
+  entry.ID = splitKey[2]
+  return nil
 }
 
 func (entry *Entry) SetBeginFromString(begin string) (time.Time, error) {
