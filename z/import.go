@@ -32,7 +32,6 @@ func importTymeJson(user string, file string) ([]Entry, error) {
         continue
       }
 
-
       entry, err := NewEntry("", "", "", tymeEntry.Project, tymeEntry.Task, user)
       if err != nil {
         fmt.Printf("%s %+v\n", CharError, err)
@@ -67,7 +66,34 @@ var importCmd = &cobra.Command{
         fmt.Printf("%s %+v\n", CharError, err)
         os.Exit(1)
       }
-      fmt.Printf("%+v", entries)
+    }
+
+    sha1List, sha1Err := database.GetImportsSHA1List(user)
+    if sha1Err != nil {
+        fmt.Printf("%s %+v\n", CharError, sha1Err)
+        os.Exit(1)
+    }
+
+    for _, entry := range entries {
+      if id, ok := sha1List[entry.SHA1]; ok {
+        fmt.Printf("%s %s was previously imported as %s; not importing again\n", CharInfo, entry.SHA1, id)
+        continue
+      }
+
+      importedId, err := database.AddEntry(user, entry, false)
+      if err != nil {
+        fmt.Printf("%s %s could not be imported: %+v\n", CharError, entry.SHA1, err)
+        continue
+      }
+
+      fmt.Printf("%s %s was imported as %s\n", CharInfo, entry.SHA1, importedId)
+      sha1List[entry.SHA1] = importedId
+    }
+
+    err = database.UpdateImportsSHA1List(user, sha1List)
+    if err != nil {
+        fmt.Printf("%s %+v\n", CharError, err)
+        os.Exit(1)
     }
 
     return
