@@ -15,6 +15,13 @@ var task string
 
 var force bool
 
+const(
+  CharTrack = "▶"
+  CharFinish = "■"
+  CharErase = "◀"
+  CharError = "▲"
+)
+
 var rootCmd = &cobra.Command{
   Use:   "zeit",
   Short: "Command line Zeiterfassung",
@@ -23,7 +30,7 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
   if err := rootCmd.Execute(); err != nil {
-    fmt.Printf("△ %+v\n", err)
+    fmt.Printf("%s %+v\n", CharError, err)
     os.Exit(-1)
   }
 }

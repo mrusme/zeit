@@ -35,7 +35,7 @@ func InitDatabase() (*Database, error) {
 func (database *Database) NewID() (string) {
   id, err := uuid.NewRandom()
   if err != nil {
-    log.Fatalln("Could not generate UUID: %+v", err)
+    log.Fatalln("could not generate UUID: %+v", err)
   }
   return id.String()
 }
@@ -91,11 +91,11 @@ func (database *Database) FinishEntry(user string, entry Entry) (string, error) 
   dberr := database.DB.Update(func(tx *buntdb.Tx) error {
     runningEntryId, grerr := tx.Get(user + ":status:running")
     if grerr != nil {
-      return errors.New("No currently running entry found!")
+      return errors.New("no currently running entry found!")
     }
 
     if runningEntryId != entry.ID {
-      return errors.New("Specified entry is not currently running!")
+      return errors.New("specified entry is not currently running!")
     }
 
     _, _, srerr := tx.Set(user + ":status:running", "", nil)

@@ -16,24 +16,24 @@ var finishCmd = &cobra.Command{
 
     runningEntryId, err := database.GetRunningEntryId(user)
     if err != nil {
-      fmt.Printf("△ %+v\n", err)
+      fmt.Printf("%s %+v\n", CharError, err)
       os.Exit(1)
     }
 
     if runningEntryId == "" {
-      fmt.Printf("□ not running\n")
+      fmt.Printf("%s not running\n", CharFinish)
       os.Exit(1)
     }
 
     runningEntry, err := database.GetEntry(user, runningEntryId)
     if err != nil {
-      fmt.Printf("△ %+v\n", err)
+      fmt.Printf("%s %+v\n", CharError, err)
       os.Exit(1)
     }
 
     tmpEntry, err := NewEntry(runningEntry.ID, begin, finish, project, task, user)
     if err != nil {
-      fmt.Printf("△ %+v\n", err)
+      fmt.Printf("%s %+v\n", CharError, err)
       os.Exit(1)
     }
 
@@ -57,7 +57,7 @@ var finishCmd = &cobra.Command{
 
     _, err = database.FinishEntry(user, runningEntry)
     if err != nil {
-      fmt.Printf("△ %+v\n", err)
+      fmt.Printf("%s %+v\n", CharError, err)
       os.Exit(1)
     }
 
@@ -76,7 +76,7 @@ func init() {
   var err error
   database, err = InitDatabase()
   if err != nil {
-    fmt.Printf("△ %+v\n", err)
+    fmt.Printf("%s %+v\n", CharError, err)
     os.Exit(1)
   }
 }

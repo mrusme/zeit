@@ -15,18 +15,18 @@ var trackCmd = &cobra.Command{
 
     runningEntryId, err := database.GetRunningEntryId(user)
     if err != nil {
-      fmt.Printf("△ %+v\n", err)
+      fmt.Printf("%s %+v\n", CharError, err)
       os.Exit(1)
     }
 
     if runningEntryId != "" {
-      fmt.Printf("▷ a task is already running\n")
+      fmt.Printf("%s a task is already running\n", CharTrack)
       os.Exit(1)
     }
 
     newEntry, err := NewEntry("", begin, finish, project, task, user)
     if err != nil {
-      fmt.Printf("△ %+v\n", err)
+      fmt.Printf("%s %+v\n", CharError, err)
       os.Exit(1)
     }
 
@@ -34,7 +34,7 @@ var trackCmd = &cobra.Command{
 
     _, err = database.AddEntry(user, newEntry, isRunning)
     if err != nil {
-      fmt.Printf("△ %+v\n", err)
+      fmt.Printf("%s %+v\n", CharError, err)
       os.Exit(1)
     }
 
@@ -54,7 +54,7 @@ func init() {
   var err error
   database, err = InitDatabase()
   if err != nil {
-    fmt.Printf("△ %+v\n", err)
+    fmt.Printf("%s %+v\n", CharError, err)
     os.Exit(1)
   }
 }

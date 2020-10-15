@@ -103,14 +103,14 @@ func (entry *Entry) GetOutputForTrack(isRunning bool, wasRunning bool) (string) 
   }
 
   if entry.Task != "" && entry.Project != "" {
-    return fmt.Sprintf("▷ %s %s on %s%s\n", outputPrefix, color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project), outputSuffix)
+    return fmt.Sprintf("%s %s %s on %s%s\n", CharTrack, outputPrefix, color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project), outputSuffix)
   } else if entry.Task != "" && entry.Project == "" {
-    return fmt.Sprintf("▷ %s %s%s\n", outputPrefix, color.FgLightWhite.Render(entry.Task), outputSuffix)
+    return fmt.Sprintf("%s %s %s%s\n", CharTrack, outputPrefix, color.FgLightWhite.Render(entry.Task), outputSuffix)
   } else if entry.Task == "" && entry.Project != "" {
-    return fmt.Sprintf("▷ %s task on %s%s\n", outputPrefix, color.FgLightWhite.Render(entry.Project), outputSuffix)
+    return fmt.Sprintf("%s %s task on %s%s\n", CharTrack, outputPrefix, color.FgLightWhite.Render(entry.Project), outputSuffix)
   }
 
-  return fmt.Sprintf("▷ %s task%s\n", outputPrefix, outputSuffix)
+  return fmt.Sprintf("%s %s task%s\n", CharTrack, outputPrefix, outputSuffix)
 }
 
 func (entry *Entry) GetOutputForFinish() (string) {
@@ -122,12 +122,12 @@ func (entry *Entry) GetOutputForFinish() (string) {
   outputSuffix = fmt.Sprintf(" for %sh", color.FgLightWhite.Render(trackDiffOut.Format("15:04")))
 
   if entry.Task != "" && entry.Project != "" {
-    return fmt.Sprintf("□ finished tracking %s on %s%s\n", color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project), outputSuffix)
+    return fmt.Sprintf("%s finished tracking %s on %s%s\n", CharFinish, color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project), outputSuffix)
   } else if entry.Task != "" && entry.Project == "" {
-    return fmt.Sprintf("□ finished tracking %s%s\n", color.FgLightWhite.Render(entry.Task), outputSuffix)
+    return fmt.Sprintf("%s finished tracking %s%s\n", CharFinish, color.FgLightWhite.Render(entry.Task), outputSuffix)
   } else if entry.Task == "" && entry.Project != "" {
-    return fmt.Sprintf("□ finished tracking task on %s%s\n", color.FgLightWhite.Render(entry.Project), outputSuffix)
+    return fmt.Sprintf("%s finished tracking task on %s%s\n", CharFinish, color.FgLightWhite.Render(entry.Project), outputSuffix)
   }
 
-  return fmt.Sprintf("□ finished tracking task%s\n", outputSuffix)
+  return fmt.Sprintf("%s finished tracking task%s\n", CharFinish, outputSuffix)
 }
