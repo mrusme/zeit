@@ -25,6 +25,12 @@ Example:
 zeit track --project project --task task --begin -0:15
 ```
 
+### Check currently tracking
+
+```
+zeit tracking
+```
+
 ### Finish tracking
 
 ```
