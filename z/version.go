@@ -17,6 +17,6 @@ var versionCmd = &cobra.Command{
   Short: "Display what Zeit it is",
   Long:  `The version of Zeit.`,
   Run: func(cmd *cobra.Command, args []string) {
-    fmt.Println("Zeit", VERSION)
+    fmt.Println("zeit", VERSION)
   },
 }
