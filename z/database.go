@@ -2,6 +2,7 @@ package z
 
 import (
   "os"
+  "sort"
   "log"
   "errors"
   "encoding/json"
@@ -147,5 +148,6 @@ func (database *Database) ListEntries(user string) ([]Entry, error) {
     return nil
   })
 
+  sort.Slice(entries, func(i, j int) bool { return entries[i].Begin.Before(entries[j].Begin) })
   return entries, dberr
 }
