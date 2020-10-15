@@ -2,7 +2,6 @@ package z
 
 import (
   "os"
-  "log"
   "fmt"
   "time"
   "github.com/spf13/cobra"
@@ -17,22 +16,25 @@ var finishCmd = &cobra.Command{
 
     runningEntryId, err := database.GetRunningEntryId(user)
     if err != nil {
-      log.Fatal(err)
+      fmt.Printf("△ %+v\n", err)
+      os.Exit(1)
     }
 
     if runningEntryId == "" {
       fmt.Printf("□ not running\n")
-      os.Exit(-1)
+      os.Exit(1)
     }
 
     runningEntry, err := database.GetEntry(user, runningEntryId)
     if err != nil {
-      log.Fatal(err)
+      fmt.Printf("△ %+v\n", err)
+      os.Exit(1)
     }
 
     tmpEntry, err := NewEntry(runningEntry.ID, begin, finish, project, task, user)
     if err != nil {
-      log.Fatal(err)
+      fmt.Printf("△ %+v\n", err)
+      os.Exit(1)
     }
 
     if begin != "" {
@@ -55,7 +57,8 @@ var finishCmd = &cobra.Command{
 
     _, err = database.FinishEntry(user, runningEntry)
     if err != nil {
-      log.Fatal(err)
+      fmt.Printf("△ %+v\n", err)
+      os.Exit(1)
     }
 
     fmt.Printf(runningEntry.GetOutputForFinish())
@@ -73,6 +76,7 @@ func init() {
   var err error
   database, err = InitDatabase()
   if err != nil {
-    log.Fatal(err)
+    fmt.Printf("△ %+v\n", err)
+    os.Exit(1)
   }
 }

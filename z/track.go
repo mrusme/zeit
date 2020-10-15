@@ -2,7 +2,6 @@ package z
 
 import (
   "os"
-  "log"
   "fmt"
   "github.com/spf13/cobra"
 )
@@ -16,24 +15,27 @@ var trackCmd = &cobra.Command{
 
     runningEntryId, err := database.GetRunningEntryId(user)
     if err != nil {
-      log.Fatal(err)
+      fmt.Printf("△ %+v\n", err)
+      os.Exit(1)
     }
 
     if runningEntryId != "" {
       fmt.Printf("▷ a task is already running\n")
-      os.Exit(-1)
+      os.Exit(1)
     }
 
     newEntry, err := NewEntry("", begin, finish, project, task, user)
     if err != nil {
-      log.Fatal(err)
+      fmt.Printf("△ %+v\n", err)
+      os.Exit(1)
     }
 
     isRunning := newEntry.Finish.IsZero()
 
     _, err = database.AddEntry(user, newEntry, isRunning)
     if err != nil {
-      log.Fatal(err)
+      fmt.Printf("△ %+v\n", err)
+      os.Exit(1)
     }
 
     fmt.Printf(newEntry.GetOutputForTrack(isRunning))
@@ -52,6 +54,7 @@ func init() {
   var err error
   database, err = InitDatabase()
   if err != nil {
-    log.Fatal(err)
+    fmt.Printf("△ %+v\n", err)
+    os.Exit(1)
   }
 }
