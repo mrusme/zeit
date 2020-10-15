@@ -143,3 +143,10 @@ func (entry *Entry) GetOutputForFinish() (string) {
 
   return fmt.Sprintf("%s finished tracking task%s\n", CharFinish, outputSuffix)
 }
+
+func (entry *Entry) GetOutput() (string) {
+  trackDiff := entry.Finish.Sub(entry.Begin)
+  trackDiffOut := time.Time{}.Add(trackDiff)
+
+  return fmt.Sprintf("%s %s on %s from %s to %s (%sh)", color.FgGray.Render(entry.ID), color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project), color.FgLightWhite.Render(entry.Begin.Format("2006-01-02 15:04 -0700")), color.FgLightWhite.Render(entry.Finish.Format("2006-01-02 15:04 -0700")), color.FgLightWhite.Render(trackDiffOut.Format("15:04")))
+}
