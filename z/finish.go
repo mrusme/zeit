@@ -6,7 +6,6 @@ import (
   "fmt"
   "time"
   "github.com/spf13/cobra"
-  "github.com/gookit/color"
 )
 
 var finishCmd = &cobra.Command{
@@ -59,18 +58,7 @@ var finishCmd = &cobra.Command{
       log.Fatal(err)
     }
 
-    trackDiff := runningEntry.Finish.Sub(runningEntry.Begin)
-    trackDiffOut := time.Time{}.Add(trackDiff)
-
-    if runningEntry.Task != "" && runningEntry.Project != "" {
-      fmt.Printf("□ finished tracking %s on %s for %sh\n", color.FgLightWhite.Render(runningEntry.Task), color.FgLightWhite.Render(runningEntry.Project), trackDiffOut.Format("15:04"))
-    } else if runningEntry.Task != "" && runningEntry.Project == "" {
-      fmt.Printf("□ finished tracking %s for %sh\n", color.FgLightWhite.Render(runningEntry.Task), trackDiffOut.Format("15:04"))
-    } else if runningEntry.Task == "" && runningEntry.Project != "" {
-      fmt.Printf("□ finished tracking task on %s for %sh\n", color.FgLightWhite.Render(runningEntry.Project), trackDiffOut.Format("15:04"))
-    } else {
-      fmt.Printf("□ finished tracking task\n")
-    }
+    fmt.Printf(runningEntry.GetOutputForFinish())
     return
   },
 }

@@ -3,6 +3,8 @@ package z
 import (
   "errors"
   "time"
+  "fmt"
+  "github.com/gookit/color"
 )
 
 type Entry struct {
@@ -80,5 +82,37 @@ func (entry *Entry) SetFinishFromString(finish string) (time.Time, error) {
 }
 
 func (entry *Entry) IsFinishedAfterBegan() (bool) {
-  return (entry.Finish.IsZero() == false && entry.Begin.Before(entry.Finish))
+  return (entry.Finish.IsZero() || entry.Begin.Before(entry.Finish))
+}
+
+func (entry *Entry) GetOutputForTrack(isRunning bool) (string) {
+  outputPrefix := "began tracking"
+  if isRunning == false {
+    outputPrefix = "tracked"
+  }
+
+  if entry.Task != "" && entry.Project != "" {
+    return fmt.Sprintf("▷ %s %s on %s\n", outputPrefix, color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project))
+  } else if entry.Task != "" && entry.Project == "" {
+    return fmt.Sprintf("▷ %s %s\n", outputPrefix, color.FgLightWhite.Render(entry.Task))
+  } else if entry.Task == "" && entry.Project != "" {
+    return fmt.Sprintf("▷ %s task on %s\n", outputPrefix, color.FgLightWhite.Render(entry.Project))
+  } else {
+    return fmt.Sprintf("▷ %s task\n", outputPrefix)
+  }
+}
+
+func (entry *Entry) GetOutputForFinish() (string) {
+  trackDiff := entry.Finish.Sub(entry.Begin)
+  trackDiffOut := time.Time{}.Add(trackDiff)
+
+  if entry.Task != "" && entry.Project != "" {
+    return fmt.Sprintf("□ finished tracking %s on %s for %sh\n", color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project), trackDiffOut.Format("15:04"))
+  } else if entry.Task != "" && entry.Project == "" {
+    return fmt.Sprintf("□ finished tracking %s for %sh\n", color.FgLightWhite.Render(entry.Task), trackDiffOut.Format("15:04"))
+  } else if entry.Task == "" && entry.Project != "" {
+    return fmt.Sprintf("□ finished tracking task on %s for %sh\n", color.FgLightWhite.Render(entry.Project), trackDiffOut.Format("15:04"))
+  }
+
+  return fmt.Sprintf("□ finished tracking task\n")
 }

@@ -5,7 +5,6 @@ import (
   "log"
   "fmt"
   "github.com/spf13/cobra"
-  "github.com/gookit/color"
 )
 
 var trackCmd = &cobra.Command{
@@ -37,20 +36,7 @@ var trackCmd = &cobra.Command{
       log.Fatal(err)
     }
 
-    outputPrefix := "began tracking"
-    if isRunning == false {
-      outputPrefix = "tracked"
-    }
-
-    if newEntry.Task != "" && newEntry.Project != "" {
-      fmt.Printf("▷ %s %s on %s\n", outputPrefix, color.FgLightWhite.Render(newEntry.Task), color.FgLightWhite.Render(newEntry.Project))
-    } else if newEntry.Task != "" && newEntry.Project == "" {
-      fmt.Printf("▷ %s %s\n", outputPrefix, color.FgLightWhite.Render(newEntry.Task))
-    } else if newEntry.Task == "" && newEntry.Project != "" {
-      fmt.Printf("▷ %s task on %s\n", outputPrefix, color.FgLightWhite.Render(newEntry.Project))
-    } else {
-      fmt.Printf("▷ %s task\n", outputPrefix)
-    }
+    fmt.Printf(newEntry.GetOutputForTrack(isRunning))
     return
   },
 }
