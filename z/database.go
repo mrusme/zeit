@@ -117,6 +117,31 @@ func (database *Database) FinishEntry(user string, entry Entry) (string, error) 
   return entry.ID, dberr
 }
 
+func (database *Database) EraseEntry(user string, id string) (error) {
+  runningEntryId, err := database.GetRunningEntryId(user)
+  if err != nil {
+    return err
+  }
+
+  dberr := database.DB.Update(func(tx *buntdb.Tx) error {
+    if runningEntryId == id {
+      _, _, seterr := tx.Set(user + ":status:running", "", nil)
+      if seterr != nil {
+        return seterr
+      }
+    }
+
+    _, delerr := tx.Delete(user + ":entry:" + id)
+    if delerr != nil {
+      return delerr
+    }
+
+    return nil
+  })
+
+  return dberr
+}
+
 func (database *Database) GetRunningEntryId(user string) (string, error) {
   var runningId string = ""
 
