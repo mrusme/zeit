@@ -2,6 +2,7 @@ package z
 
 import (
   "fmt"
+  "math"
   "time"
   "github.com/gookit/color"
   "github.com/shopspring/decimal"
@@ -53,7 +54,7 @@ func GetOutputBarForHours(hours decimal.Decimal, stats []Statistic) ([]string) {
   colorFractionPrevAmount := 0.0
 
   for _, stat := range stats {
-    statHoursInt := int((stat.Hours.Round(0)).IntPart())
+    statHoursInt, _ := stat.Hours.Float64()
     statRest := (stat.Hours.Round(0)).Mod(decimal.NewFromInt(4))
     statRestFloat, _ := statRest.Float64()
 
@@ -62,7 +63,15 @@ func GetOutputBarForHours(hours decimal.Decimal, stats []Statistic) ([]string) {
       colorFraction = stat.Color
     }
 
-    fullColoredParts := int(statHoursInt / 4)
+    fmt.Printf("%f\n", statHoursInt)
+    fullColoredParts := int(math.Round(statHoursInt) / 4)
+
+    if fullColoredParts == 0 && statHoursInt > colorFractionPrevAmount {
+      colorFractionPrevAmount = statHoursInt
+      colorFraction = stat.Color
+    }
+
+    fmt.Printf("Full parts: %d\n", fullColoredParts)
     for i := 0; i < fullColoredParts; i++ {
       colorsFull[colorsFullIdx] = stat.Color
       colorsFullIdx++
@@ -75,7 +84,7 @@ func GetOutputBarForHours(hours decimal.Decimal, stats []Statistic) ([]string) {
       bar[i] = " " + GetOutputBoxForNumber(4, colorsFull[iColor]) + " "
       iColor++
     } else {
-      bar[i] = " " + GetOutputBoxForNumber(4, color.FgWhite.Render) + " "
+      bar[i] = " " + GetOutputBoxForNumber(4, colorFraction) + " "
     }
   }
 
