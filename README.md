@@ -49,6 +49,18 @@ zeit finish
 zeit list
 ```
 
+### Erase tracked activity
+
+```sh
+zeit erase --help
+```
+
+Example
+
+```sh
+zeit erase 14037730-5c2d-44ff-b70e-81f1dcd4eb5f
+```
+
 ### Import tracked activities
 
 ```sh
