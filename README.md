@@ -12,6 +12,8 @@ zeit
 
 Zeit erfassen. A command line tool for tracking time spent on tasks & projects.
 
+![zeit](documentation/header.jpg)
+
 ## Build
 
 ```sh
