@@ -16,11 +16,11 @@ var task string
 var force bool
 
 const(
-  CharTrack = "▶"
-  CharFinish = "■"
-  CharErase = "◀"
-  CharError = "▲"
-  CharInfo = "●"
+  CharTrack = " ▶"
+  CharFinish = " ■"
+  CharErase = " ◀"
+  CharError = " ▲"
+  CharInfo = " ●"
 )
 
 var rootCmd = &cobra.Command{
