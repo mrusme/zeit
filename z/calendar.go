@@ -27,10 +27,14 @@ type Month struct {
 
 type Calendar struct {
   Months [12]Month
+  Distribution map[string]Statistic
+  TotalHours decimal.Decimal
 }
 
 func NewCalendar(entries []Entry) (Calendar, error) {
   cal := Calendar{}
+
+  cal.Distribution = make(map[string]Statistic)
 
   for _, entry := range entries {
     endOfBeginDay := now.With(entry.Begin).EndOfDay()
@@ -88,7 +92,7 @@ func NewCalendar(entries []Entry) (Calendar, error) {
       stat := Statistic{
         Hours: nextDayHours,
         Project: entry.Project,
-        Color: color.FgCyan.Render,
+        Color: color.FgCyan.Render, // TODO: Make configurable
       }
 
       if cal.Months[month0].Weeks[weeknumber0].Statistics == nil {
@@ -97,6 +101,17 @@ func NewCalendar(entries []Entry) (Calendar, error) {
 
       cal.Months[month0].Weeks[weeknumber0].Statistics[weekdayName] = append(cal.Months[month0].Weeks[weeknumber0].Statistics[weekdayName], stat)
     }
+
+    var dist = cal.Distribution[entry.Project]
+    dist.Project = entry.Project
+    dist.Hours = dist.Hours.Add(sameDayHours)
+    dist.Hours = dist.Hours.Add(nextDayHours)
+    dist.Color = color.FgCyan.Render // TODO: Make configurable
+    cal.Distribution[entry.Project] = dist
+
+    // fmt.Printf("Same Day: %s \n Next Day: %s \n Project Hours: %s\n", sameDayHours.String(), nextDayHours.String(), dist.Hours.String())
+    cal.TotalHours = cal.TotalHours.Add(sameDayHours)
+    cal.TotalHours = cal.TotalHours.Add(nextDayHours)
   }
 
   return cal, nil
@@ -130,6 +145,25 @@ func (calendar *Calendar) GetOutputForWeekCalendar(date time.Time, month int, we
   }
   output = fmt.Sprintf("%s   └────────────────────────────\n     %s  %s  %s  %s  %s  %s  %s\n",
     output, days[0], days[1], days[2], days[3], days[4], days[5], days[6])
+
+  return output
+}
+
+func (calendar *Calendar) GetOutputForDistribution() (string) {
+  var output string = ""
+
+  output = fmt.Sprintf("DISTRIBUTION\n\n");
+  output = fmt.Sprintf("%s████████████████████████████████████████████████████████████████████████████████\n\n", output)
+
+  // fmt.Printf("%s\n", calendar.TotalHours.String())
+
+  for _, stat := range calendar.Distribution {
+    divided := stat.Hours.Div(calendar.TotalHours)
+    percentage := divided.Mul(decimal.NewFromInt(100))
+    hoursStr := stat.Hours.StringFixed(2)
+    percentageStr := percentage.StringFixed(2)
+    output = fmt.Sprintf("%s%s%*s H / %*s %%\n", output, stat.Project, (68 - len(stat.Project)), hoursStr, 5, percentageStr)
+  }
 
   return output
 }

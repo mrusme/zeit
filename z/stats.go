@@ -38,6 +38,8 @@ var statsCmd = &cobra.Command{
 
     fmt.Printf("%s\n", OutputAppendRight(thisWeek, previousWeek, 16))
 
+    fmt.Printf("%s\n", cal.GetOutputForDistribution())
+
     return
   },
 }
