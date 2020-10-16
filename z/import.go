@@ -5,6 +5,7 @@ import (
   "fmt"
   "time"
   "github.com/spf13/cobra"
+  "github.com/gookit/color"
   "github.com/cnf/structhash"
 )
 
@@ -79,17 +80,17 @@ var importCmd = &cobra.Command{
 
     for _, entry := range entries {
       if id, ok := sha1List[entry.SHA1]; ok {
-        fmt.Printf("%s %s was previously imported as %s; not importing again\n", CharInfo, entry.SHA1, id)
+        fmt.Printf("%s %s was previously imported as %s; not importing again\n", CharInfo, color.FgLightWhite.Render(entry.SHA1), color.FgLightWhite.Render(id))
         continue
       }
 
       importedId, err := database.AddEntry(user, entry, false)
       if err != nil {
-        fmt.Printf("%s %s could not be imported: %+v\n", CharError, entry.SHA1, err)
+        fmt.Printf("%s %s could not be imported: %+v\n", CharError, color.FgLightWhite.Render(entry.SHA1), color.FgRed.Render(err))
         continue
       }
 
-      fmt.Printf("%s %s was imported as %s\n", CharInfo, entry.SHA1, importedId)
+      fmt.Printf("%s %s was imported as %s\n", CharInfo, color.FgLightWhite.Render(entry.SHA1), color.FgLightWhite.Render(importedId))
       sha1List[entry.SHA1] = importedId
     }
 
