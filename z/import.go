@@ -66,6 +66,9 @@ var importCmd = &cobra.Command{
         fmt.Printf("%s %+v\n", CharError, err)
         os.Exit(1)
       }
+    } else {
+      fmt.Printf("%s specify an import format; see `zeit import --help` for more info\n", CharError)
+      os.Exit(1)
     }
 
     sha1List, sha1Err := database.GetImportsSHA1List(user)
