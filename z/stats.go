@@ -5,7 +5,6 @@ import (
   "fmt"
   "github.com/spf13/cobra"
   "github.com/shopspring/decimal"
-  "github.com/gookit/color"
 )
 
 var statsCmd = &cobra.Command{
@@ -37,21 +36,10 @@ var statsCmd = &cobra.Command{
     data["Sa"], _ = decimal.NewFromString("18.2")
     data["Su"], _ = decimal.NewFromString("1.0")
 
-    buff := cal.GetTuiBufferForWeekCalendar(1, data)
-    buff2 := cal.GetTuiBufferForWeekCalendar(2, data)
+    out := cal.GetOutputForWeekCalendar(1, data)
+    out2 := cal.GetOutputForWeekCalendar(2, data)
 
-    r := []rune(color.FgLightWhite.Render("A"))
-    for _, bla := range r {
-      fmt.Printf("Char: %c", bla)
-    }
-
-    tui := Tui{}
-    // tui.Init()
-    fmt.Printf("%s\n", tui.Render(100, 10))
-    tui.Merge(buff, 0, 0)
-    tui.Merge(buff2, 0, 48)
-    fmt.Printf("---\n")
-    fmt.Printf("%s\n", tui.Render(100, 10))
+    fmt.Printf("%s\n", OutputAppendRight(out, out2, 10))
 
     return
   },

@@ -1,6 +1,7 @@
 package z
 
 import (
+  "fmt"
   "os/user"
   "regexp"
   "strconv"
@@ -97,4 +98,29 @@ func ParseTime(timeStr string) (time.Time, error) {
   default:
     return time.Now(), errors.New("No match")
   }
+}
+
+func OutputAppendRight(leftStr string, rightStr string, pad int) (string) {
+  var output string = ""
+  var rpos int = 0
+
+  left := []rune(leftStr)
+  right := []rune(rightStr)
+
+  for lpos := 0; lpos < len(left); lpos++ {
+    if left[lpos] == '\n' || lpos == (len(left) - 1) {
+      output = fmt.Sprintf("%s%*s", output, pad, "")
+      for rpos = rpos; rpos < len(right); rpos++ {
+        output = fmt.Sprintf("%s%c", output, right[rpos])
+        if right[rpos] == '\n' {
+          rpos++
+          break
+        }
+      }
+      continue
+    }
+    output = fmt.Sprintf("%s%c", output, left[lpos])
+  }
+
+  return output
 }
