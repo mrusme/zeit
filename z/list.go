@@ -8,8 +8,8 @@ import (
 
 var listCmd = &cobra.Command{
   Use:   "list",
-  Short: "List activity",
-  Long: "List all tracked activity.",
+  Short: "List activities",
+  Long: "List all tracked activities.",
   Run: func(cmd *cobra.Command, args []string) {
     user := GetCurrentUser()
 
