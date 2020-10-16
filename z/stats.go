@@ -5,6 +5,7 @@ import (
   "fmt"
   "github.com/spf13/cobra"
   "github.com/shopspring/decimal"
+  "github.com/gookit/color"
 )
 
 var statsCmd = &cobra.Command{
@@ -26,15 +27,36 @@ var statsCmd = &cobra.Command{
 
     var cal Calendar
 
-    var data = make(map[string]decimal.Decimal)
+    var data = make(map[string][]Statistic)
 
-    data["Mo"], _ = decimal.NewFromString("15.00")
-    data["Tu"], _ = decimal.NewFromString("4.0")
-    data["We"], _ = decimal.NewFromString("10.0")
-    data["Th"], _ = decimal.NewFromString("1.0")
-    data["Fr"], _ = decimal.NewFromString("0.0")
-    data["Sa"], _ = decimal.NewFromString("18.2")
-    data["Su"], _ = decimal.NewFromString("1.0")
+    data["Mo"] = []Statistic {
+      Statistic{ Hours: decimal.NewFromFloat(12.0), Project: "zeit", Color: color.FgRed.Render },
+      Statistic{ Hours: decimal.NewFromFloat(3.5), Project: "blog", Color: color.FgGreen.Render },
+    }
+    data["Tu"] = []Statistic {
+      Statistic{ Hours: decimal.NewFromFloat(2.25), Project: "zeit", Color: color.FgRed.Render },
+      Statistic{ Hours: decimal.NewFromFloat(4.0), Project: "blog", Color: color.FgGreen.Render },
+    }
+    data["We"] = []Statistic {
+      Statistic{ Hours: decimal.NewFromFloat(10.0), Project: "zeit", Color: color.FgRed.Render },
+      Statistic{ Hours: decimal.NewFromFloat(1.5), Project: "blog", Color: color.FgGreen.Render },
+    }
+    data["Th"] = []Statistic {
+      Statistic{ Hours: decimal.NewFromFloat(4.0), Project: "zeit", Color: color.FgRed.Render },
+      Statistic{ Hours: decimal.NewFromFloat(4.5), Project: "blog", Color: color.FgGreen.Render },
+    }
+    data["Fr"] = []Statistic {
+      Statistic{ Hours: decimal.NewFromFloat(0.5), Project: "zeit", Color: color.FgRed.Render },
+      Statistic{ Hours: decimal.NewFromFloat(3.5), Project: "blog", Color: color.FgGreen.Render },
+    }
+    data["Sa"] = []Statistic {
+      Statistic{ Hours: decimal.NewFromFloat(1.0), Project: "zeit", Color: color.FgRed.Render },
+      Statistic{ Hours: decimal.NewFromFloat(1.0), Project: "blog", Color: color.FgGreen.Render },
+    }
+    data["Su"] = []Statistic {
+      Statistic{ Hours: decimal.NewFromFloat(10.0), Project: "zeit", Color: color.FgRed.Render },
+      Statistic{ Hours: decimal.NewFromFloat(0.5), Project: "blog", Color: color.FgGreen.Render },
+    }
 
     out := cal.GetOutputForWeekCalendar(1, data)
     out2 := cal.GetOutputForWeekCalendar(2, data)

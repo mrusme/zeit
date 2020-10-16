@@ -105,12 +105,14 @@ func OutputAppendRight(leftStr string, rightStr string, pad int) (string) {
   var rpos int = 0
 
   left := []rune(leftStr)
+  leftLen := len(left)
   right := []rune(rightStr)
+  rightLen := len(right)
 
-  for lpos := 0; lpos < len(left); lpos++ {
-    if left[lpos] == '\n' || lpos == (len(left) - 1) {
+  for lpos := 0; lpos < leftLen; lpos++ {
+    if left[lpos] == '\n' || lpos == (leftLen - 1) {
       output = fmt.Sprintf("%s%*s", output, pad, "")
-      for rpos = rpos; rpos < len(right); rpos++ {
+      for rpos = rpos; rpos < rightLen; rpos++ {
         output = fmt.Sprintf("%s%c", output, right[rpos])
         if right[rpos] == '\n' {
           rpos++

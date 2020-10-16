@@ -3,33 +3,40 @@ package z
 import (
   "fmt"
   "time"
+  "github.com/gookit/color"
   "github.com/shopspring/decimal"
 )
+
+type Statistic struct {
+  Hours decimal.Decimal
+  Project string
+  Color (func(...interface {}) string)
+}
 
 type Calendar struct {
 
 }
 
-func GetOutputBoxForNumber(number int) (string) {
+func GetOutputBoxForNumber(number int, clr (func(...interface {}) string) ) (string) {
   switch(number) {
-  case 0: return "  "
-  case 1: return " ▄"
-  case 2: return "▄▄"
-  case 3: return "▄█"
-  case 4: return "██"
+  case 0: return clr("  ")
+  case 1: return clr(" ▄")
+  case 2: return clr("▄▄")
+  case 3: return clr("▄█")
+  case 4: return clr("██")
   }
 
-  return "  "
+  return clr("  ")
 }
 
-func GetOutputBarForHours(hours decimal.Decimal) ([]string) {
+func GetOutputBarForHours(hours decimal.Decimal, stats []Statistic) ([]string) {
   var bar = []string{
-    "····",
-    "····",
-    "····",
-    "····",
-    "····",
-    "····",
+    color.FgGray.Render("····"),
+    color.FgGray.Render("····"),
+    color.FgGray.Render("····"),
+    color.FgGray.Render("····"),
+    color.FgGray.Render("····"),
+    color.FgGray.Render("····"),
   }
 
   hoursInt := int((hours.Round(0)).IntPart())
@@ -39,12 +46,41 @@ func GetOutputBarForHours(hours decimal.Decimal) ([]string) {
   divisible := hoursInt - restInt
   fullparts := divisible / 4
 
+  colorsFull := make(map[int](func(...interface {}) string))
+  colorsFullIdx := 0
+
+  colorFraction := color.FgWhite.Render
+  colorFractionPrevAmount := 0.0
+
+  for _, stat := range stats {
+    statHoursInt := int((stat.Hours.Round(0)).IntPart())
+    statRest := (stat.Hours.Round(0)).Mod(decimal.NewFromInt(4))
+    statRestFloat, _ := statRest.Float64()
+
+    if statRestFloat > colorFractionPrevAmount {
+      colorFractionPrevAmount = statRestFloat
+      colorFraction = stat.Color
+    }
+
+    fullColoredParts := int(statHoursInt / 4)
+    for i := 0; i < fullColoredParts; i++ {
+      colorsFull[colorsFullIdx] = stat.Color
+      colorsFullIdx++
+    }
+  }
+
+  iColor := 0
   for i := (len(bar) - 1); i > (len(bar) - 1 - fullparts); i-- {
-    bar[i] = " " + GetOutputBoxForNumber(4) + " "
+    if iColor < colorsFullIdx {
+      bar[i] = " " + GetOutputBoxForNumber(4, colorsFull[iColor]) + " "
+      iColor++
+    } else {
+      bar[i] = " " + GetOutputBoxForNumber(4, color.FgWhite.Render) + " "
+    }
   }
 
   if(restInt > 0) {
-    bar[(len(bar) - 1 - fullparts)] = " " + GetOutputBoxForNumber(restInt) + " "
+    bar[(len(bar) - 1 - fullparts)] = " " + GetOutputBoxForNumber(restInt, colorFraction) + " "
   }
 
   return bar
@@ -55,16 +91,21 @@ func (calendar *Calendar) GetCalendarWeek(timestamp time.Time) (int) {
   return cw
 }
 
-func (calendar *Calendar) GetOutputForWeekCalendar(cw int, data map[string]decimal.Decimal) (string) {
+func (calendar *Calendar) GetOutputForWeekCalendar(cw int, data map[string][]Statistic) (string) {
   var output string = ""
   var bars [][]string
   var totalHours = decimal.NewFromInt(0)
 
   var days = []string{"Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"}
   for _, day := range days {
-    hours := data[day]
-    totalHours = totalHours.Add(hours)
-    bar := GetOutputBarForHours(hours)
+    var dayHours = decimal.NewFromInt(0)
+
+    for _, stat := range data[day] {
+      dayHours = dayHours.Add(stat.Hours)
+      totalHours = totalHours.Add(stat.Hours)
+    }
+
+    bar := GetOutputBarForHours(dayHours, data[day])
     bars = append(bars, bar)
   }
 
