@@ -2,10 +2,10 @@ package z
 
 import (
   "fmt"
-  "math"
   "time"
-  "github.com/gookit/color"
   "github.com/shopspring/decimal"
+  "github.com/jinzhu/now"
+  "github.com/gookit/color"
 )
 
 type Statistic struct {
@@ -14,93 +14,95 @@ type Statistic struct {
   Color (func(...interface {}) string)
 }
 
+type WeekStatistics map[string][]Statistic
+
+type Week struct {
+  Statistics WeekStatistics
+}
+
+type Month struct {
+  Name string
+  Weeks [5]Week
+}
+
 type Calendar struct {
-
+  Months [12]Month
 }
 
-func GetOutputBoxForNumber(number int, clr (func(...interface {}) string) ) (string) {
-  switch(number) {
-  case 0: return clr("  ")
-  case 1: return clr(" ▄")
-  case 2: return clr("▄▄")
-  case 3: return clr("▄█")
-  case 4: return clr("██")
-  }
+func NewCalendar(entries []Entry) (Calendar, error) {
+  cal := Calendar{}
 
-  return clr("  ")
-}
+  for _, entry := range entries {
+    endOfBeginDay := now.With(entry.Begin).EndOfDay()
+    sameDayHours := decimal.NewFromInt(0)
+    nextDayHours := decimal.NewFromInt(0)
 
-func GetOutputBarForHours(hours decimal.Decimal, stats []Statistic) ([]string) {
-  var bar = []string{
-    color.FgGray.Render("····"),
-    color.FgGray.Render("····"),
-    color.FgGray.Render("····"),
-    color.FgGray.Render("····"),
-    color.FgGray.Render("····"),
-    color.FgGray.Render("····"),
-  }
+    /*
+     * Apparently the activity end is on a new day.
+     * This means we have to split the activity across two days.
+     */
+    if endOfBeginDay.Before(entry.Finish) == true {
+      startOfFinishDay := now.With(entry.Finish).BeginningOfDay()
 
-  hoursInt := int((hours.Round(0)).IntPart())
-  rest := ((hours.Round(0)).Mod(decimal.NewFromInt(4))).Round(0)
-  restInt := int(rest.IntPart())
+      sameDayDuration := endOfBeginDay.Sub(entry.Begin)
+      sameDay := sameDayDuration.Hours()
+      sameDayHours = decimal.NewFromFloat(sameDay)
 
-  divisible := hoursInt - restInt
-  fullparts := divisible / 4
+      nextDayDuration := entry.Finish.Sub(startOfFinishDay)
+      nextDay := nextDayDuration.Hours()
+      nextDayHours = decimal.NewFromFloat(nextDay)
 
-  colorsFull := make(map[int](func(...interface {}) string))
-  colorsFullIdx := 0
-
-  colorFraction := color.FgWhite.Render
-  colorFractionPrevAmount := 0.0
-
-  for _, stat := range stats {
-    statHoursInt, _ := stat.Hours.Float64()
-    statRest := (stat.Hours.Round(0)).Mod(decimal.NewFromInt(4))
-    statRestFloat, _ := statRest.Float64()
-
-    if statRestFloat > colorFractionPrevAmount {
-      colorFractionPrevAmount = statRestFloat
-      colorFraction = stat.Color
-    }
-
-    fmt.Printf("%f\n", statHoursInt)
-    fullColoredParts := int(math.Round(statHoursInt) / 4)
-
-    if fullColoredParts == 0 && statHoursInt > colorFractionPrevAmount {
-      colorFractionPrevAmount = statHoursInt
-      colorFraction = stat.Color
-    }
-
-    fmt.Printf("Full parts: %d\n", fullColoredParts)
-    for i := 0; i < fullColoredParts; i++ {
-      colorsFull[colorsFullIdx] = stat.Color
-      colorsFullIdx++
-    }
-  }
-
-  iColor := 0
-  for i := (len(bar) - 1); i > (len(bar) - 1 - fullparts); i-- {
-    if iColor < colorsFullIdx {
-      bar[i] = " " + GetOutputBoxForNumber(4, colorsFull[iColor]) + " "
-      iColor++
     } else {
-      bar[i] = " " + GetOutputBoxForNumber(4, colorFraction) + " "
+      sameDayDuration := entry.Finish.Sub(entry.Begin)
+      sameDay := sameDayDuration.Hours()
+      sameDayHours = decimal.NewFromFloat(sameDay)
+    }
+
+    if sameDayHours.GreaterThan(decimal.NewFromInt(0)) {
+      month, weeknumber := GetISOWeekInMonth(entry.Begin)
+      month0 := month - 1
+      weeknumber0 := weeknumber - 1
+      weekday := entry.Begin.Weekday()
+      weekdayName := weekday.String()[:2]
+
+      stat := Statistic{
+        Hours: sameDayHours,
+        Project: entry.Project,
+        Color: color.FgCyan.Render,
+      }
+
+      if cal.Months[month0].Weeks[weeknumber0].Statistics == nil {
+        cal.Months[month0].Weeks[weeknumber0].Statistics = make(WeekStatistics)
+      }
+
+      cal.Months[month0].Weeks[weeknumber0].Statistics[weekdayName] = append(cal.Months[month0].Weeks[weeknumber0].Statistics[weekdayName], stat)
+    }
+
+    if nextDayHours.GreaterThan(decimal.NewFromInt(0)) {
+      month, weeknumber := GetISOWeekInMonth(entry.Finish)
+      month0 := month - 1
+      weeknumber0 := weeknumber - 1
+      weekday := entry.Begin.Weekday()
+      weekdayName := weekday.String()[:2]
+
+      stat := Statistic{
+        Hours: nextDayHours,
+        Project: entry.Project,
+        Color: color.FgCyan.Render,
+      }
+
+      if cal.Months[month0].Weeks[weeknumber0].Statistics == nil {
+        cal.Months[month0].Weeks[weeknumber0].Statistics = make(WeekStatistics)
+      }
+
+      cal.Months[month0].Weeks[weeknumber0].Statistics[weekdayName] = append(cal.Months[month0].Weeks[weeknumber0].Statistics[weekdayName], stat)
     }
   }
 
-  if(restInt > 0) {
-    bar[(len(bar) - 1 - fullparts)] = " " + GetOutputBoxForNumber(restInt, colorFraction) + " "
-  }
-
-  return bar
+  return cal, nil
 }
 
-func (calendar *Calendar) GetCalendarWeek(timestamp time.Time) (int) {
-  var _, cw = timestamp.ISOWeek()
-  return cw
-}
-
-func (calendar *Calendar) GetOutputForWeekCalendar(cw int, data map[string][]Statistic) (string) {
+func (calendar *Calendar) GetOutputForWeekCalendar(date time.Time, month int, week int) (string) {
   var output string = ""
   var bars [][]string
   var totalHours = decimal.NewFromInt(0)
@@ -109,16 +111,16 @@ func (calendar *Calendar) GetOutputForWeekCalendar(cw int, data map[string][]Sta
   for _, day := range days {
     var dayHours = decimal.NewFromInt(0)
 
-    for _, stat := range data[day] {
+    for _, stat := range calendar.Months[month].Weeks[week].Statistics[day] {
       dayHours = dayHours.Add(stat.Hours)
       totalHours = totalHours.Add(stat.Hours)
     }
 
-    bar := GetOutputBarForHours(dayHours, data[day])
+    bar := GetOutputBarForHours(dayHours, calendar.Months[month].Weeks[week].Statistics[day])
     bars = append(bars, bar)
   }
 
-  output = fmt.Sprintf("CW %02d                    %s H\n", cw, totalHours.StringFixed(2))
+  output = fmt.Sprintf("CW %02d                    %s H\n", GetISOCalendarWeek(date), totalHours.StringFixed(2))
   for row := 0; row < len(bars[0]); row++ {
     output = fmt.Sprintf("%s%2d │", output, ((6 - row) * 4))
     for col := 0; col < len(bars); col++ {

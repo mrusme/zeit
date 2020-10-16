@@ -1,11 +1,11 @@
 package z
 
 import (
-  "fmt"
   "os/user"
   "regexp"
   "strconv"
   "time"
+  "math"
   "errors"
 )
 
@@ -53,6 +53,7 @@ func GetTimeFormat(timeStr string) (int) {
   return -1
 }
 
+// TODO: Use https://golang.org/pkg/time/#ParseDuration
 func RelToTime(timeStr string, ftId int) (time.Time, error) {
     var re = regexp.MustCompile(TimeFormats()[ftId])
     gm := re.FindStringSubmatch(timeStr)
@@ -100,29 +101,19 @@ func ParseTime(timeStr string) (time.Time, error) {
   }
 }
 
-func OutputAppendRight(leftStr string, rightStr string, pad int) (string) {
-  var output string = ""
-  var rpos int = 0
+func GetISOCalendarWeek(date time.Time) (int) {
+  var _, cw = date.ISOWeek()
+  return cw
+}
 
-  left := []rune(leftStr)
-  leftLen := len(left)
-  right := []rune(rightStr)
-  rightLen := len(right)
-
-  for lpos := 0; lpos < leftLen; lpos++ {
-    if left[lpos] == '\n' || lpos == (leftLen - 1) {
-      output = fmt.Sprintf("%s%*s", output, pad, "")
-      for rpos = rpos; rpos < rightLen; rpos++ {
-        output = fmt.Sprintf("%s%c", output, right[rpos])
-        if right[rpos] == '\n' {
-          rpos++
-          break
-        }
-      }
-      continue
-    }
-    output = fmt.Sprintf("%s%c", output, left[lpos])
+func GetISOWeekInMonth(date time.Time) (month int, weeknumber int) {
+  if date.IsZero() {
+    return -1, -1
   }
 
-  return output
+  newDay := (date.Day() - int(date.Weekday()) + 1)
+  addDay := (date.Day() - newDay) * -1
+  changedDate := date.AddDate(0, 0, addDay)
+
+  return int(changedDate.Month()), int(math.Ceil(float64(changedDate.Day()) / 7.0));
 }
