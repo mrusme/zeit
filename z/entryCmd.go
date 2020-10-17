@@ -3,6 +3,7 @@ package z
 import (
   "os"
   "fmt"
+  "time"
   "strings"
   "github.com/spf13/cobra"
 )
@@ -23,26 +24,28 @@ var entryCmd = &cobra.Command{
     }
 
     if begin != "" || finish != "" || project != "" || notes != "" || task != "" {
-      tmpEntry, err := NewEntry(entry.ID, begin, finish, project, task, user)
-      if err != nil {
-        fmt.Printf("%s %+v\n", CharError, err)
-        os.Exit(1)
-      }
-
       if begin != "" {
-        entry.Begin = tmpEntry.Begin
+        entry.Begin, err = time.Parse(time.RFC3339, begin)
+        if err != nil {
+          fmt.Printf("%s %+v\n", CharError, err)
+          os.Exit(1)
+        }
       }
 
       if finish != "" {
-        entry.Finish = tmpEntry.Finish
+        entry.Finish, err = time.Parse(time.RFC3339, finish)
+        if err != nil {
+          fmt.Printf("%s %+v\n", CharError, err)
+          os.Exit(1)
+        }
       }
 
       if project != "" {
-        entry.Project = tmpEntry.Project
+        entry.Project = project
       }
 
       if task != "" {
-        entry.Task = tmpEntry.Task
+        entry.Task = task
       }
 
       if notes != "" {
@@ -63,8 +66,8 @@ var entryCmd = &cobra.Command{
 
 func init() {
   rootCmd.AddCommand(entryCmd)
-  entryCmd.Flags().StringVarP(&begin, "begin", "b", "", "Update time the activity began at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).")
-  entryCmd.Flags().StringVarP(&finish, "finish", "s", "", "Update time the activity finished at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).\nMust be after --begin time.")
+  entryCmd.Flags().StringVarP(&begin, "begin", "b", "", "Update date/time the activity began at\n\nUse RFC3339 format.")
+  entryCmd.Flags().StringVarP(&finish, "finish", "s", "", "Update date/time the activity finished at\n\nUse RFC3339 format.")
   entryCmd.Flags().StringVarP(&project, "project", "p", "", "Update activity project")
   entryCmd.Flags().StringVarP(&notes, "notes", "n", "", "Update activity notes")
   entryCmd.Flags().StringVarP(&task, "task", "t", "", "Update activity task")
