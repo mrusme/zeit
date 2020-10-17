@@ -85,6 +85,24 @@ func (database *Database) GetEntry(user string, entryId string) (Entry, error) {
   return entry, dberr
 }
 
+func (database *Database) UpdateEntry(user string, entry Entry) (string, error) {
+  entryJson, jsonerr := json.Marshal(entry)
+  if jsonerr != nil {
+    return entry.ID, jsonerr
+  }
+
+  dberr := database.DB.Update(func(tx *buntdb.Tx) error {
+    _, _, seerr := tx.Set(user + ":entry:" + entry.ID, string(entryJson), nil)
+    if seerr != nil {
+      return seerr
+    }
+
+    return nil
+  })
+
+  return entry.ID, dberr
+}
+
 func (database *Database) FinishEntry(user string, entry Entry) (string, error) {
   entryJson, jsonerr := json.Marshal(entry)
   if jsonerr != nil {
