@@ -2,6 +2,8 @@ package z
 
 import (
   "os/user"
+  "os/exec"
+  "bytes"
   "regexp"
   "strconv"
   "strings"
@@ -128,4 +130,19 @@ func GetISOWeekInMonth(date time.Time) (month int, weeknumber int) {
   changedDate := date.AddDate(0, 0, addDay)
 
   return int(changedDate.Month()), int(math.Ceil(float64(changedDate.Day()) / 7.0));
+}
+
+func GetGitLog(repo string, since time.Time, until time.Time) (string, string, error) {
+  var stdout, stderr bytes.Buffer
+
+  cmd := exec.Command("git", "-C", repo, "log", "--since", since.Format("2006-01-02T15:04:05-0700"), "--until", until.Format("2006-01-02T15:04:05-0700"), "--pretty=oneline")
+  cmd.Stdout = &stdout
+  cmd.Stderr = &stderr
+  err := cmd.Run()
+  if err != nil {
+      return "", "", err
+  }
+
+  stdoutStr, stderrStr := string(stdout.Bytes()), string(stderr.Bytes())
+  return stdoutStr, stderrStr, nil
 }
