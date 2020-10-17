@@ -1,16 +1,7 @@
-zeit
-----
+![zeit](documentation/zeit.png)
+-------------------------------
 
-```
-                          ███████╗███████╗██╗████████╗                             
-                          ╚══███╔╝██╔════╝██║╚══██╔══╝
-                            ███╔╝ █████╗  ██║   ██║   
-                           ███╔╝  ██╔══╝  ██║   ██║   
-                          ███████╗███████╗██║   ██║   
-                          ╚══════╝╚══════╝╚═╝   ╚═╝   
-```
-
-Zeit erfassen. A command line tool for tracking time spent on tasks & projects.
+Zeit, erfassen. A command line tool for tracking time spent on tasks & projects.
 
 ![zeit](documentation/header.jpg)
 
