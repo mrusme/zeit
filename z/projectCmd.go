@@ -10,11 +10,6 @@ import (
 
 var projectColor string
 
-type Project struct {
-  Name    string      `json:"name,omitempty"`
-  Color   string      `json:"color,omitempty"`
-}
-
 var projectCmd = &cobra.Command{
   Use:   "project ([flags]) [project]",
   Short: "Project settings",

@@ -10,11 +10,6 @@ import (
 
 var taskGitRepository string
 
-type Task struct {
-  Name          string      `json:"name,omitempty"`
-  GitRepository string      `json:"gitRepository,omitempty"`
-}
-
 var taskCmd = &cobra.Command{
   Use:   "task ([flags]) [task]",
   Short: "Task settings",
