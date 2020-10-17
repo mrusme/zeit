@@ -136,6 +136,27 @@ zeit list
 ```
 
 
+### Display/update activity
+
+```sh
+zeit entry --help
+```
+
+#### Examples:
+
+Display a tracked activity:
+
+```sh
+zeit entry 14037730-5c2d-44ff-b70e-81f1dcd4eb5f
+```
+
+Update a tracked activity:
+
+```sh
+zeit entry --finish "2020-09-02T18:16:00+01:00" 14037730-5c2d-44ff-b70e-81f1dcd4eb5f
+```
+
+
 ### Erase tracked activity
 
 ```sh
