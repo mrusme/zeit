@@ -30,6 +30,10 @@ var trackCmd = &cobra.Command{
       os.Exit(1)
     }
 
+    if notes != "" {
+      newEntry.Notes = notes
+    }
+
     isRunning := newEntry.Finish.IsZero()
 
     _, err = database.AddEntry(user, newEntry, isRunning)
@@ -49,6 +53,7 @@ func init() {
   trackCmd.Flags().StringVarP(&finish, "finish", "s", "", "Time the activity should finish at\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).\nMust be after --begin time.")
   trackCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be assigned")
   trackCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be assigned")
+  trackCmd.Flags().StringVarP(&notes, "notes", "n", "", "Activity notes")
   trackCmd.Flags().BoolVarP(&force, "force", "f", false, "Force begin tracking of a new task \neven though another one is still running \n(ONLY IF YOU KNOW WHAT YOU'RE DOING!)")
 
   var err error

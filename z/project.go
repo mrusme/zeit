@@ -3,6 +3,7 @@ package z
 import (
   "os"
   "fmt"
+  // "time"
   "github.com/spf13/cobra"
   // "github.com/gookit/color"
 )
@@ -22,7 +23,6 @@ var projectCmd = &cobra.Command{
   Run: func(cmd *cobra.Command, args []string) {
     user := GetCurrentUser()
     projectName := args[0]
-
 
     project, err := database.GetProject(user, projectName)
     if err != nil {

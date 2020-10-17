@@ -14,6 +14,7 @@ type Entry struct {
   Finish  time.Time   `json:"finish,omitempty"`
   Project string      `json:"project,omitempty"`
   Task    string      `json:"task,omitempty"`
+  Notes   string      `json:"notes,omitempty"`
   User    string      `json:"user,omitempty"`
 
   SHA1    string      `json:"-"`

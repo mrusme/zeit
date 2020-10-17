@@ -12,6 +12,7 @@ var begin string
 var finish string
 var project string
 var task string
+var notes string
 
 var force bool
 
