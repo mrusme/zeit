@@ -59,13 +59,18 @@ var importCmd = &cobra.Command{
 
     user := GetCurrentUser()
 
-    if formatTymeJson == true {
+    switch(format) {
+    case "zeit":
+      // TODO:
+      fmt.Printf("%s not yet implemented\n", CharError)
+      os.Exit(1)
+    case "tyme":
       entries, err = importTymeJson(user, args[0])
       if err != nil {
         fmt.Printf("%s %+v\n", CharError, err)
         os.Exit(1)
       }
-    } else {
+    default:
       fmt.Printf("%s specify an import format; see `zeit import --help` for more info\n", CharError)
       os.Exit(1)
     }
@@ -104,7 +109,7 @@ var importCmd = &cobra.Command{
 
 func init() {
   rootCmd.AddCommand(importCmd)
-  importCmd.Flags().BoolVar(&formatTymeJson, "tyme", false, "Import from Tyme 3 JSON export")
+  importCmd.Flags().StringVar(&format, "format", "", "Format to import, possible values: zeit, tyme")
 
   var err error
   database, err = InitDatabase()

@@ -4,21 +4,30 @@ import (
   "os"
   "fmt"
   "time"
+  "encoding/json"
   "github.com/spf13/cobra"
 )
 
 var exportSince string
 var exportUntil string
 
-func exportTymeJson(user string, entries []*Entry) (string, error) {
+func exportZeitJson(user string, entries []Entry) (string, error) {
+  stringified, err := json.Marshal(entries)
+  if err != nil {
+    return "", err
+  }
 
-    tyme := Tyme{}
-    err := tyme.FromEntries(entries)
-    if err != nil {
-      return "", err
-    }
+  return string(stringified), nil
+}
 
-    return tyme.Stringify(), nil
+func exportTymeJson(user string, entries []Entry) (string, error) {
+  tyme := Tyme{}
+  err := tyme.FromEntries(entries)
+  if err != nil {
+    return "", err
+  }
+
+  return tyme.Stringify(), nil
 }
 
 var exportCmd = &cobra.Command{
@@ -57,34 +66,40 @@ var exportCmd = &cobra.Command{
       }
     }
 
-    var filteredEntries []*Entry
-    filteredEntries, err = GetFilteredEntries(&entries, project, task, since, until)
+    var filteredEntries []Entry
+    filteredEntries, err = GetFilteredEntries(entries, project, task, since, until)
     if err != nil {
       fmt.Printf("%s %+v\n", CharError, err)
       os.Exit(1)
     }
 
     var output string = ""
-    if formatTymeJson == true {
+    switch(format) {
+    case "zeit":
+      output, err = exportZeitJson(user, filteredEntries)
+      if err != nil {
+        fmt.Printf("%s %+v\n", CharError, err)
+        os.Exit(1)
+      }
+    case "tyme":
       output, err = exportTymeJson(user, filteredEntries)
       if err != nil {
         fmt.Printf("%s %+v\n", CharError, err)
         os.Exit(1)
       }
-    } else {
+    default:
       fmt.Printf("%s specify an export format; see `zeit export --help` for more info\n", CharError)
       os.Exit(1)
     }
 
     fmt.Printf("%s\n", output)
-
     return
   },
 }
 
 func init() {
   rootCmd.AddCommand(exportCmd)
-  exportCmd.Flags().BoolVar(&formatTymeJson, "tyme", false, "Export to Tyme 3 JSON")
+  exportCmd.Flags().StringVar(&format, "format", "", "Format to export, possible values: zeit, tyme")
   exportCmd.Flags().StringVar(&exportSince, "since", "", "Date/time to start the export from")
   exportCmd.Flags().StringVar(&exportUntil, "until", "", "Date/time to export until")
   exportCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be exported")

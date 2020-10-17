@@ -151,13 +151,14 @@ zeit erase 14037730-5c2d-44ff-b70e-81f1dcd4eb5f
 ```
 
 
-### Display statistics
+### Statistics
 
 ![zeit stats](documentation/zeit_stats.png)
 
 ```sh
 zeit stats
 ```
+
 
 ### Import tracked activities
 
@@ -167,7 +168,7 @@ zeit import --help
 
 The following formats are supported as of right now:
 
-#### Tyme 3 JSON
+#### `tyme`: Tyme 3 JSON
 
 It is possible to import JSON exports from [Tyme 3](https://www.tyme-app.com). 
 It is important that the JSON is exported with the following options set/unset:
@@ -192,8 +193,9 @@ then import them again into *zeit*.
 Import a Tyme 3 JSON export:
 
 ```sh
-zeit import --tyme ./tyme.export.json
+zeit import --format tyme ./tyme.export.json
 ```
+
 
 ### Export tracked activities
 
@@ -203,7 +205,12 @@ zeit export --help
 
 The following formats are supported as of right now:
 
-#### Tyme 3 JSON
+#### `zeit`: *zeit* JSON
+
+The *zeit* internal JSON format. Basically a dump of the database including
+only tracked activities.
+
+#### `tyme`: Tyme 3 JSON
 
 It is possible to export JSON compatible to the Tyme 3 JSON format. Fields that
 are not available in *zeit* will be filled with dummy values, e.g.
@@ -214,5 +221,5 @@ are not available in *zeit* will be filled with dummy values, e.g.
 Export a Tyme 3 JSON:
 
 ```sh
-zeit export --tyme --project "my project" --since "2020-04-01T15:04:05+07:00" --until "2020-04-04T15:04:05+07:00"
+zeit export --format tyme --project "my project" --since "2020-04-01T15:04:05+07:00" --until "2020-04-04T15:04:05+07:00"
 ```

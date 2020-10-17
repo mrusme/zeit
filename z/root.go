@@ -14,6 +14,7 @@ var project string
 var task string
 var notes string
 
+var format string
 var force bool
 
 const(

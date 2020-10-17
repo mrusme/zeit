@@ -8,8 +8,6 @@ import (
   "time"
 )
 
-var formatTymeJson bool
-
 type TymeEntry struct {
   Billing string `json:"billing"` // "UNBILLED",
   Category string `json:"category"` // "Client",
@@ -50,7 +48,7 @@ func (tyme *Tyme) Load(filename string) error {
   return nil
 }
 
-func (tyme *Tyme) FromEntries(entries []*Entry) error {
+func (tyme *Tyme) FromEntries(entries []Entry) error {
   for _, entry := range entries {
     duration := decimal.NewFromFloat(entry.Finish.Sub(entry.Begin).Minutes())
 
