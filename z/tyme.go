@@ -5,7 +5,7 @@ import (
   // "fmt"
   "os"
   "github.com/shopspring/decimal"
-  // "time"
+  "time"
 )
 
 var formatTymeJson bool
@@ -50,7 +50,7 @@ func (tyme *Tyme) Load(filename string) error {
   return nil
 }
 
-func (tyme *Tyme) FromEntries(entries []Entry) error {
+func (tyme *Tyme) FromEntries(entries []*Entry) error {
   for _, entry := range entries {
     duration := decimal.NewFromFloat(entry.Finish.Sub(entry.Begin).Minutes())
 

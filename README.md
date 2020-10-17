@@ -169,7 +169,7 @@ The following formats are supported as of right now:
 
 #### Tyme 3 JSON
 
-It's possible to import JSON exports from [Tyme 3](https://www.tyme-app.com). 
+It is possible to import JSON exports from [Tyme 3](https://www.tyme-app.com). 
 It is important that the JSON is exported with the following options set/unset:
 
 ![Tyme 3 JSON export](documentation/tyme3json.png)
@@ -193,4 +193,26 @@ Import a Tyme 3 JSON export:
 
 ```sh
 zeit import --tyme ./tyme.export.json
+```
+
+### Export tracked activities
+
+```sh
+zeit export --help
+```
+
+The following formats are supported as of right now:
+
+#### Tyme 3 JSON
+
+It is possible to export JSON compatible to the Tyme 3 JSON format. Fields that
+are not available in *zeit* will be filled with dummy values, e.g.
+`Billing: "UNBILLED"`.
+
+#### Examples:
+
+Export a Tyme 3 JSON:
+
+```sh
+zeit export --tyme --project "my project" --since "2020-04-01T15:04:05+07:00" --until "2020-04-04T15:04:05+07:00"
 ```

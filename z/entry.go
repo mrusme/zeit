@@ -153,3 +153,29 @@ func (entry *Entry) GetOutput() (string) {
 
   return fmt.Sprintf("%s %s on %s from %s to %s (%sh)", color.FgGray.Render(entry.ID), color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project), color.FgLightWhite.Render(entry.Begin.Format("2006-01-02 15:04 -0700")), color.FgLightWhite.Render(entry.Finish.Format("2006-01-02 15:04 -0700")), color.FgLightWhite.Render(trackDiffOut.Format("15:04")))
 }
+
+func GetFilteredEntries(entries *[]Entry, project string, task string, since time.Time, until time.Time) ([]*Entry, error) {
+  var filteredEntries []*Entry
+
+  for _, entry := range *entries {
+    if project != "" && GetIdFromName(entry.Project) != GetIdFromName(project) {
+      continue
+    }
+
+    if task != "" && GetIdFromName(entry.Task) != GetIdFromName(task) {
+      continue
+    }
+
+    if since.IsZero() == false && since.Before(entry.Begin) == false && since.Equal(entry.Begin) == false {
+      continue
+    }
+
+    if until.IsZero() == false && until.After(entry.Finish) == false && until.Equal(entry.Finish) == false {
+      continue
+    }
+
+    filteredEntries = append(filteredEntries, &entry)
+  }
+
+  return filteredEntries, nil
+}
