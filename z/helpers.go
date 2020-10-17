@@ -100,7 +100,7 @@ func ParseTime(timeStr string) (time.Time, error) {
   case TFRelHourMinute, TFRelHourFraction:
     return RelToTime(timeStr, tfId)
   default:
-    return time.Now(), errors.New("No match")
+    return time.Now(), errors.New("could not match passed time")
   }
 }
 
