@@ -222,3 +222,41 @@ func (database *Database) UpdateImportsSHA1List(user string, sha1List map[string
 
     return dberr
 }
+
+func (database *Database) UpdateProject(user string, projectName string, project Project) (error) {
+  projectJson, jsonerr := json.Marshal(project)
+  if jsonerr != nil {
+    return jsonerr
+  }
+
+  projectId := GetProjectIdFromName(projectName)
+
+  dberr := database.DB.Update(func(tx *buntdb.Tx) error {
+    _, _, sperr := tx.Set(user + ":project:" + projectId, string(projectJson), nil)
+    if sperr != nil {
+      return sperr
+    }
+
+    return nil
+  })
+
+  return dberr
+}
+
+func (database *Database) GetProject(user string, projectName string) (Project, error) {
+  var project Project
+  projectId := GetProjectIdFromName(projectName)
+
+  dberr := database.DB.View(func(tx *buntdb.Tx) error {
+    value, err := tx.Get(user + ":project:" + projectId, false)
+    if err != nil {
+      return nil
+    }
+
+    json.Unmarshal([]byte(value), &project)
+
+    return nil
+  })
+
+  return project, dberr
+}
