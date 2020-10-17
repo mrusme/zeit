@@ -134,11 +134,25 @@ func GetISOWeekInMonth(date time.Time) (month int, weeknumber int) {
 
 func GetGitLog(repo string, since time.Time, until time.Time) (string, string, error) {
   var stdout, stderr bytes.Buffer
-
-  cmd := exec.Command("git", "-C", repo, "log", "--since", since.Format("2006-01-02T15:04:05-0700"), "--until", until.Format("2006-01-02T15:04:05-0700"), "--pretty=oneline")
+  cmd := exec.Command("git", "-C", repo, "config", "user.name")
   cmd.Stdout = &stdout
   cmd.Stderr = &stderr
   err := cmd.Run()
+  if err != nil {
+      return "", "", err
+  }
+  gitUserStr, gitUserErrStr := string(stdout.Bytes()), string(stderr.Bytes())
+  if gitUserStr == "" && gitUserErrStr != "" {
+    return gitUserStr, gitUserErrStr, errors.New(gitUserErrStr)
+  }
+
+  stdout.Reset()
+  stderr.Reset()
+
+  cmd = exec.Command("git", "-C", repo, "log", "--author", gitUserStr, "--since", since.Format("2006-01-02T15:04:05-0700"), "--until", until.Format("2006-01-02T15:04:05-0700"), "--pretty=oneline")
+  cmd.Stdout = &stdout
+  cmd.Stderr = &stderr
+  err = cmd.Run()
   if err != nil {
       return "", "", err
   }
