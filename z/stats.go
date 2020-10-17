@@ -25,20 +25,23 @@ var statsCmd = &cobra.Command{
 
     cal, _ := NewCalendar(entries)
 
-    today := time.Now()
-    month, weeknumber := GetISOWeekInMonth(today)
-    month0 := month - 1
-    weeknumber0 := weeknumber - 1
-    thisWeek := cal.GetOutputForWeekCalendar(today, month0, weeknumber0)
+    weekMinus0 := time.Now()
+    monthMinus0, weeknumberMinus0 := GetISOWeekInMonth(weekMinus0)
+    monthMinus00 := monthMinus0 - 1
+    weeknumberMinus00 := weeknumberMinus0 - 1
+    thisWeek := cal.GetOutputForWeekCalendar(weekMinus0, monthMinus00, weeknumberMinus00)
 
-    oneWeekAgo := today.AddDate(0, 0, -7)
-    month, weeknumber = GetISOWeekInMonth(oneWeekAgo)
-    month0 = month - 1
-    weeknumber0 = weeknumber - 1
-    previousWeek := cal.GetOutputForWeekCalendar(oneWeekAgo, month0, weeknumber0)
+    weekMinus1 := weekMinus0.AddDate(0, 0, -7)
+    monthMinus1, weeknumberMinus1 := GetISOWeekInMonth(weekMinus1)
+    monthMinus10 := monthMinus1 - 1
+    weeknumberMinus10 := weeknumberMinus1 - 1
+    previousWeek := cal.GetOutputForWeekCalendar(weekMinus1, monthMinus10, weeknumberMinus10)
 
-
-    fmt.Printf("\n%s\n\n", strings.ToUpper(today.Month().String()))
+    if monthMinus00 == monthMinus10 {
+      fmt.Printf("\n%s\n\n", strings.ToUpper(weekMinus0.Month().String()))
+    } else {
+      fmt.Printf("\n%s / %s\n\n", strings.ToUpper(weekMinus0.Month().String()), strings.ToUpper(weekMinus1.Month().String()))
+    }
     fmt.Printf("%s\n\n\n", OutputAppendRight(thisWeek, previousWeek, 16))
     fmt.Printf("%s\n", cal.GetOutputForDistribution())
 
