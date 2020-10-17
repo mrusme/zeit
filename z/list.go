@@ -5,7 +5,10 @@ import (
   "fmt"
   "time"
   "github.com/spf13/cobra"
+  "github.com/shopspring/decimal"
 )
+
+var listTotalTime bool
 
 var listCmd = &cobra.Command{
   Use:   "list",
@@ -46,10 +49,17 @@ var listCmd = &cobra.Command{
       os.Exit(1)
     }
 
+    totalHours := decimal.NewFromInt(0);
     for _, entry := range filteredEntries {
+      duration := entry.Finish.Sub(entry.Begin)
+      durationDec := decimal.NewFromFloat(duration.Hours())
+      totalHours = totalHours.Add(durationDec)
       fmt.Printf("%s\n", entry.GetOutput())
     }
 
+    if listTotalTime == true {
+      fmt.Printf("\nTOTAL: %s H\n\n", totalHours.StringFixed(2))
+    }
     return
   },
 }
@@ -60,6 +70,7 @@ func init() {
   listCmd.Flags().StringVar(&until, "until", "", "Date/time to list until")
   listCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be listed")
   listCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be listed")
+  listCmd.Flags().BoolVar(&listTotalTime, "total", false, "Show total time of hours for listed activities")
 
   var err error
   database, err = InitDatabase()
