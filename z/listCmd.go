@@ -54,7 +54,7 @@ var listCmd = &cobra.Command{
       duration := entry.Finish.Sub(entry.Begin)
       durationDec := decimal.NewFromFloat(duration.Hours())
       totalHours = totalHours.Add(durationDec)
-      fmt.Printf("%s\n", entry.GetOutput())
+      fmt.Printf("%s\n", entry.GetOutput(false))
     }
 
     if listTotalTime == true {
