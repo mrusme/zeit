@@ -9,8 +9,6 @@ import (
   "github.com/cnf/structhash"
 )
 
-var formatTymeJson bool
-
 func importTymeJson(user string, file string) ([]Entry, error) {
     var entries []Entry
 
@@ -53,7 +51,7 @@ func importTymeJson(user string, file string) ([]Entry, error) {
 var importCmd = &cobra.Command{
   Use:   "import ([flags]) [file]",
   Short: "Import tracked activities",
-  Long: "Import tracked activities from various sources.",
+  Long: "Import tracked activities from various formats.",
   Args: cobra.ExactArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
     var entries []Entry
