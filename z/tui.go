@@ -108,3 +108,10 @@ func OutputAppendRight(leftStr string, rightStr string, pad int) (string) {
 
   return output
 }
+
+func GetColorFnFromHex(colorHex string) (func(...interface {}) string) {
+  if colorHex == "" {
+    colorHex = "#dddddd"
+  }
+  return color.NewRGBStyle(color.HEX(colorHex)).Sprint
+}
