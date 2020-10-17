@@ -4,6 +4,7 @@ import (
   "os/user"
   "regexp"
   "strconv"
+  "strings"
   "time"
   "math"
   "errors"
@@ -99,6 +100,17 @@ func ParseTime(timeStr string) (time.Time, error) {
   default:
     return time.Now(), errors.New("No match")
   }
+}
+
+func GetProjectIdFromName(projectName string) string {
+  reg, regerr := regexp.Compile("[^a-zA-Z0-9]+")
+  if regerr != nil {
+      return ""
+  }
+
+  projectId := strings.ToLower(reg.ReplaceAllString(projectName, ""))
+
+  return projectId
 }
 
 func GetISOCalendarWeek(date time.Time) (int) {
