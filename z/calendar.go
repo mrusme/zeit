@@ -145,6 +145,11 @@ func (calendar *Calendar) GetOutputForWeekCalendar(date time.Time, month int, we
       totalHours = totalHours.Add(stat.Hours)
     }
 
+    if dayHours.GreaterThan(decimal.NewFromInt(24)) {
+      fmt.Printf("%s %s of week %d in month %d has more than 24h tracked; cutting at 24h now\n", CharError, day, (month+1), (week+1))
+      dayHours = decimal.NewFromInt(24)
+    }
+
     bar := GetOutputBarForHours(dayHours, calendar.Months[month].Weeks[week].Statistics[day])
     bars = append(bars, bar)
   }
