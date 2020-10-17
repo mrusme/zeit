@@ -5,8 +5,6 @@ Zeit, erfassen. A command line tool for tracking time spent on tasks & projects.
 
 [Download the latest version for macOS, Linux, FreeBSD, NetBSD, OpenBSD & Plan9 here](https://github.com/mrusme/zeit/releases/latest)
 
-![zeit](documentation/header.jpg)
-
 
 ## Build
 
@@ -20,6 +18,8 @@ the version in `zeit --help` to be a different one.
 
 
 ## Usage
+
+![zeit](documentation/header.jpg)
 
 Please make sure to `export ZEIT_DB=~/.config/zeit.db` (or whatever location 
 you would like to have the zeit database at).
@@ -167,7 +167,7 @@ zeit erase 14037730-5c2d-44ff-b70e-81f1dcd4eb5f
 
 ### Statistics
 
-![zeit stats](documentation/zeit_stats.png)
+![zeit stats](documentation/zeit_stats.jpg)
 
 ```sh
 zeit stats
