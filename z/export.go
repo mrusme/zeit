@@ -8,9 +8,6 @@ import (
   "github.com/spf13/cobra"
 )
 
-var exportSince string
-var exportUntil string
-
 func exportZeitJson(user string, entries []Entry) (string, error) {
   stringified, err := json.Marshal(entries)
   if err != nil {
@@ -47,19 +44,19 @@ var exportCmd = &cobra.Command{
       os.Exit(1)
     }
 
-    var since time.Time
-    var until time.Time
+    var sinceTime time.Time
+    var untilTime time.Time
 
-    if exportSince != "" {
-      since, err = time.Parse(time.RFC3339, exportSince)
+    if since != "" {
+      sinceTime, err = time.Parse(time.RFC3339, since)
       if err != nil {
         fmt.Printf("%s %+v\n", CharError, err)
         os.Exit(1)
       }
     }
 
-    if exportUntil != "" {
-      until, err = time.Parse(time.RFC3339, exportUntil)
+    if until != "" {
+      untilTime, err = time.Parse(time.RFC3339, until)
       if err != nil {
         fmt.Printf("%s %+v\n", CharError, err)
         os.Exit(1)
@@ -67,7 +64,7 @@ var exportCmd = &cobra.Command{
     }
 
     var filteredEntries []Entry
-    filteredEntries, err = GetFilteredEntries(entries, project, task, since, until)
+    filteredEntries, err = GetFilteredEntries(entries, project, task, sinceTime, untilTime)
     if err != nil {
       fmt.Printf("%s %+v\n", CharError, err)
       os.Exit(1)
@@ -100,8 +97,8 @@ var exportCmd = &cobra.Command{
 func init() {
   rootCmd.AddCommand(exportCmd)
   exportCmd.Flags().StringVar(&format, "format", "", "Format to export, possible values: zeit, tyme")
-  exportCmd.Flags().StringVar(&exportSince, "since", "", "Date/time to start the export from")
-  exportCmd.Flags().StringVar(&exportUntil, "until", "", "Date/time to export until")
+  exportCmd.Flags().StringVar(&since, "since", "", "Date/time to start the export from")
+  exportCmd.Flags().StringVar(&until, "until", "", "Date/time to export until")
   exportCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be exported")
   exportCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be exported")
 
