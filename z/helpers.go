@@ -102,7 +102,7 @@ func ParseTime(timeStr string) (time.Time, error) {
   }
 }
 
-func GetProjectIdFromName(projectName string) string {
+func GetIdFromName(projectName string) string {
   reg, regerr := regexp.Compile("[^a-zA-Z0-9]+")
   if regerr != nil {
       return ""

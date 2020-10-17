@@ -44,7 +44,7 @@ func NewCalendar(entries []Entry) (Calendar, error) {
     sameDayHours := decimal.NewFromInt(0)
     nextDayHours := decimal.NewFromInt(0)
 
-    projectId := GetProjectIdFromName(entry.Project)
+    projectId := GetIdFromName(entry.Project)
 
     if projects[projectId].Name == "" {
       project, err := database.GetProject(entry.User, entry.Project)

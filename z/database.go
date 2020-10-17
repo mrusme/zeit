@@ -229,7 +229,7 @@ func (database *Database) UpdateProject(user string, projectName string, project
     return jsonerr
   }
 
-  projectId := GetProjectIdFromName(projectName)
+  projectId := GetIdFromName(projectName)
 
   dberr := database.DB.Update(func(tx *buntdb.Tx) error {
     _, _, sperr := tx.Set(user + ":project:" + projectId, string(projectJson), nil)
@@ -245,7 +245,7 @@ func (database *Database) UpdateProject(user string, projectName string, project
 
 func (database *Database) GetProject(user string, projectName string) (Project, error) {
   var project Project
-  projectId := GetProjectIdFromName(projectName)
+  projectId := GetIdFromName(projectName)
 
   dberr := database.DB.View(func(tx *buntdb.Tx) error {
     value, err := tx.Get(user + ":project:" + projectId, false)
