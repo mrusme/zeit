@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
       - uses: actions/checkout@v2
 
       - name: Setup Go
@@ -27,7 +31,7 @@ jobs:
           golint .
 
       - name: Run build
-        run: go build -v .
+        run: go build -v -ldflags "-X github.com/mrusme/zeit/z.VERSION=${{ steps.get_version.outputs.VERSION }}" .
 
       # - name: Run testing
       #   run: cd test && go test -v
@@ -39,6 +43,10 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
       - name: Check out repository
         uses: actions/checkout@v2
 
@@ -70,7 +78,7 @@ jobs:
             echo ""
             echo "=== Building ${GOOS} ${GOARCH} ==="
 
-            go build -v .
+            go build -v -ldflags "-X github.com/mrusme/zeit/z.VERSION=${{ steps.get_version.outputs.VERSION }}" .
 
             tar -czf ./zeit_${GOOS}_${GOARCH}.tar.gz zeit
             go clean
