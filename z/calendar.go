@@ -3,9 +3,10 @@ package z
 import (
   "fmt"
   "time"
+  "strings"
   "github.com/shopspring/decimal"
   "github.com/jinzhu/now"
-  "github.com/gookit/color"
+  // "github.com/gookit/color"
 )
 
 type Statistic struct {
@@ -36,10 +37,23 @@ func NewCalendar(entries []Entry) (Calendar, error) {
 
   cal.Distribution = make(map[string]Statistic)
 
+  projects := make(map[string]Project)
+
   for _, entry := range entries {
     endOfBeginDay := now.With(entry.Begin).EndOfDay()
     sameDayHours := decimal.NewFromInt(0)
     nextDayHours := decimal.NewFromInt(0)
+
+    projectId := GetProjectIdFromName(entry.Project)
+
+    if projects[projectId].Name == "" {
+      project, err := database.GetProject(entry.User, entry.Project)
+      if err != nil {
+        return cal, err
+      }
+
+      projects[projectId] = project
+    }
 
     /*
      * Apparently the activity end is on a new day.
@@ -72,7 +86,7 @@ func NewCalendar(entries []Entry) (Calendar, error) {
       stat := Statistic{
         Hours: sameDayHours,
         Project: entry.Project,
-        Color: color.FgCyan.Render,
+        Color: GetColorFnFromHex(projects[projectId].Color),
       }
 
       if cal.Months[month0].Weeks[weeknumber0].Statistics == nil {
@@ -92,7 +106,7 @@ func NewCalendar(entries []Entry) (Calendar, error) {
       stat := Statistic{
         Hours: nextDayHours,
         Project: entry.Project,
-        Color: color.FgCyan.Render, // TODO: Make configurable
+        Color: GetColorFnFromHex(projects[projectId].Color),
       }
 
       if cal.Months[month0].Weeks[weeknumber0].Statistics == nil {
@@ -106,7 +120,7 @@ func NewCalendar(entries []Entry) (Calendar, error) {
     dist.Project = entry.Project
     dist.Hours = dist.Hours.Add(sameDayHours)
     dist.Hours = dist.Hours.Add(nextDayHours)
-    dist.Color = color.FgCyan.Render // TODO: Make configurable
+    dist.Color = GetColorFnFromHex(projects[projectId].Color)
     cal.Distribution[entry.Project] = dist
 
     // fmt.Printf("Same Day: %s \n Next Day: %s \n Project Hours: %s\n", sameDayHours.String(), nextDayHours.String(), dist.Hours.String())
@@ -152,18 +166,24 @@ func (calendar *Calendar) GetOutputForWeekCalendar(date time.Time, month int, we
 func (calendar *Calendar) GetOutputForDistribution() (string) {
   var output string = ""
 
-  output = fmt.Sprintf("DISTRIBUTION\n\n");
-  output = fmt.Sprintf("%s████████████████████████████████████████████████████████████████████████████████\n\n", output)
-
   // fmt.Printf("%s\n", calendar.TotalHours.String())
 
+  var bar string = ""
   for _, stat := range calendar.Distribution {
     divided := stat.Hours.Div(calendar.TotalHours)
     percentage := divided.Mul(decimal.NewFromInt(100))
     hoursStr := stat.Hours.StringFixed(2)
     percentageStr := percentage.StringFixed(2)
-    output = fmt.Sprintf("%s%s%*s H / %*s %%\n", output, stat.Project, (68 - len(stat.Project)), hoursStr, 5, percentageStr)
+
+    dividedByBarLength := percentage.Div(decimal.NewFromInt(100))
+    percentageForBar := dividedByBarLength.Mul(decimal.NewFromInt(80))
+    percentageForBarInt := int(percentageForBar.Round(0).IntPart())
+
+    bar = fmt.Sprintf("%s%s", bar, stat.Color(strings.Repeat("█", percentageForBarInt)))
+
+    output = fmt.Sprintf("%s%s%*s H / %*s %%\n", output, stat.Color(stat.Project), (68 - len(stat.Project)), hoursStr, 5, percentageStr)
   }
 
+  output = fmt.Sprintf("DISTRIBUTION\n\n%s\n\n%s\n", bar, output)
   return output
 }
