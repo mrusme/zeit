@@ -3,6 +3,8 @@
 
 Zeit, erfassen. A command line tool for tracking time spent on tasks & projects.
 
+[Download the latest version for macOS, Linux, FreeBSD, NetBSD, OpenBSD & Plan9 here](https://github.com/mrusme/zeit/releases/latest)
+
 ![zeit](documentation/header.jpg)
 
 
