@@ -260,3 +260,41 @@ func (database *Database) GetProject(user string, projectName string) (Project, 
 
   return project, dberr
 }
+
+func (database *Database) UpdateTask(user string, taskName string, task Task) (error) {
+  taskJson, jsonerr := json.Marshal(task)
+  if jsonerr != nil {
+    return jsonerr
+  }
+
+  taskId := GetIdFromName(taskName)
+
+  dberr := database.DB.Update(func(tx *buntdb.Tx) error {
+    _, _, sperr := tx.Set(user + ":task:" + taskId, string(taskJson), nil)
+    if sperr != nil {
+      return sperr
+    }
+
+    return nil
+  })
+
+  return dberr
+}
+
+func (database *Database) GetTask(user string, taskName string) (Task, error) {
+  var task Task
+  taskId := GetIdFromName(taskName)
+
+  dberr := database.DB.View(func(tx *buntdb.Tx) error {
+    value, err := tx.Get(user + ":task:" + taskId, false)
+    if err != nil {
+      return nil
+    }
+
+    json.Unmarshal([]byte(value), &task)
+
+    return nil
+  })
+
+  return task, dberr
+}
