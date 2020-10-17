@@ -4,6 +4,7 @@ import (
   "os"
   "fmt"
   "time"
+  "strings"
   "github.com/spf13/cobra"
   // "github.com/shopspring/decimal"
   // "github.com/gookit/color"
@@ -36,8 +37,9 @@ var statsCmd = &cobra.Command{
     weeknumber0 = weeknumber - 1
     previousWeek := cal.GetOutputForWeekCalendar(oneWeekAgo, month0, weeknumber0)
 
-    fmt.Printf("%s\n", OutputAppendRight(thisWeek, previousWeek, 16))
 
+    fmt.Printf("\n%s\n\n", strings.ToUpper(today.Month().String()))
+    fmt.Printf("%s\n\n\n", OutputAppendRight(thisWeek, previousWeek, 16))
     fmt.Printf("%s\n", cal.GetOutputForDistribution())
 
     return
