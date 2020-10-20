@@ -9,6 +9,7 @@ import (
 )
 
 var listTotalTime bool
+var listOnlyProjectsAndTasks bool
 
 var listCmd = &cobra.Command{
   Use:   "list",
@@ -49,11 +50,35 @@ var listCmd = &cobra.Command{
       os.Exit(1)
     }
 
+    if listOnlyProjectsAndTasks == true {
+      var projectsAndTasks = make(map[string]map[string]bool)
+
+      for _, filteredEntry := range filteredEntries {
+        taskMap, ok := projectsAndTasks[filteredEntry.Project]
+
+        if !ok {
+          taskMap = make(map[string]bool)
+          projectsAndTasks[filteredEntry.Project] = taskMap
+        }
+
+        taskMap[filteredEntry.Task] = true
+        projectsAndTasks[filteredEntry.Project] = taskMap
+      }
+
+      for project, _ := range projectsAndTasks {
+        fmt.Printf("%s %s\n", CharMore, project)
+
+        for task, _ := range projectsAndTasks[project] {
+          fmt.Printf("%*s└── %s\n", 1, " ", task)
+        }
+      }
+
+      return
+    }
+
     totalHours := decimal.NewFromInt(0);
     for _, entry := range filteredEntries {
-      duration := entry.Finish.Sub(entry.Begin)
-      durationDec := decimal.NewFromFloat(duration.Hours())
-      totalHours = totalHours.Add(durationDec)
+      totalHours = totalHours.Add(entry.GetDuration())
       fmt.Printf("%s\n", entry.GetOutput(false))
     }
 
@@ -71,6 +96,7 @@ func init() {
   listCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be listed")
   listCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be listed")
   listCmd.Flags().BoolVar(&listTotalTime, "total", false, "Show total time of hours for listed activities")
+  listCmd.Flags().BoolVar(&listOnlyProjectsAndTasks, "only-projects-and-tasks", false, "Only list projects and their tasks, no entries")
 
   var err error
   database, err = InitDatabase()

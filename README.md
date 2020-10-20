@@ -127,7 +127,40 @@ zeit finish --begin 16:00
 ### List tracked activity
 
 ```sh
+zeit list --help
+```
+
+#### Examples:
+
+List all tracked activities:
+
+```sh
 zeit list
+```
+
+List all tracked activities since a specific date/time:
+
+```sh
+zeit list --since "2020-10-14T00:00:01+01:00"
+```
+
+List all tracked activities and add the total hours:
+
+```sh
+zeit list --total
+```
+
+List only projects and tasks (relational):
+
+```sh
+zeit list --only-projects-and-tasks
+```
+
+List only projects and tasks (relational) that were tracked since a specific 
+date/time:
+
+```sh
+zeit list --only-projects-and-tasks --since "2020-10-14T00:00:01+01:00"
 ```
 
 

@@ -6,6 +6,7 @@ import (
   "time"
   "fmt"
   "github.com/gookit/color"
+  "github.com/shopspring/decimal"
 )
 
 type Entry struct {
@@ -126,6 +127,11 @@ func (entry *Entry) GetOutputForTrack(isRunning bool, wasRunning bool) (string) 
   }
 
   return fmt.Sprintf("%s %s task%s\n", CharTrack, outputPrefix, outputSuffix)
+}
+
+func (entry *Entry) GetDuration() (decimal.Decimal) {
+  duration := entry.Finish.Sub(entry.Begin)
+  return decimal.NewFromFloat(duration.Hours())
 }
 
 func (entry *Entry) GetOutputForFinish() (string) {

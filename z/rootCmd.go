@@ -26,6 +26,7 @@ const(
   CharErase = " ◀"
   CharError = " ▲"
   CharInfo = " ●"
+  CharMore = " ◆"
 )
 
 var rootCmd = &cobra.Command{
