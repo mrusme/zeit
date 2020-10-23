@@ -104,15 +104,15 @@ func ParseTime(timeStr string) (time.Time, error) {
   }
 }
 
-func GetIdFromName(projectName string) string {
+func GetIdFromName(name string) string {
   reg, regerr := regexp.Compile("[^a-zA-Z0-9]+")
   if regerr != nil {
       return ""
   }
 
-  projectId := strings.ToLower(reg.ReplaceAllString(projectName, ""))
+  id := strings.ToLower(reg.ReplaceAllString(name, ""))
 
-  return projectId
+  return id
 }
 
 func GetISOCalendarWeek(date time.Time) (int) {
