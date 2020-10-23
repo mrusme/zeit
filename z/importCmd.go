@@ -17,8 +17,6 @@ func importTymeJson(user string, file string) ([]Entry, error) {
 
     for _, tymeEntry := range tyme.Data {
       tymeEntrySHA1 := structhash.Sha1(tymeEntry, 1)
-      fmt.Printf("%x\n", tymeEntrySHA1)
-
       tymeStart, err := time.Parse("2006-01-02T15:04:05-07:00", tymeEntry.Start)
       if err != nil {
         fmt.Printf("%s %+v\n", CharError, err)
