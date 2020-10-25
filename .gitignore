@@ -15,4 +15,5 @@
 # vendor/
 
 /zeit
+/db
 .DS_Store
