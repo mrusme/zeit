@@ -11,7 +11,9 @@ jobs:
     steps:
       - name: Get version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: |
+          export VERSION="${GITHUB_REF/refs\/tags\//}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - uses: actions/checkout@v2
 
@@ -45,15 +47,17 @@ jobs:
     steps:
       - name: Get version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: |
+          export VERSION="${GITHUB_REF/refs\/tags\//}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Check out repository
         uses: actions/checkout@v2
 
       - name: Changelog
         run: |
-          export CHANGELOG=`git log $(git tag --sort=-version:refname | head -n 2 | tail -n 1)...${{ github.ref }} --pretty=format:'<li> <a href="http://github.com/jerel/<project>/commit/%H">view commit &bull;</a> %s</li> ' --reverse`
-          echo "::set-env name=CHANGELOG::$CHANGELOG"
+          export CHANGELOG=`git log $(git tag --sort=-version:refname | head -n 2 | tail -n 1)...${{ github.ref }} --pretty=format:'<li> <a href="http://github.com/mrusme/zeit/commit/%H">view commit &bull;</a> %s</li> ' --reverse`
+          echo "CHANGELOG=$CHANGELOG" >> $GITHUB_ENV
 
       - name: Create Release
         id: create_release
