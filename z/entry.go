@@ -47,7 +47,7 @@ func NewEntry(
     return Entry{}, err
   }
 
-  if newEntry.IsFinishedAfterBegan() == false {
+  if id == "" && newEntry.IsFinishedAfterBegan() == false {
     return Entry{}, errors.New("beginning time of tracking cannot be after finish time")
   }
 

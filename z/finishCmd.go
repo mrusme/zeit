@@ -81,6 +81,11 @@ var finishCmd = &cobra.Command{
       }
     }
 
+    if runningEntry.IsFinishedAfterBegan() == false {
+      fmt.Printf("%s %+v\n", CharError, "beginning time of tracking cannot be after finish time")
+      os.Exit(1)
+    }
+
     _, err = database.FinishEntry(user, runningEntry)
     if err != nil {
       fmt.Printf("%s %+v\n", CharError, err)
