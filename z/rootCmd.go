@@ -3,6 +3,7 @@ package z
 import (
   "fmt"
   "github.com/spf13/cobra"
+  "github.com/gookit/color"
   "os"
 )
 
@@ -19,6 +20,8 @@ var until string
 
 var format string
 var force bool
+
+var noColors bool
 
 const(
   CharTrack = " ▶"
@@ -44,7 +47,12 @@ func Execute() {
 
 func init() {
   cobra.OnInitialize(initConfig)
+
+  rootCmd.PersistentFlags().BoolVar(&noColors, "no-colors", false, "Do not use colors in output")
 }
 
 func initConfig() {
+  if noColors == true {
+    color.Disable()
+  }
 }
