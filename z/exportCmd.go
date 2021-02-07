@@ -96,7 +96,7 @@ var exportCmd = &cobra.Command{
 
 func init() {
   rootCmd.AddCommand(exportCmd)
-  exportCmd.Flags().StringVar(&format, "format", "", "Format to export, possible values: zeit, tyme")
+  exportCmd.Flags().StringVar(&format, "format", "zeit", "Format to export, possible values: zeit, tyme")
   exportCmd.Flags().StringVar(&since, "since", "", "Date/time to start the export from")
   exportCmd.Flags().StringVar(&until, "until", "", "Date/time to export until")
   exportCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be exported")

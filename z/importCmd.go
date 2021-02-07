@@ -107,7 +107,7 @@ var importCmd = &cobra.Command{
 
 func init() {
   rootCmd.AddCommand(importCmd)
-  importCmd.Flags().StringVar(&format, "format", "", "Format to import, possible values: zeit, tyme")
+  importCmd.Flags().StringVar(&format, "format", "zeit", "Format to import, possible values: zeit, tyme")
 
   var err error
   database, err = InitDatabase()
