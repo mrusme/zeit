@@ -65,7 +65,6 @@ func RelToTime(timeStr string, ftId int) (time.Time, error) {
       return time.Now(), errors.New("No match")
     }
 
-
     var hours int = 0
     var minutes int = 0
 
@@ -92,11 +91,17 @@ func RelToTime(timeStr string, ftId int) (time.Time, error) {
 func ParseTime(timeStr string) (time.Time, error) {
   tfId := GetTimeFormat(timeStr)
 
+  t:= time.Now()
+
   switch tfId {
   case TFAbsTwelveHour:
-    return time.Parse("3:04pm", timeStr)
+    tadj, err := time.Parse("3:04pm", timeStr)
+    tnew := time.Date(t.Year(), t.Month(), t.Day(), tadj.Hour(), tadj.Minute(), t.Second(), t.Nanosecond(), t.Location())
+    return tnew, err
   case TFAbsTwentyfourHour:
-    return time.Parse("15:04", timeStr)
+    tadj, err := time.Parse("15:04", timeStr)
+    tnew := time.Date(t.Year(), t.Month(), t.Day(), tadj.Hour(), tadj.Minute(), t.Second(), t.Nanosecond(), t.Location())
+    return tnew, err
   case TFRelHourMinute, TFRelHourFraction:
     return RelToTime(timeStr, tfId)
   default:
@@ -160,3 +165,4 @@ func GetGitLog(repo string, since time.Time, until time.Time) (string, string, e
   stdoutStr, stderrStr := string(stdout.Bytes()), string(stderr.Bytes())
   return stdoutStr, stderrStr, nil
 }
+
