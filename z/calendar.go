@@ -40,6 +40,7 @@ func NewCalendar(entries []Entry) (Calendar, error) {
   projects := make(map[string]Project)
 
   for _, entry := range entries {
+    var entryFinish time.Time
     endOfBeginDay := now.With(entry.Begin).EndOfDay()
     sameDayHours := decimal.NewFromInt(0)
     nextDayHours := decimal.NewFromInt(0)
@@ -55,23 +56,29 @@ func NewCalendar(entries []Entry) (Calendar, error) {
       projects[projectId] = project
     }
 
+    if entry.Finish.IsZero() {
+      entryFinish = time.Now()
+    } else {
+      entryFinish = entry.Finish
+    }
+
     /*
      * Apparently the activity end is on a new day.
      * This means we have to split the activity across two days.
      */
-    if endOfBeginDay.Before(entry.Finish) == true {
-      startOfFinishDay := now.With(entry.Finish).BeginningOfDay()
+    if endOfBeginDay.Before(entryFinish) == true {
+      startOfFinishDay := now.With(entryFinish).BeginningOfDay()
 
       sameDayDuration := endOfBeginDay.Sub(entry.Begin)
       sameDay := sameDayDuration.Hours()
       sameDayHours = decimal.NewFromFloat(sameDay)
 
-      nextDayDuration := entry.Finish.Sub(startOfFinishDay)
+      nextDayDuration := entryFinish.Sub(startOfFinishDay)
       nextDay := nextDayDuration.Hours()
       nextDayHours = decimal.NewFromFloat(nextDay)
 
     } else {
-      sameDayDuration := entry.Finish.Sub(entry.Begin)
+      sameDayDuration := entryFinish.Sub(entry.Begin)
       sameDay := sameDayDuration.Hours()
       sameDayHours = decimal.NewFromFloat(sameDay)
     }
@@ -97,7 +104,7 @@ func NewCalendar(entries []Entry) (Calendar, error) {
     }
 
     if nextDayHours.GreaterThan(decimal.NewFromInt(0)) {
-      month, weeknumber := GetISOWeekInMonth(entry.Finish)
+      month, weeknumber := GetISOWeekInMonth(entryFinish)
       month0 := month - 1
       weeknumber0 := weeknumber - 1
       weekday := entry.Begin.Weekday()
