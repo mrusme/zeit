@@ -275,7 +275,13 @@ zeit export --format tyme --project "my project" --since "2020-04-01T15:04:05+07
 
 ## Integrations
 
-Here are a few integrations and extensions built by other people that make use of `zeit`:
+Here are a few integrations and extensions built by myself as well as other 
+people that make use of `zeit`:
 
-- [`zeit-status.sh`](https://github.com/khughitt/dotfiles/blob/master/polybar/scripts/zeit-status.sh), a [Polybar](https://github.com/polybar/polybar) integration for `zeit` by [@khughitt](https://github.com/khughitt) (see [#1](https://github.com/mrusme/zeit/issues/1))
+- [`zeit.1m.sh`](https://github.com/mrusme/zeit/blob/main/extras/zeit.1m.sh), 
+  an [`xbar`](https://github.com/matryer/xbar) plugin for `zeit`
+- [`zeit-status.sh`](https://github.com/khughitt/dotfiles/blob/master/polybar/scripts/zeit-status.sh), 
+  a [Polybar](https://github.com/polybar/polybar) integration for `zeit` by 
+  [@khughitt](https://github.com/khughitt) 
+  (see [#1](https://github.com/mrusme/zeit/issues/1))
 - your link here, feel free to PR! :-)
