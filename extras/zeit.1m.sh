@@ -19,12 +19,12 @@
 PLACEHOLDER_NO_PROJECT='[no project]'
 PLACEHOLDER_NO_TASK='[no task]'
 
-if [[ -z "$ZEIT_BIN" ]]
+if [ -z "$ZEIT_BIN" ]
 then
   ZEIT_BIN=$1
 fi
 
-if [[ -z "$ZEIT_DB" ]]
+if [ -z "$ZEIT_DB" ]
 then
   export ZEIT_DB=$2
 fi
@@ -36,11 +36,11 @@ case $3 in
 
     $ZEIT_BIN --no-colors finish
 
-    if [[ "$flag_p" = "$PLACEHOLDER_NO_PROJECT" ]]
+    if [ "$flag_p" = "$PLACEHOLDER_NO_PROJECT" ]
     then
       flag_p=''
     fi
-    if [[ "$flag_t" = "$PLACEHOLDER_NO_TASK" ]]
+    if [ "$flag_t" = "$PLACEHOLDER_NO_TASK" ]
     then
       flag_t=''
     fi
@@ -59,59 +59,57 @@ trackingTask=''
 trackingDuration=''
 tracking=$($ZEIT_BIN --no-colors tracking)
 
-if [[ "${tracking:3:8}" = "tracking" ]]
+if echo "$tracking" | grep -q '^ ▶ tracking'
 then
-  if [[ "${tracking:12:8}" = "task for" ]]
+  if echo "$tracking" | grep -q '^ ▶ tracking task for'
   then
     trackingProject=$PLACEHOLDER_NO_PROJECT
     trackingTask=$PLACEHOLDER_NO_TASK
-    trackingDuration=$(echo $tracking | sed -E 's/.*tracking task for (.+)/\1/g')
+    trackingDuration=$(echo "$tracking" | sed -E 's/.*tracking task for (.+)/\1/g')
   else
-    trackingProject=$(echo $tracking | sed -E 's/.*tracking (.+) on (.+) for (.+)/\2/g')
-    trackingTask=$(echo $tracking | sed -E 's/.*tracking (.+) on (.+) for (.+)/\1/g')
-    trackingDuration=$(echo $tracking | sed -E 's/.*tracking (.+) on (.+) for (.+)/\3/g')
+    trackingProject=$(echo "$tracking" | sed -E 's/.*tracking (.+) on (.+) for (.+)/\2/g')
+    trackingTask=$(echo "$tracking" | sed -E 's/.*tracking (.+) on (.+) for (.+)/\1/g')
+    trackingDuration=$(echo "$tracking" | sed -E 's/.*tracking (.+) on (.+) for (.+)/\3/g')
   fi
   tracking=$trackingDuration
 fi
 
-echo $tracking
+echo "$tracking"
 echo '---'
 echo 'Projects'
 
 project=''
-$ZEIT_BIN --no-colors list --only-projects-and-tasks | while read line
+$ZEIT_BIN --no-colors list --only-projects-and-tasks | while read -r line
 do
-  if [[ $line = \◆* ]]
+  if echo "$line" | grep -q '^◆'
   then
-    project=$(echo $line | sed 's/◆[[:space:]]\{0,1\}//g')
-
-    if [[ "$project" = "" ]]
+    project=$(echo "$line" | sed 's/◆[[:space:]]\{0,3\}//g')
+    if [ "$project" = "" ]
     then
       project=$PLACEHOLDER_NO_PROJECT
     fi
 
-    if [[ "$project" = "$trackingProject" ]]
+    if [ "$project" = "$trackingProject" ]
     then
       echo "-- ▶ $project"
     else
       echo "-- $project"
     fi
-  elif [[ $line = \└\─\─* ]]
+  elif echo "$line" | grep -q '^└──'
   then
-    task=$(echo $line | sed 's/└──[[:space:]]\{0,1\}//g')
+    task=$(echo "$line" | sed 's/└──[[:space:]]\{0,3\}//g')
 
-    if [[ "$task" = "" ]]
+    if [ "$task" = "" ]
     then
       task=$PLACEHOLDER_NO_TASK
     fi
 
-    if [[ "$project" = "$trackingProject" && "$task" = "$trackingTask" ]]
+    if [ "$project" = "$trackingProject" ] && [ "$task" = "$trackingTask" ]
     then
       echo "---- ▶ $task | shell='$0' param1='$ZEIT_BIN' param2='$ZEIT_DB' param3=finish param4='$project' param5='$task' terminal=false refresh=true"
     else
       echo "---- $task | shell='$0' param1='$ZEIT_BIN' param2='$ZEIT_DB' param3=track param4='$project' param5='$task' terminal=false refresh=true"
     fi
   fi
-  #echo $line | sed 's/◆/--/g' | sed 's/└── \(.*\)/---- \1 \| shell="$0" param1=track param2="\1" terminal=false/g'; done
 done
 exit
