@@ -131,6 +131,9 @@ func (entry *Entry) GetOutputForTrack(isRunning bool, wasRunning bool) (string) 
 
 func (entry *Entry) GetDuration() (decimal.Decimal) {
   duration := entry.Finish.Sub(entry.Begin)
+  if (duration < 0) { 
+    duration = time.Now().Sub(entry.Begin)
+  }
   return decimal.NewFromFloat(duration.Hours())
 }
 
