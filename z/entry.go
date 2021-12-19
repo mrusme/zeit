@@ -107,13 +107,13 @@ func (entry *Entry) GetOutputForTrack(isRunning bool, wasRunning bool) (string) 
 
   now := time.Now()
   trackDiffNow := now.Sub(entry.Begin)
-  trackDiffNowOut := time.Time{}.Add(trackDiffNow)
+  durationString := fmtDuration(trackDiffNow)
 
   if isRunning == true && wasRunning == false {
     outputPrefix = "began tracking"
   } else if isRunning == true && wasRunning == true {
     outputPrefix = "tracking"
-    outputSuffix = fmt.Sprintf(" for %sh", color.FgLightWhite.Render(trackDiffNowOut.Format("15:04")))
+    outputSuffix = fmt.Sprintf(" for %sh", color.FgLightWhite.Render(durationString))
   } else if isRunning == false && wasRunning == false {
     outputPrefix = "tracked"
   }
@@ -143,7 +143,7 @@ func (entry *Entry) GetOutputForFinish() (string) {
   trackDiff := entry.Finish.Sub(entry.Begin)
   taskDuration := fmtDuration(trackDiff)
 
-  outputSuffix = fmt.Sprintf(" for %s h", color.FgLightWhite.Render(taskDuration))
+  outputSuffix = fmt.Sprintf(" for %sh", color.FgLightWhite.Render(taskDuration))
 
   if entry.Task != "" && entry.Project != "" {
     return fmt.Sprintf("%s finished tracking %s on %s%s\n", CharFinish, color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project), outputSuffix)
@@ -172,7 +172,7 @@ func (entry *Entry) GetOutput(full bool) (string) {
 	taskDuration := fmtDuration(trackDiff)
   if full == false {
   	
-    output = fmt.Sprintf("%s %s on %s from %s to %s (%s h) %s",
+    output = fmt.Sprintf("%s %s on %s from %s to %s (%sh) %s",
       color.FgGray.Render(entry.ID),
       color.FgLightWhite.Render(entry.Task),
       color.FgLightWhite.Render(entry.Project),
@@ -182,7 +182,7 @@ func (entry *Entry) GetOutput(full bool) (string) {
       color.FgLightYellow.Render(isRunning),
     )
   } else {
-    output = fmt.Sprintf("%s\n   %s on %s\n   %s h from %s to %s %s\n\n   Notes:\n   %s\n",
+    output = fmt.Sprintf("%s\n   %s on %s\n   %sh from %s to %s %s\n\n   Notes:\n   %s\n",
       color.FgGray.Render(entry.ID),
       color.FgLightWhite.Render(entry.Task),
       color.FgLightWhite.Render(entry.Project),
