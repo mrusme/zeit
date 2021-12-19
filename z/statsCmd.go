@@ -51,7 +51,7 @@ var statsCmd = &cobra.Command{
 
 func init() {
   rootCmd.AddCommand(statsCmd)
-
+  statsCmd.Flags().BoolVar(&fractional, "decimal", false, "Show fractional hours in decimal format instead of minutes")
   var err error
   database, err = InitDatabase()
   if err != nil {
