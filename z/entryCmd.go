@@ -71,6 +71,7 @@ func init() {
   entryCmd.Flags().StringVarP(&project, "project", "p", "", "Update activity project")
   entryCmd.Flags().StringVarP(&notes, "notes", "n", "", "Update activity notes")
   entryCmd.Flags().StringVarP(&task, "task", "t", "", "Update activity task")
+  entryCmd.Flags().BoolVar(&fractional, "decimal", false, "Show fractional hours in decimal format instead of minutes")
 
   var err error
   database, err = InitDatabase()
