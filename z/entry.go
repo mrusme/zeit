@@ -141,9 +141,9 @@ func (entry *Entry) GetOutputForFinish() (string) {
   var outputSuffix string = ""
 
   trackDiff := entry.Finish.Sub(entry.Begin)
-  trackDiffOut := time.Time{}.Add(trackDiff)
+  taskDuration := fmtDuration(trackDiff)
 
-  outputSuffix = fmt.Sprintf(" for %sh", color.FgLightWhite.Render(trackDiffOut.Format("15:04")))
+  outputSuffix = fmt.Sprintf(" for %s h", color.FgLightWhite.Render(taskDuration))
 
   if entry.Task != "" && entry.Project != "" {
     return fmt.Sprintf("%s finished tracking %s on %s%s\n", CharFinish, color.FgLightWhite.Render(entry.Task), color.FgLightWhite.Render(entry.Project), outputSuffix)
@@ -169,24 +169,24 @@ func (entry *Entry) GetOutput(full bool) (string) {
   }
 
   trackDiff := entryFinish.Sub(entry.Begin)
-  trackDiffOut := time.Time{}.Add(trackDiff)
-
+	taskDuration := fmtDuration(trackDiff)
   if full == false {
-    output = fmt.Sprintf("%s %s on %s from %s to %s (%sh) %s",
+  	
+    output = fmt.Sprintf("%s %s on %s from %s to %s (%s h) %s",
       color.FgGray.Render(entry.ID),
       color.FgLightWhite.Render(entry.Task),
       color.FgLightWhite.Render(entry.Project),
       color.FgLightWhite.Render(entry.Begin.Format("2006-01-02 15:04 -0700")),
       color.FgLightWhite.Render(entryFinish.Format("2006-01-02 15:04 -0700")),
-      color.FgLightWhite.Render(trackDiffOut.Format("15:04")),
+      color.FgLightWhite.Render(taskDuration) ,
       color.FgLightYellow.Render(isRunning),
     )
   } else {
-    output = fmt.Sprintf("%s\n   %s on %s\n   %sh from %s to %s %s\n\n   Notes:\n   %s\n",
+    output = fmt.Sprintf("%s\n   %s on %s\n   %s h from %s to %s %s\n\n   Notes:\n   %s\n",
       color.FgGray.Render(entry.ID),
       color.FgLightWhite.Render(entry.Task),
       color.FgLightWhite.Render(entry.Project),
-      color.FgLightWhite.Render(trackDiffOut.Format("15:04")),
+      color.FgLightWhite.Render(taskDuration),
       color.FgLightWhite.Render(entry.Begin.Format("2006-01-02 15:04 -0700")),
       color.FgLightWhite.Render(entryFinish.Format("2006-01-02 15:04 -0700")),
       color.FgLightYellow.Render(isRunning),

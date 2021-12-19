@@ -161,7 +161,7 @@ func (calendar *Calendar) GetOutputForWeekCalendar(date time.Time, month int, we
     bars = append(bars, bar)
   }
 
-  output = fmt.Sprintf("CW %02d                    %s H\n", GetISOCalendarWeek(date), totalHours.StringFixed(2))
+  output = fmt.Sprintf("CW %02d                    %s H\n", GetISOCalendarWeek(date), fmtHours(totalHours))
   for row := 0; row < len(bars[0]); row++ {
     output = fmt.Sprintf("%s%2d │", output, ((6 - row) * 4))
     for col := 0; col < len(bars); col++ {
@@ -184,7 +184,7 @@ func (calendar *Calendar) GetOutputForDistribution() (string) {
   for _, stat := range calendar.Distribution {
     divided := stat.Hours.Div(calendar.TotalHours)
     percentage := divided.Mul(decimal.NewFromInt(100))
-    hoursStr := stat.Hours.StringFixed(2)
+    hoursStr := fmtHours(stat.Hours)
     percentageStr := percentage.StringFixed(2)
 
     dividedByBarLength := percentage.Div(decimal.NewFromInt(100))

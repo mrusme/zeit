@@ -13,6 +13,7 @@ var listTotalTime bool
 var listOnlyProjectsAndTasks bool
 var appendProjectIDToTask bool
 
+
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List activities",
@@ -89,7 +90,7 @@ var listCmd = &cobra.Command{
 		}
 
 		if listTotalTime == true {
-			fmt.Printf("\nTOTAL: %s H\n\n", totalHours.StringFixed(2))
+			fmt.Printf("\nTOTAL: %s H\n\n", fmtHours(totalHours));
 		}
 		return
 	},
@@ -101,6 +102,7 @@ func init() {
 	listCmd.Flags().StringVar(&until, "until", "", "Date/time to list until")
 	listCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be listed")
 	listCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be listed")
+	listCmd.Flags().BoolVar(&fractional, "decimal", false, "Show fractional hours in decimal format instead of minutes")
 	listCmd.Flags().BoolVar(&listTotalTime, "total", false, "Show total time of hours for listed activities")
 	listCmd.Flags().BoolVar(&listOnlyProjectsAndTasks, "only-projects-and-tasks", false, "Only list projects and their tasks, no entries")
 	listCmd.Flags().BoolVar(&appendProjectIDToTask, "append-project-id-to-task", false, "Append project ID to tasks in the list")
