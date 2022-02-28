@@ -131,7 +131,7 @@ func (entry *Entry) GetOutputForTrack(isRunning bool, wasRunning bool) (string) 
 
 func (entry *Entry) GetDuration() (decimal.Decimal) {
   duration := entry.Finish.Sub(entry.Begin)
-  if (duration < 0) { 
+  if (duration < 0) {
     duration = time.Now().Sub(entry.Begin)
   }
   return decimal.NewFromFloat(duration.Hours())
@@ -169,9 +169,9 @@ func (entry *Entry) GetOutput(full bool) (string) {
   }
 
   trackDiff := entryFinish.Sub(entry.Begin)
-	taskDuration := fmtDuration(trackDiff)
+  taskDuration := fmtDuration(trackDiff)
   if full == false {
-  	
+
     output = fmt.Sprintf("%s %s on %s from %s to %s (%sh) %s",
       color.FgGray.Render(entry.ID),
       color.FgLightWhite.Render(entry.Task),
