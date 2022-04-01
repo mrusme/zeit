@@ -5,6 +5,7 @@ import (
   "fmt"
   "time"
   "encoding/json"
+  "github.com/jinzhu/now"
   "github.com/spf13/cobra"
 )
 
@@ -48,7 +49,7 @@ var exportCmd = &cobra.Command{
     var untilTime time.Time
 
     if since != "" {
-      sinceTime, err = time.Parse(time.RFC3339, since)
+      sinceTime, err = now.Parse(since)
       if err != nil {
         fmt.Printf("%s %+v\n", CharError, err)
         os.Exit(1)
@@ -56,7 +57,7 @@ var exportCmd = &cobra.Command{
     }
 
     if until != "" {
-      untilTime, err = time.Parse(time.RFC3339, until)
+      untilTime, err = now.Parse(until)
       if err != nil {
         fmt.Printf("%s %+v\n", CharError, err)
         os.Exit(1)
