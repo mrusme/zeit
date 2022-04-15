@@ -11,6 +11,7 @@ import (
 
 var listTotalTime bool
 var listOnlyProjectsAndTasks bool
+var listOnlyTasks bool
 var appendProjectIDToTask bool
 
 
@@ -53,7 +54,7 @@ var listCmd = &cobra.Command{
       os.Exit(1)
     }
 
-    if listOnlyProjectsAndTasks == true {
+    if listOnlyProjectsAndTasks == true || listOnlyTasks == true {
       var projectsAndTasks = make(map[string]map[string]bool)
 
       for _, filteredEntry := range filteredEntries {
@@ -69,13 +70,19 @@ var listCmd = &cobra.Command{
       }
 
       for project, _ := range projectsAndTasks {
-        fmt.Printf("%s %s\n", CharMore, project)
+        if listOnlyProjectsAndTasks == true && listOnlyTasks == false {
+          fmt.Printf("%s %s\n", CharMore, project)
+        }
 
         for task, _ := range projectsAndTasks[project] {
+          if listOnlyProjectsAndTasks == true && listOnlyTasks == false {
+            fmt.Printf("%*s└── ", 1, " ")
+          }
+
           if appendProjectIDToTask == true {
-            fmt.Printf("%*s└── %s [%s]\n", 1, " ", task, project)
+            fmt.Printf("%s [%s]\n", task, project)
           } else {
-            fmt.Printf("%*s└── %s\n", 1, " ", task)
+            fmt.Printf("%s\n", task)
           }
         }
       }
@@ -105,6 +112,7 @@ func init() {
   listCmd.Flags().BoolVar(&fractional, "decimal", false, "Show fractional hours in decimal format instead of minutes")
   listCmd.Flags().BoolVar(&listTotalTime, "total", false, "Show total time of hours for listed activities")
   listCmd.Flags().BoolVar(&listOnlyProjectsAndTasks, "only-projects-and-tasks", false, "Only list projects and their tasks, no entries")
+  listCmd.Flags().BoolVar(&listOnlyTasks, "only-tasks", false, "Only list tasks, no projects nor entries")
   listCmd.Flags().BoolVar(&appendProjectIDToTask, "append-project-id-to-task", false, "Append project ID to tasks in the list")
 
   var err error
