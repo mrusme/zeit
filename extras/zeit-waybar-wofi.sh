@@ -23,7 +23,7 @@ then
   fi
 
   selection=$($ZEIT_BIN list \
-    --only-projects-and-tasks \
+    --only-tasks \
     --append-project-id-to-task \
     | wofi \
       --dmenu \
@@ -31,7 +31,7 @@ then
       --cache-file /dev/null\
   )
 
-  task=$(echo $selection | pcregrep -io1 '└── (.+) \[.+')
+  task=$(echo $selection | pcregrep -io1 '(.+) \[.+')
   project=$(echo $selection | pcregrep -io1 '.+\[(.+)\]')
 
   if [[ "$task" == "" ]] || [[ "$project" == "" ]]
