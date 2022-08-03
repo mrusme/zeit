@@ -280,7 +280,9 @@ All tested in `zsh` under `macOS Monterey Version 12.4` for a single task. An ex
 
 Getting running totals (includes the currently running task time):
 
-`alias zlist-all="zeit list"`
+```
+alias zlist-all="zeit list"
+```
 
 Today: 
 ```
