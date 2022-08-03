@@ -273,6 +273,38 @@ Export a Tyme 3 JSON:
 zeit export --format tyme --project "my project" --since "2020-04-01T15:04:05+07:00" --until "2020-04-04T15:04:05+07:00"
 ```
 
+### Quality of life aliases 
+All tested in `zsh` under `macOS Monterey Version 12.4` for a single task. An example of the time formats is as follows: `1994-11-05T08:15:30-05:00 corresponds to November 5, 1994, 8:15:30 am, US Eastern Standard Time.` 
+
+#### Examples:
+
+Getting running totals (includes the currently running task time):
+
+`alias zlist-all="zeit list"`
+
+Today: 
+```
+alias zlist-tday="zlist-all --since "$(date +%F)T00:00:00+12:00" --total"
+```
+
+Current week: 
+```
+alias zlist-cweek="zlist-all --since "$(date -v -Mon +%F)T00:00:00+12:00" --total | grep TOTAL:"
+``` 
+
+Current month (coincides with total under `zeit stats`): 
+```
+alias zlist-cmonth="zlist-all --since "$(date +%Y-%m-01)T00:00:00+12:00" --total | grep TOTAL:"
+``` 
+
+Pausing the current task retroactively, e.g., after getting back from lunch. Replace `YOUR_PROJECT` and `YOUR_TASK` appropriately. 
+```
+function zbreak {
+  date -v-$1M +%H:%M | xargs -I{} zeit finish -s {}
+  zeit track --project YOUR_PROJECT --task YOUR_TASK
+}
+```
+
 ## Integrations
 
 Here are a few integrations and extensions built by myself as well as other 
