@@ -278,8 +278,14 @@ zeit export --format tyme --project "my project" --since "2020-04-01T15:04:05+07
 Here are a few integrations and extensions built by myself as well as other 
 people that make use of `zeit`:
 
+- [`zeit-waybar-bemenu.sh`](https://github.com/mrusme/zeit/blob/main/extras/zeit-waybar-bemenu.sh), 
+  a script for integrating `zeit` into
+  [waybar](https://github.com/Alexays/Waybar), using
+  [bemenu](https://github.com/Cloudef/bemenu)
 - [`zeit-waybar-wofi.sh`](https://github.com/mrusme/zeit/blob/main/extras/zeit-waybar-wofi.sh), 
-  a script for integrating `zeit` into waybar, using wofi
+  a script for integrating `zeit` into
+  [waybar](https://github.com/Alexays/Waybar), using
+  [wofi](https://hg.sr.ht/~scoopta/wofi)
 - [`zeit.1m.sh`](https://github.com/mrusme/zeit/blob/main/extras/zeit.1m.sh), 
   an [`xbar`](https://github.com/matryer/xbar) plugin for `zeit`
 - [`zeit-status.sh`](https://github.com/khughitt/dotfiles/blob/master/polybar/scripts/zeit-status.sh), 
