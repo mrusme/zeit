@@ -1,15 +1,15 @@
 package z
 
 import (
-	"encoding/json"
-	"errors"
-	"log"
-	"os"
-	"sort"
-	"strings"
+  "encoding/json"
+  "errors"
+  "log"
+  "os"
+  "sort"
+  "strings"
 
-	"github.com/google/uuid"
-	"github.com/tidwall/buntdb"
+  "github.com/google/uuid"
+  "github.com/tidwall/buntdb"
 )
 
 type Database struct {
@@ -69,20 +69,20 @@ func (database *Database) AddEntry(user string, entry Entry, setRunning bool) (s
 }
 
 func (database *Database) GetEntry(user string, entryId string) (Entry, error) {
-	var entry Entry
+  var entry Entry
 
-	dberr := database.DB.View(func(tx *buntdb.Tx) error {
-		value, err := tx.Get(user + ":entry:" + entryId)
-		if err != nil {
-			return err
-		}
-		json.Unmarshal([]byte(value), &entry)
+  dberr := database.DB.View(func(tx *buntdb.Tx) error {
+    value, err := tx.Get(user + ":entry:" + entryId)
+    if err != nil {
+      return err
+    }
+    json.Unmarshal([]byte(value), &entry)
 
-		entry.ID = entryId
-		return nil
-	})
+    entry.ID = entryId
+    return nil
+  })
 
-	return entry, dberr
+  return entry, dberr
 }
 
 func (database *Database) UpdateEntry(user string, entry Entry) (string, error) {
