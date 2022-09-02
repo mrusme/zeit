@@ -1,14 +1,15 @@
 package z
 
 import (
-  "os"
-  "sort"
-  "strings"
-  "log"
-  "errors"
-  "encoding/json"
-  "github.com/tidwall/buntdb"
-  "github.com/google/uuid"
+	"encoding/json"
+	"errors"
+	"log"
+	"os"
+	"sort"
+	"strings"
+
+	"github.com/google/uuid"
+	"github.com/tidwall/buntdb"
 )
 
 type Database struct {
@@ -68,21 +69,20 @@ func (database *Database) AddEntry(user string, entry Entry, setRunning bool) (s
 }
 
 func (database *Database) GetEntry(user string, entryId string) (Entry, error) {
-  var entry Entry
+	var entry Entry
 
-  dberr := database.DB.View(func(tx *buntdb.Tx) error {
-    tx.AscendKeys(user + ":entry:" + entryId, func(key, value string) bool {
-      json.Unmarshal([]byte(value), &entry)
+	dberr := database.DB.View(func(tx *buntdb.Tx) error {
+		value, err := tx.Get(user + ":entry:" + entryId)
+		if err != nil {
+			return err
+		}
+		json.Unmarshal([]byte(value), &entry)
 
-      entry.SetIDFromDatabaseKey(key)
+		entry.ID = entryId
+		return nil
+	})
 
-      return true
-    })
-
-    return nil
-  })
-
-  return entry, dberr
+	return entry, dberr
 }
 
 func (database *Database) UpdateEntry(user string, entry Entry) (string, error) {
@@ -164,11 +164,11 @@ func (database *Database) GetRunningEntryId(user string) (string, error) {
   var runningId string = ""
 
   dberr := database.DB.View(func(tx *buntdb.Tx) error {
-    tx.AscendKeys(user + ":status:running", func(key, value string) bool {
-      runningId = value
-      return true
-    })
-
+    value, err := tx.Get(user + ":status:running")
+    if err != nil {
+      return err
+    }
+    runningId = value
     return nil
   })
 
