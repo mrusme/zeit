@@ -1,11 +1,15 @@
+Zeit
+----
+
 ![zeit](documentation/zeit.png)
--------------------------------
 
 Zeit, erfassen. A command line tool for tracking time spent on tasks & projects.
 
-[Get some more info on why I build this here](https://マリウス.com/zeit-erfassen-a-cli-activity-time-tracker/).
+[Get some more info on why I build this
+here](https://マリウス.com/zeit-erfassen-a-cli-activity-time-tracker/).
 
-[Download the latest version for macOS, Linux, FreeBSD, NetBSD, OpenBSD & Plan9 here](https://github.com/mrusme/zeit/releases/latest).
+[Download the latest version for macOS, Linux, FreeBSD, NetBSD, OpenBSD & Plan9
+here](https://github.com/mrusme/zeit/releases/latest).
 
 
 ## Build
