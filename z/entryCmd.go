@@ -12,10 +12,22 @@ var entryCmd = &cobra.Command{
   Use:   "entry ([flags]) [id]",
   Short: "Display or update activity",
   Long: "Display or update tracked activity.",
-  Args: cobra.ExactArgs(1),
+  Args: cobra.MaximumNArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
     user := GetCurrentUser()
-    id := args[0]
+
+    var id string
+    if len(args) == 0 {
+      entryList, err := database.ListEntries(user)
+      if err != nil {
+        fmt.Printf("%s %+v\n", CharError, err)
+        os.Exit(1)
+      }
+      id = entryList[len(entryList) - 1].ID
+    } else {
+      id = args[0]
+    }
+
 
     entry, err := database.GetEntry(user, id)
     if err != nil {
