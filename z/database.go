@@ -165,6 +165,9 @@ func (database *Database) GetRunningEntryId(user string) (string, error) {
 
   dberr := database.DB.View(func(tx *buntdb.Tx) error {
     value, err := tx.Get(user + ":status:running")
+    if errors.Is(err, buntdb.ErrNotFound) {
+      return nil
+    }
     if err != nil {
       return err
     }
