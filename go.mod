@@ -6,11 +6,11 @@ require (
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08
 	github.com/google/uuid v1.3.0
-	github.com/gookit/color v1.5.2
+	github.com/gookit/color v1.5.3
 	github.com/jinzhu/now v1.1.5
 	github.com/shopspring/decimal v1.3.1
-	github.com/spf13/cobra v1.6.1
-	github.com/tidwall/buntdb v1.2.10
+	github.com/spf13/cobra v1.7.0
+	github.com/tidwall/buntdb v1.3.0
 )
 
 require (
@@ -24,5 +24,5 @@ require (
 	github.com/tidwall/rtred v0.1.2 // indirect
 	github.com/tidwall/tinyqueue v0.1.1 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
 )
