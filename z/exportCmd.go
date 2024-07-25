@@ -72,24 +72,20 @@ var exportCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if exportHours {
-      var addedHoursEntries []Entry
+		if exportHours || exportDate {
+			var addedInformationEntries []Entry
 			for _, v := range filteredEntries {
-				v.Hours = fmtHours(v.GetDuration())
-				addedHoursEntries = append(addedHoursEntries, v)
+				if exportHours {
+					v.Hours = fmtHours(v.GetDuration())
+				}
+				if exportDate {
+					v.SetDateFromBegining()
+				}
+				addedInformationEntries = append(addedInformationEntries, v)
 			}
-      // Reasignment here so we don't need to check other flags later
-      filteredEntries = addedHoursEntries
+			// Reasignment here so we don't need to check other flags later
+			filteredEntries = addedInformationEntries
 		}
-
-    if exportDate {
-      var addedDateEntries []Entry
-			for _, v := range filteredEntries {
-        v.SetDateFromBegining()
-        addedDateEntries = append(addedDateEntries, v)
-      }
-      filteredEntries = addedDateEntries
-    }
 
 		var output string = ""
 		switch format {
