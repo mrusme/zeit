@@ -3,6 +3,9 @@ Zeit
 
 ![zeit](documentation/zeit.png)
 
+[![Static 
+Badge](https://img.shields.io/badge/Join_on_Matrix-green?style=for-the-badge&logo=element&logoColor=%23ffffff&label=Chat&labelColor=%23333&color=%230DBD8B&link=https%3A%2F%2Fmatrix.to%2F%23%2F%2521PHlbgZTdrhjkCJrfVY%253Amatrix.org)](https://matrix.to/#/%21PHlbgZTdrhjkCJrfVY%3Amatrix.org)
+
 Zeit, erfassen. A command line tool for tracking time spent on tasks & projects.
 
 [Get some more info on why I build this
