@@ -104,11 +104,4 @@ func init() {
   finishCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be assigned")
   finishCmd.Flags().StringVarP(&notes, "notes", "n", "", "Activity notes")
   finishCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be assigned")
-
-  var err error
-  database, err = InitDatabase()
-  if err != nil {
-    fmt.Printf("%s %+v\n", CharError, err)
-    os.Exit(1)
-  }
 }
