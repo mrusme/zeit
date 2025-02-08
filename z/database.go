@@ -4,12 +4,12 @@ import (
   "encoding/json"
   "errors"
   "log"
-  "os"
   "sort"
   "strings"
 
   "github.com/google/uuid"
   "github.com/tidwall/buntdb"
+  "github.com/spf13/viper"
 )
 
 type Database struct {
@@ -17,8 +17,8 @@ type Database struct {
 }
 
 func InitDatabase() (*Database, error) {
-  dbfile, ok := os.LookupEnv("ZEIT_DB")
-  if ok == false || dbfile == "" {
+  dbfile := viper.GetString("db")
+  if dbfile == "" {
     return nil, errors.New("please `export ZEIT_DB` to the location the zeit database should be stored at")
   }
 
