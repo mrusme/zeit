@@ -55,11 +55,4 @@ func init() {
   trackCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be assigned")
   trackCmd.Flags().StringVarP(&notes, "notes", "n", "", "Activity notes")
   trackCmd.Flags().BoolVarP(&force, "force", "f", false, "Force begin tracking of a new task \neven though another one is still running \n(ONLY IF YOU KNOW WHAT YOU'RE DOING!)")
-
-  var err error
-  database, err = InitDatabase()
-  if err != nil {
-    fmt.Printf("%s %+v\n", CharError, err)
-    os.Exit(1)
-  }
 }

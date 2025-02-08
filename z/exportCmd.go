@@ -102,11 +102,4 @@ func init() {
   exportCmd.Flags().StringVar(&until, "until", "", "Date/time to export until")
   exportCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be exported")
   exportCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be exported")
-
-  var err error
-  database, err = InitDatabase()
-  if err != nil {
-    fmt.Printf("%s %+v\n", CharError, err)
-    os.Exit(1)
-  }
 }

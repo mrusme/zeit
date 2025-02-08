@@ -115,11 +115,4 @@ func init() {
   listCmd.Flags().BoolVar(&listOnlyProjectsAndTasks, "only-projects-and-tasks", false, "Only list projects and their tasks, no entries")
   listCmd.Flags().BoolVar(&listOnlyTasks, "only-tasks", false, "Only list tasks, no projects nor entries")
   listCmd.Flags().BoolVar(&appendProjectIDToTask, "append-project-id-to-task", false, "Append project ID to tasks in the list")
-
-  var err error
-  database, err = InitDatabase()
-  if err != nil {
-    fmt.Printf("%s %+v\n", CharError, err)
-    os.Exit(1)
-  }
 }

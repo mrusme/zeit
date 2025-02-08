@@ -45,11 +45,4 @@ var projectCmd = &cobra.Command{
 func init() {
   rootCmd.AddCommand(projectCmd)
   projectCmd.Flags().StringVarP(&projectColor, "color", "c", "", "Set the color of the project (hex code, e.g. #121212)")
-
-  var err error
-  database, err = InitDatabase()
-  if err != nil {
-    fmt.Printf("%s %+v\n", CharError, err)
-    os.Exit(1)
-  }
 }

@@ -51,13 +51,13 @@ func Execute() {
 func init() {
   cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $XDG_CONFIG_HOME/zeit.[yaml|toml")
+  rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $XDG_CONFIG_HOME/zeit.[yaml|toml")
 
-	rootCmd.PersistentFlags().BoolVar(&noColors, FlagNoColors, false, "Do not use colors in output")
-	viper.BindPFlag(FlagNoColors, rootCmd.PersistentFlags().Lookup(FlagNoColors))
+  rootCmd.PersistentFlags().BoolVar(&noColors, FlagNoColors, false, "Do not use colors in output")
+  viper.BindPFlag(FlagNoColors, rootCmd.PersistentFlags().Lookup(FlagNoColors))
 
-	rootCmd.PersistentFlags().BoolVarP(&debug, FlagDebug, "d", false, "Display debugging output in the console. (default: false)")
-	viper.BindPFlag(FlagDebug, rootCmd.PersistentFlags().Lookup(FlagDebug))
+  rootCmd.PersistentFlags().BoolVarP(&debug, FlagDebug, "d", false, "Display debugging output in the console. (default: false)")
+  viper.BindPFlag(FlagDebug, rootCmd.PersistentFlags().Lookup(FlagDebug))
 }
 
 func initConfig() {
@@ -65,34 +65,40 @@ func initConfig() {
     color.Disable()
   }
 
-	viper.SetEnvPrefix("zeit")
-	viper.BindEnv("db")
+  viper.SetEnvPrefix("zeit")
+  viper.BindEnv("db")
 
   if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+    // Use config file from the flag.
+    viper.SetConfigFile(cfgFile)
+  } else {
+    // Find home directory.
+    home, err := os.UserHomeDir()
+    cobra.CheckErr(err)
 
     // TODO: Discuss if toml is also needed - Config Type can only be set one per block, supporting toml would need a complete new block
-		viper.AddConfigPath("$XDG_CONFIG_HOME")
-		viper.AddConfigPath("$XDG_CONFIG_HOME/zeit")
-		viper.AddConfigPath(home + "/.config")
-		viper.AddConfigPath(home + "/.config/zeit")
-		viper.SetConfigType("yaml")
-		viper.SetConfigName("zeit")
-	}
+    viper.AddConfigPath("$XDG_CONFIG_HOME")
+    viper.AddConfigPath("$XDG_CONFIG_HOME/zeit")
+    viper.AddConfigPath(home + "/.config")
+    viper.AddConfigPath(home + "/.config/zeit")
+    viper.SetConfigType("yaml")
+    viper.SetConfigName("zeit")
+  }
 
-	if err := viper.ReadInConfig(); err != nil {
-		// Set default values for parameters
-		viper.Set("debug", false)
-	}
+  if err := viper.ReadInConfig(); err != nil {
+    // Set default values for parameters
+    viper.Set("debug", false)
+  }
 
-	if viper.GetBool("debug") {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-		fmt.Fprintln(os.Stderr, "Using Database file:", viper.GetString("db"))
-	}
-	}
+  if viper.GetBool("debug") {
+    fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+    fmt.Fprintln(os.Stderr, "Using Database file:", viper.GetString("db"))
+  }
+
+  var err error
+  database, err = InitDatabase()
+  if err != nil {
+    fmt.Printf("%s %+v\n", CharError, err)
+    os.Exit(1)
+  }
 }
