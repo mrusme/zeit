@@ -12,6 +12,7 @@ import (
   "errors"
 
   "github.com/araddon/dateparse"
+  "github.com/spf13/viper"
 )
 
 
@@ -59,7 +60,7 @@ func GetTimeFormat(timeStr string) (int) {
 }
 
 // TODO: Use https://golang.org/pkg/time/#ParseDuration
-func RelToTime(timeStr string, ftId int) (time.Time, error) {
+func RelToTime(timeStr string, ftId int, contextTime time.Time) (time.Time, error) {
     var re = regexp.MustCompile(TimeFormats()[ftId])
     gm := re.FindStringSubmatch(timeStr)
 
@@ -80,6 +81,17 @@ func RelToTime(timeStr string, ftId int) (time.Time, error) {
 
     var t time.Time
 
+    if viper.IsSet("time.relative") && viper.GetString("time.relative") == "context" && !contextTime.IsZero() {
+      switch gm[1] {
+      case "+":
+        t = contextTime.Add(time.Hour * time.Duration(hours) + time.Minute * time.Duration(minutes))
+      case "-":
+        t = contextTime.Add((time.Hour * time.Duration(hours) + time.Minute * time.Duration(minutes)) * -1)
+      }
+
+      return t, nil
+    }
+
     switch gm[1] {
     case "+":
       t = time.Now().Local().Add(time.Hour * time.Duration(hours) + time.Minute * time.Duration(minutes))
@@ -90,7 +102,7 @@ func RelToTime(timeStr string, ftId int) (time.Time, error) {
     return t, nil
 }
 
-func ParseTime(timeStr string) (time.Time, error) {
+func ParseTime(timeStr string, contextTime time.Time) (time.Time, error) {
   tfId := GetTimeFormat(timeStr)
 
   t:= time.Now()
@@ -105,7 +117,7 @@ func ParseTime(timeStr string) (time.Time, error) {
     tnew := time.Date(t.Year(), t.Month(), t.Day(), tadj.Hour(), tadj.Minute(), t.Second(), t.Nanosecond(), t.Location())
     return tnew, err
   case TFRelHourMinute, TFRelHourFraction:
-    return RelToTime(timeStr, tfId)
+    return RelToTime(timeStr, tfId, contextTime)
   default:
     loc, err := time.LoadLocation("Local")
 
