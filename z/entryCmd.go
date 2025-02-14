@@ -72,4 +72,12 @@ func init() {
   entryCmd.Flags().StringVarP(&notes, "notes", "n", "", "Update activity notes")
   entryCmd.Flags().StringVarP(&task, "task", "t", "", "Update activity task")
   entryCmd.Flags().BoolVar(&fractional, "decimal", false, "Show fractional hours in decimal format instead of minutes")
+
+  flagName := "task"
+  entryCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+    user := GetCurrentUser()
+    entries, _ := database.ListEntries(user)
+    _, tasks := listProjectsAndTasks(entries)
+    return tasks, cobra.ShellCompDirectiveDefault
+  })
 }

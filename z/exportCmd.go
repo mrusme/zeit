@@ -83,4 +83,12 @@ func init() {
   exportCmd.Flags().StringVar(&listRange, "range", "", "shortcut to set since/until for a given range (today, yesterday, thisWeek, lastWeek, thisMonth, lastMonth)")
   exportCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be exported")
   exportCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be exported")
+
+  flagName := "task"
+  exportCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+    user := GetCurrentUser()
+    entries, _ := database.ListEntries(user)
+    _, tasks := listProjectsAndTasks(entries)
+    return tasks, cobra.ShellCompDirectiveDefault
+  })
 }
