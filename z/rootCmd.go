@@ -18,6 +18,7 @@ var notes string
 
 var since string
 var until string
+var listRange string
 
 var format string
 var force bool
