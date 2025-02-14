@@ -45,11 +45,4 @@ var taskCmd = &cobra.Command{
 func init() {
   rootCmd.AddCommand(taskCmd)
   taskCmd.Flags().StringVarP(&taskGitRepository, "git", "g", "-", "Set the task's Git repository to enable commit message importing into activity notes.\nSet to an empty string '' to remove a previously set repository and disable git log imports.")
-
-  var err error
-  database, err = InitDatabase()
-  if err != nil {
-    fmt.Printf("%s %+v\n", CharError, err)
-    os.Exit(1)
-  }
 }

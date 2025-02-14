@@ -29,11 +29,4 @@ var eraseCmd = &cobra.Command{
 
 func init() {
   rootCmd.AddCommand(eraseCmd)
-
-  var err error
-  database, err = InitDatabase()
-  if err != nil {
-    fmt.Printf("%s %+v\n", CharError, err)
-    os.Exit(1)
-  }
 }
