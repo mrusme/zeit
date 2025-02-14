@@ -3,9 +3,7 @@ package z
 import (
   "fmt"
   "os"
-  "time"
 
-  "github.com/jinzhu/now"
   "github.com/shopspring/decimal"
   "github.com/spf13/cobra"
 )
@@ -29,24 +27,7 @@ var listCmd = &cobra.Command{
       os.Exit(1)
     }
 
-    var sinceTime time.Time
-    var untilTime time.Time
-
-    if since != "" {
-      sinceTime, err = now.Parse(since)
-      if err != nil {
-        fmt.Printf("%s %+v\n", CharError, err)
-        os.Exit(1)
-      }
-    }
-
-    if until != "" {
-      untilTime, err = now.Parse(until)
-      if err != nil {
-        fmt.Printf("%s %+v\n", CharError, err)
-        os.Exit(1)
-      }
-    }
+    sinceTime, untilTime := ParseSinceUntil(since, until, listRange)
 
     var filteredEntries []Entry
     filteredEntries, err = GetFilteredEntries(entries, project, task, sinceTime, untilTime)
@@ -108,6 +89,7 @@ func init() {
   rootCmd.AddCommand(listCmd)
   listCmd.Flags().StringVar(&since, "since", "", "Date/time to start the list from")
   listCmd.Flags().StringVar(&until, "until", "", "Date/time to list until")
+  listCmd.Flags().StringVar(&listRange, "range", "", "shortcut to set since/until for a given range (today, yesterday, thisWeek, lastWeek, thisMonth, lastMonth)")
   listCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be listed")
   listCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be listed")
   listCmd.Flags().BoolVar(&fractional, "decimal", false, "Show fractional hours in decimal format instead of minutes")

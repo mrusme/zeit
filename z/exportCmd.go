@@ -3,9 +3,7 @@ package z
 import (
   "os"
   "fmt"
-  "time"
   "encoding/json"
-  "github.com/jinzhu/now"
   "github.com/spf13/cobra"
 )
 
@@ -44,25 +42,7 @@ var exportCmd = &cobra.Command{
       fmt.Printf("%s %+v\n", CharError, err)
       os.Exit(1)
     }
-
-    var sinceTime time.Time
-    var untilTime time.Time
-
-    if since != "" {
-      sinceTime, err = now.Parse(since)
-      if err != nil {
-        fmt.Printf("%s %+v\n", CharError, err)
-        os.Exit(1)
-      }
-    }
-
-    if until != "" {
-      untilTime, err = now.Parse(until)
-      if err != nil {
-        fmt.Printf("%s %+v\n", CharError, err)
-        os.Exit(1)
-      }
-    }
+    sinceTime, untilTime := ParseSinceUntil(since, until, listRange)
 
     var filteredEntries []Entry
     filteredEntries, err = GetFilteredEntries(entries, project, task, sinceTime, untilTime)
@@ -100,6 +80,7 @@ func init() {
   exportCmd.Flags().StringVar(&format, "format", "zeit", "Format to export, possible values: zeit, tyme")
   exportCmd.Flags().StringVar(&since, "since", "", "Date/time to start the export from")
   exportCmd.Flags().StringVar(&until, "until", "", "Date/time to export until")
+  exportCmd.Flags().StringVar(&listRange, "range", "", "shortcut to set since/until for a given range (today, yesterday, thisWeek, lastWeek, thisMonth, lastMonth)")
   exportCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be exported")
   exportCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be exported")
 }
