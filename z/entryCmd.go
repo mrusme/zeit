@@ -25,7 +25,7 @@ var entryCmd = &cobra.Command{
 
     if begin != "" || finish != "" || project != "" || notes != "" || task != "" {
       if begin != "" {
-        entry.Begin, err = entry.SetBeginFromString(begin)
+        entry.Begin, err = entry.SetBeginFromString(begin, entry.Begin)
         if err != nil {
           fmt.Printf("%s %+v\n", CharError, err)
           os.Exit(1)
@@ -33,7 +33,7 @@ var entryCmd = &cobra.Command{
       }
 
       if finish != "" {
-        entry.Finish, err = entry.SetFinishFromString(finish)
+        entry.Finish, err = entry.SetFinishFromString(finish, entry.Finish)
         if err != nil {
           fmt.Printf("%s %+v\n", CharError, err)
           os.Exit(1)
