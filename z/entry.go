@@ -37,12 +37,12 @@ func NewEntry(
   newEntry.Task = task
   newEntry.User = user
 
-  _, err = newEntry.SetBeginFromString(begin)
+  _, err = newEntry.SetBeginFromString(begin, time.Time{})
   if err != nil {
     return Entry{}, err
   }
 
-  _, err = newEntry.SetFinishFromString(finish)
+  _, err = newEntry.SetFinishFromString(finish, time.Time{})
   if err != nil {
     return Entry{}, err
   }
@@ -65,14 +65,14 @@ func (entry *Entry) SetIDFromDatabaseKey(key string) (error) {
   return nil
 }
 
-func (entry *Entry) SetBeginFromString(begin string) (time.Time, error) {
+func (entry *Entry) SetBeginFromString(begin string, contextTime time.Time) (time.Time, error) {
   var beginTime time.Time
   var err error
 
   if begin == "" {
     beginTime = time.Now()
   } else {
-    beginTime, err = ParseTime(begin)
+    beginTime, err = ParseTime(begin, contextTime)
     if err != nil {
       return beginTime, err
     }
@@ -82,12 +82,12 @@ func (entry *Entry) SetBeginFromString(begin string) (time.Time, error) {
   return beginTime, nil
 }
 
-func (entry *Entry) SetFinishFromString(finish string) (time.Time, error) {
+func (entry *Entry) SetFinishFromString(finish string, contextTime time.Time) (time.Time, error) {
   var finishTime time.Time
   var err error
 
   if finish != "" {
-    finishTime, err = ParseTime(finish)
+    finishTime, err = ParseTime(finish, contextTime)
     if err != nil {
       return finishTime, err
     }
