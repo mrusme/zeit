@@ -5,7 +5,6 @@ import (
   "os"
   "strings"
 
-  "github.com/araddon/dateparse"
   "github.com/spf13/cobra"
 )
 
@@ -26,7 +25,7 @@ var entryCmd = &cobra.Command{
 
     if begin != "" || finish != "" || project != "" || notes != "" || task != "" {
       if begin != "" {
-        entry.Begin, err = dateparse.ParseAny(begin)
+        entry.Begin, err = entry.SetBeginFromString(begin)
         if err != nil {
           fmt.Printf("%s %+v\n", CharError, err)
           os.Exit(1)
@@ -34,7 +33,7 @@ var entryCmd = &cobra.Command{
       }
 
       if finish != "" {
-        entry.Finish, err = dateparse.ParseAny(finish)
+        entry.Finish, err = entry.SetFinishFromString(finish)
         if err != nil {
           fmt.Printf("%s %+v\n", CharError, err)
           os.Exit(1)
