@@ -10,6 +10,8 @@ import (
   "time"
   "math"
   "errors"
+
+  "github.com/araddon/dateparse"
 )
 
 
@@ -105,7 +107,20 @@ func ParseTime(timeStr string) (time.Time, error) {
   case TFRelHourMinute, TFRelHourFraction:
     return RelToTime(timeStr, tfId)
   default:
-    return time.Now(), errors.New("could not match passed time")
+    loc, err := time.LoadLocation("Local")
+
+    if err != nil {
+      return time.Now(), errors.New("could not load location")
+    }
+
+    time.Local = loc
+
+    tnew, err := dateparse.ParseIn(timeStr, loc)
+    if err != nil {
+      return time.Now(), errors.New("could not match passed time")
+    }
+
+    return tnew, nil
   }
 }
 
