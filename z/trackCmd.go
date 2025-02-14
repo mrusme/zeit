@@ -4,6 +4,7 @@ import (
   "os"
   "fmt"
   "github.com/spf13/cobra"
+  "github.com/spf13/viper"
 )
 
 var trackCmd = &cobra.Command{
@@ -21,6 +22,20 @@ var trackCmd = &cobra.Command{
 
     if runningEntryId != "" {
       fmt.Printf("%s a task is already running\n", CharTrack)
+      os.Exit(1)
+    }
+
+    if project == "" && viper.GetString("project.default") != "" {
+      project = viper.GetString("project.default")
+    }
+
+    if project == "" && viper.GetBool("project.mandatory") {
+      fmt.Println("project is mandatory but missing")
+      os.Exit(1)
+    }
+
+    if task == "" && viper.GetBool("task.mandatory") {
+      fmt.Println("task is mandatory but missing")
       os.Exit(1)
     }
 
