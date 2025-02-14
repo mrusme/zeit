@@ -1,9 +1,6 @@
 package z
 
 import (
-  "os"
-  "fmt"
-  "time"
   "github.com/spf13/cobra"
 )
 
@@ -12,89 +9,7 @@ var finishCmd = &cobra.Command{
   Short: "Finish currently running activity",
   Long: "Finishing tracking of currently running activity.",
   Run: func(cmd *cobra.Command, args []string) {
-    user := GetCurrentUser()
-
-    runningEntryId, err := database.GetRunningEntryId(user)
-    if err != nil {
-      fmt.Printf("%s %+v\n", CharError, err)
-      os.Exit(1)
-    }
-
-    if runningEntryId == "" {
-      fmt.Printf("%s not running\n", CharFinish)
-      os.Exit(1)
-    }
-
-    runningEntry, err := database.GetEntry(user, runningEntryId)
-    if err != nil {
-      fmt.Printf("%s %+v\n", CharError, err)
-      os.Exit(1)
-    }
-
-    tmpEntry, err := NewEntry(runningEntry.ID, begin, finish, project, task, user)
-    if err != nil {
-      fmt.Printf("%s %+v\n", CharError, err)
-      os.Exit(1)
-    }
-
-    if begin != "" {
-      runningEntry.Begin = tmpEntry.Begin
-    }
-
-    if finish != "" {
-      runningEntry.Finish = tmpEntry.Finish
-    } else {
-      runningEntry.Finish = time.Now()
-      runningEntry.secondsFinish()
-    }
-
-    if project != "" {
-      runningEntry.Project = tmpEntry.Project
-    }
-
-    if task != "" {
-      runningEntry.Task = tmpEntry.Task
-    }
-
-    if notes != "" {
-      runningEntry.Notes = fmt.Sprintf("%s\n%s", runningEntry.Notes, notes)
-    }
-
-    if runningEntry.Task != "" {
-      task, err := database.GetTask(user, runningEntry.Task)
-      if err != nil {
-        fmt.Printf("%s %+v\n", CharError, err)
-        os.Exit(1)
-      }
-
-      if task.GitRepository != "" && task.GitRepository != "-" {
-        stdout, stderr, err := GetGitLog(task.GitRepository, runningEntry.Begin, runningEntry.Finish)
-        if err != nil {
-          fmt.Printf("%s %+v\n", CharError, err)
-          os.Exit(1)
-        }
-
-        if stderr == "" {
-          runningEntry.Notes = fmt.Sprintf("%s\n%s", runningEntry.Notes, stdout)
-        } else {
-          fmt.Printf("%s notes were not imported: %+v\n", CharError, stderr)
-        }
-      }
-    }
-
-    if runningEntry.IsFinishedAfterBegan() == false {
-      fmt.Printf("%s %+v\n", CharError, "beginning time of tracking cannot be after finish time")
-      os.Exit(1)
-    }
-
-    _, err = database.FinishEntry(user, runningEntry)
-    if err != nil {
-      fmt.Printf("%s %+v\n", CharError, err)
-      os.Exit(1)
-    }
-
-    fmt.Printf(runningEntry.GetOutputForFinish())
-    return
+    finishTask(FinishWithMetadata)
   },
 }
 
