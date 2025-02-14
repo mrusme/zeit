@@ -7,6 +7,7 @@ import (
   "fmt"
   "github.com/gookit/color"
   "github.com/shopspring/decimal"
+  "github.com/spf13/viper"
 )
 
 type Entry struct {
@@ -79,7 +80,8 @@ func (entry *Entry) SetBeginFromString(begin string, contextTime time.Time) (tim
   }
 
   entry.Begin = beginTime
-  return beginTime, nil
+  entry.secondsBegin()
+  return entry.Begin, nil
 }
 
 func (entry *Entry) SetFinishFromString(finish string, contextTime time.Time) (time.Time, error) {
@@ -94,11 +96,12 @@ func (entry *Entry) SetFinishFromString(finish string, contextTime time.Time) (t
   }
 
   entry.Finish = finishTime
-  return finishTime, nil
+  entry.secondsFinish()
+  return entry.Finish, nil
 }
 
 func (entry *Entry) IsFinishedAfterBegan() (bool) {
-  return (entry.Finish.IsZero() || entry.Begin.Before(entry.Finish))
+  return (entry.Finish.IsZero() || entry.Begin.Before(entry.Finish) || entry.Begin.Equal(entry.Finish))
 }
 
 func (entry *Entry) GetOutputForTrack(isRunning bool, wasRunning bool) (string) {
@@ -222,3 +225,16 @@ func GetFilteredEntries(entries []Entry, project string, task string, since time
 
   return filteredEntries, nil
 }
+
+func (entry *Entry) secondsBegin() {
+  if viper.GetBool("time.no-seconds") {
+    entry.Begin = entry.Begin.Truncate(time.Duration(time.Minute))
+  }
+}
+
+func (entry *Entry) secondsFinish() {
+  if viper.GetBool("time.no-seconds") {
+    entry.Finish = entry.Finish.Truncate(time.Duration(time.Minute))
+  }
+}
+

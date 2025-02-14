@@ -45,6 +45,7 @@ var finishCmd = &cobra.Command{
       runningEntry.Finish = tmpEntry.Finish
     } else {
       runningEntry.Finish = time.Now()
+      runningEntry.secondsFinish()
     }
 
     if project != "" {
