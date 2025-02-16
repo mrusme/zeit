@@ -3,6 +3,7 @@ package z
 import (
   "os"
   "fmt"
+  "strings"
   "encoding/json"
   "github.com/spf13/cobra"
 )
@@ -80,7 +81,7 @@ func init() {
   exportCmd.Flags().StringVar(&format, "format", "zeit", "Format to export, possible values: zeit, tyme")
   exportCmd.Flags().StringVar(&since, "since", "", "Date/time to start the export from")
   exportCmd.Flags().StringVar(&until, "until", "", "Date/time to export until")
-  exportCmd.Flags().StringVar(&listRange, "range", "", "shortcut to set since/until for a given range (today, yesterday, thisWeek, lastWeek, thisMonth, lastMonth)")
+  exportCmd.Flags().StringVar(&listRange, "range", "", "Shortcut for --since and --until that accepts: " + strings.Join(Ranges(), ", "))
   exportCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be exported")
   exportCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be exported")
 

@@ -188,6 +188,16 @@ func GetGitLog(repo string, since time.Time, until time.Time) (string, string, e
   return stdoutStr, stderrStr, nil
 }
 
+func Ranges() []string {
+  return []string{
+    "today",
+    "yesterday",
+    "thisWeek",
+    "lastWeek",
+    "thisMonth",
+    "lastMonth",
+  }
+}
 
 func ParseSinceUntil(since string, until string, listRange string) (time.Time, time.Time) {
 
@@ -223,29 +233,29 @@ func ParseSinceUntil(since string, until string, listRange string) (time.Time, t
 
     loc, _ := time.LoadLocation("Local")
     time.Local = loc
-    switch listRange {
+    switch strings.ToLower(listRange) {
     case "today":
       sinceTime = now.BeginningOfDay()
       untilTime = now.EndOfDay()
     case "yesterday":
       sinceTime = now.BeginningOfDay().AddDate(0, 0, -1)
       untilTime = now.EndOfDay().AddDate(0, 0, -1)
-    case "thisWeek":
+    case "thisweek":
       sinceTime = now.BeginningOfWeek()
       untilTime = now.EndOfWeek()
-    case "lastWeek":
+    case "lastweek":
       lastWeekDay := time.Now().AddDate(0, 0, -7)
       sinceTime = now.With(lastWeekDay).BeginningOfWeek()
       untilTime = now.With(lastWeekDay).EndOfWeek()
-    case "thisMonth":
+    case "thismonth":
       sinceTime = now.BeginningOfMonth()
       untilTime = now.EndOfMonth()
-    case "lastMonth":
+    case "lastmonth":
       lastMonthDay := time.Now().AddDate(0, -1, 0)
       sinceTime = now.With(lastMonthDay).BeginningOfMonth()
       untilTime = now.With(lastMonthDay).EndOfMonth()
     default:
-      fmt.Println("unkown range selection: (today, yesterday, thisWeek, lastWeek, thisMonth, lastMonth)")
+      fmt.Println("Unknown range selection, possible options: ", strings.Join(Ranges(), " "))
       os.Exit(1)
     }
   }
