@@ -3,9 +3,8 @@ package z
 import (
   "os"
   "fmt"
-  "time"
+  "strings"
   "encoding/json"
-  "github.com/jinzhu/now"
   "github.com/spf13/cobra"
 )
 
@@ -44,25 +43,7 @@ var exportCmd = &cobra.Command{
       fmt.Printf("%s %+v\n", CharError, err)
       os.Exit(1)
     }
-
-    var sinceTime time.Time
-    var untilTime time.Time
-
-    if since != "" {
-      sinceTime, err = now.Parse(since)
-      if err != nil {
-        fmt.Printf("%s %+v\n", CharError, err)
-        os.Exit(1)
-      }
-    }
-
-    if until != "" {
-      untilTime, err = now.Parse(until)
-      if err != nil {
-        fmt.Printf("%s %+v\n", CharError, err)
-        os.Exit(1)
-      }
-    }
+    sinceTime, untilTime := ParseSinceUntil(since, until, listRange)
 
     var filteredEntries []Entry
     filteredEntries, err = GetFilteredEntries(entries, project, task, sinceTime, untilTime)
@@ -100,6 +81,15 @@ func init() {
   exportCmd.Flags().StringVar(&format, "format", "zeit", "Format to export, possible values: zeit, tyme")
   exportCmd.Flags().StringVar(&since, "since", "", "Date/time to start the export from")
   exportCmd.Flags().StringVar(&until, "until", "", "Date/time to export until")
+  exportCmd.Flags().StringVar(&listRange, "range", "", "Shortcut for --since and --until that accepts: " + strings.Join(Ranges(), ", "))
   exportCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be exported")
   exportCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be exported")
+
+  flagName := "task"
+  exportCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+    user := GetCurrentUser()
+    entries, _ := database.ListEntries(user)
+    _, tasks := listProjectsAndTasks(entries)
+    return tasks, cobra.ShellCompDirectiveDefault
+  })
 }

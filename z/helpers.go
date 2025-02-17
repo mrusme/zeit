@@ -10,17 +10,12 @@ import (
   "time"
   "math"
   "errors"
+  "fmt"
+  "os"
 
   "github.com/araddon/dateparse"
   "github.com/spf13/viper"
-)
-
-
-const (
-  TFAbsTwelveHour int = 0
-  TFAbsTwentyfourHour int = 1
-  TFRelHourMinute int = 2
-  TFRelHourFraction int = 3
+  "github.com/jinzhu/now"
 )
 
 func TimeFormats() []string {
@@ -193,3 +188,77 @@ func GetGitLog(repo string, since time.Time, until time.Time) (string, string, e
   return stdoutStr, stderrStr, nil
 }
 
+func Ranges() []string {
+  return []string{
+    "today",
+    "yesterday",
+    "thisWeek",
+    "lastWeek",
+    "thisMonth",
+    "lastMonth",
+  }
+}
+
+func ParseSinceUntil(since string, until string, listRange string) (time.Time, time.Time) {
+
+  var sinceTime time.Time
+  var untilTime time.Time
+  var err error
+
+  if since != "" {
+    sinceTime, err = now.Parse(since)
+    if err != nil {
+      fmt.Printf("%s %+v\n", CharError, err)
+      os.Exit(1)
+    }
+  }
+
+  if until != "" {
+    untilTime, err = now.Parse(until)
+    if err != nil {
+      fmt.Printf("%s %+v\n", CharError, err)
+      os.Exit(1)
+    }
+  }
+
+  if listRange != "" {
+    if since != "" || until != "" {
+      fmt.Println("Range and since/until can't be used together, select one of them")
+      os.Exit(1)
+    }
+
+    if viper.GetBool("firstWeekDayMonday") {
+      now.WeekStartDay = time.Monday
+    }
+
+    loc, _ := time.LoadLocation("Local")
+    time.Local = loc
+    switch strings.ToLower(listRange) {
+    case "today":
+      sinceTime = now.BeginningOfDay()
+      untilTime = now.EndOfDay()
+    case "yesterday":
+      sinceTime = now.BeginningOfDay().AddDate(0, 0, -1)
+      untilTime = now.EndOfDay().AddDate(0, 0, -1)
+    case "thisweek":
+      sinceTime = now.BeginningOfWeek()
+      untilTime = now.EndOfWeek()
+    case "lastweek":
+      lastWeekDay := time.Now().AddDate(0, 0, -7)
+      sinceTime = now.With(lastWeekDay).BeginningOfWeek()
+      untilTime = now.With(lastWeekDay).EndOfWeek()
+    case "thismonth":
+      sinceTime = now.BeginningOfMonth()
+      untilTime = now.EndOfMonth()
+    case "lastmonth":
+      lastMonthDay := time.Now().AddDate(0, -1, 0)
+      sinceTime = now.With(lastMonthDay).BeginningOfMonth()
+      untilTime = now.With(lastMonthDay).EndOfMonth()
+    default:
+      fmt.Println("Unknown range selection, possible options: ", strings.Join(Ranges(), " "))
+      os.Exit(1)
+    }
+  }
+
+  return sinceTime, untilTime
+}
