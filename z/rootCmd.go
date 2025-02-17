@@ -12,6 +12,7 @@ var database *Database
 
 var begin string
 var finish string
+var switchString string
 var project string
 var task string
 var notes string
