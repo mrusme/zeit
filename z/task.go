@@ -226,3 +226,47 @@ func taskGit(task *Task, runningEntry *Entry) {
   }
 }
 
+func resumeTask(index int) {
+  user := GetCurrentUser()
+
+  entries, err := database.ListEntries(user)
+  if err != nil {
+    fmt.Printf("%s %+v\n", CharError, err)
+    os.Exit(1)
+  }
+  lastEntry := entries[len(entries)-index]
+
+  runningEntryId, err := database.GetRunningEntryId(user)
+  if err != nil {
+    fmt.Printf("%s %+v\n", CharError, err)
+    os.Exit(1)
+  }
+
+  if runningEntryId != "" {
+    fmt.Printf("%s a task is already running\n", CharTrack)
+    os.Exit(1)
+  }
+
+  project = lastEntry.Project
+  task = lastEntry.Task
+
+  newEntry, err := NewEntry("", begin, finish, project, task, user)
+  if err != nil {
+    fmt.Printf("%s %+v\n", CharError, err)
+    os.Exit(1)
+  }
+
+  if lastEntry.Notes != "" {
+    newEntry.Notes = lastEntry.Notes
+  }
+
+  isRunning := newEntry.Finish.IsZero()
+
+  _, err = database.AddEntry(user, newEntry, isRunning)
+  if err != nil {
+    fmt.Printf("%s %+v\n", CharError, err)
+    os.Exit(1)
+  }
+
+  fmt.Print(newEntry.GetOutputForTrack(isRunning, false))
+}
