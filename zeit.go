@@ -1,9 +1,9 @@
 package main
 
 import (
-"github.com/mrusme/zeit/z"
+	"github.com/mrusme/zeit/z"
 )
 
 func main() {
-  z.Execute()
+	z.Execute()
 }
