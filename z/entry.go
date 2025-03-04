@@ -221,6 +221,10 @@ func GetFilteredEntries(entries []Entry, project string, task string, since time
 			continue
 		}
 
+		if entry.Finish.IsZero() && !entry.Begin.Before(until) {
+			continue
+		}
+
 		filteredEntries = append(filteredEntries, entry)
 	}
 
