@@ -16,3 +16,5 @@ const (
 	FinishWithMetadata int = 0
 	FinishOnlyTime     int = 1
 )
+
+const DateFormat string = "2006-01-02"
