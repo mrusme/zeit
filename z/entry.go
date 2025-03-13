@@ -221,7 +221,7 @@ func GetFilteredEntries(entries []Entry, project string, task string, since time
 			continue
 		}
 
-		if entry.Finish.IsZero() && !entry.Begin.Before(until) {
+		if until.IsZero() == false && entry.Finish.IsZero() && !entry.Begin.Before(until) {
 			continue
 		}
 
