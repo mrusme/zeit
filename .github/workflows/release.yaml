@@ -1,0 +1,269 @@
+name: Release
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get version
+        id: get_version
+        run: |
+          export VERSION="${GITHUB_REF/refs\/tags\//}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.15.2'
+
+      - name: Install dependencies
+        run: |
+          go version
+          go get -u golang.org/x/lint/golint
+
+      - name: Run vet & lint
+        run: |
+          go vet .
+          golint .
+
+      - name: Run build
+        run: go build -v -ldflags "-X github.com/mrusme/zeit/z.VERSION=${{ steps.get_version.outputs.VERSION }}" .
+
+      # - name: Run testing
+      #   run: cd test && go test -v
+
+  release:
+    name: Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Get version
+        id: get_version
+        run: |
+          export VERSION="${GITHUB_REF/refs\/tags\//}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Changelog
+        run: |
+          export CHANGELOG=`git log $(git tag --sort=-version:refname | head -n 2 | tail -n 1)...${{ github.ref }} --pretty=format:'<li> <a href="http://github.com/mrusme/zeit/commit/%H">view commit &bull;</a> %s</li> ' --reverse`
+          echo "CHANGELOG=$CHANGELOG" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: ${{ env.CHANGELOG }}
+          draft: false
+          prerelease: false
+
+      - name: Run release builds
+        run: |
+          declare -a arr=("linux_386" "linux_amd64" "linux_arm" "linux_arm64" "darwin_amd64" "freebsd_386" "freebsd_amd64" "freebsd_arm" "netbsd_386" "netbsd_amd64" "netbsd_arm" "openbsd_386" "openbsd_amd64" "openbsd_arm" "openbsd_arm64" "plan9_386" "plan9_amd64" "plan9_arm")
+          for i in "${arr[@]}"
+          do
+            export GOOS=$(echo $i | cut -f1 -d_)
+            export GOARCH=$(echo $i | cut -f2 -d_)
+
+            echo ""
+            echo "=== Building ${GOOS} ${GOARCH} ==="
+
+            go build -v -ldflags "-X github.com/mrusme/zeit/z.VERSION=${{ steps.get_version.outputs.VERSION }}" .
+
+            tar -czf ./zeit_${GOOS}_${GOARCH}.tar.gz zeit
+            go clean
+          done
+
+      - name: Upload linux_386
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_linux_386.tar.gz
+          asset_name: zeit_linux_386.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload linux_amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_linux_amd64.tar.gz
+          asset_name: zeit_linux_amd64.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload linux_arm
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_linux_arm.tar.gz
+          asset_name: zeit_linux_arm.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload linux_arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_linux_arm64.tar.gz
+          asset_name: zeit_linux_arm64.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload darwin_amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_darwin_amd64.tar.gz
+          asset_name: zeit_darwin_amd64.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload freebsd_386
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_freebsd_386.tar.gz
+          asset_name: zeit_freebsd_386.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload freebsd_amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_freebsd_amd64.tar.gz
+          asset_name: zeit_freebsd_amd64.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload freebsd_arm
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_freebsd_arm.tar.gz
+          asset_name: zeit_freebsd_arm.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload netbsd_386
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_netbsd_386.tar.gz
+          asset_name: zeit_netbsd_386.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload netbsd_amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_netbsd_amd64.tar.gz
+          asset_name: zeit_netbsd_amd64.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload netbsd_arm
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_netbsd_arm.tar.gz
+          asset_name: zeit_netbsd_arm.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload openbsd_386
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_openbsd_386.tar.gz
+          asset_name: zeit_openbsd_386.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload openbsd_amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_openbsd_amd64.tar.gz
+          asset_name: zeit_openbsd_amd64.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload openbsd_arm
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_openbsd_arm.tar.gz
+          asset_name: zeit_openbsd_arm.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload openbsd_arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_openbsd_arm64.tar.gz
+          asset_name: zeit_openbsd_arm64.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload plan9_386
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_plan9_386.tar.gz
+          asset_name: zeit_plan9_386.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload plan9_amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_plan9_amd64.tar.gz
+          asset_name: zeit_plan9_amd64.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload plan9_arm
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./zeit_plan9_arm.tar.gz
+          asset_name: zeit_plan9_arm.tar.gz
+          asset_content_type: application/zip
