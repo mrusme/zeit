@@ -46,6 +46,7 @@ else
 		exit 1
   fi
 fi
+export ZEIT_DB="$DB_PATH"
 
 if [[ -f $DB_PATH ]]; then
 	rm $DB_PATH

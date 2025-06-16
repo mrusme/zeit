@@ -28,5 +28,5 @@ jobs:
       run: chmod +x ./extras/test-parsing.sh
 
     - name: Run tests
-      run: ./extras/test-parsing.sh
+      run: ./extras/test-parsing.sh -c ./zeit
 
