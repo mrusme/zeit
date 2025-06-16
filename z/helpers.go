@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/araddon/dateparse"
 	"github.com/jinzhu/now"
+	"github.com/markusmobius/go-dateparser"
 	"github.com/spf13/viper"
 )
 
@@ -98,35 +98,27 @@ func RelToTime(timeStr string, ftId int, contextTime time.Time) (time.Time, erro
 }
 
 func ParseTime(timeStr string, contextTime time.Time) (time.Time, error) {
+	loc, err := time.LoadLocation("Local")
+	if err != nil {
+		return time.Now(), errors.New("could not load location")
+	}
+
+	cfg := dateparser.Configuration{
+		DefaultTimezone: loc,
+	}
+
 	tfId := GetTimeFormat(timeStr)
 
-	t := time.Now()
-
 	switch tfId {
-	case TFAbsTwelveHour:
-		tadj, err := time.Parse("3:04pm", timeStr)
-		tnew := time.Date(t.Year(), t.Month(), t.Day(), tadj.Hour(), tadj.Minute(), t.Second(), t.Nanosecond(), t.Location())
-		return tnew, err
-	case TFAbsTwentyfourHour:
-		tadj, err := time.Parse("15:04", timeStr)
-		tnew := time.Date(t.Year(), t.Month(), t.Day(), tadj.Hour(), tadj.Minute(), t.Second(), t.Nanosecond(), t.Location())
-		return tnew, err
 	case TFRelHourMinute, TFRelHourFraction:
 		return RelToTime(timeStr, tfId, contextTime)
 	default:
-		loc, err := time.LoadLocation("Local")
-		if err != nil {
-			return time.Now(), errors.New("could not load location")
-		}
-
-		time.Local = loc
-
-		tnew, err := dateparse.ParseIn(timeStr, loc)
+		tnew, err := dateparser.Parse(&cfg, timeStr)
 		if err != nil {
 			return time.Now(), errors.New("could not match passed time")
 		}
 
-		return tnew, nil
+		return tnew.Time, err
 	}
 }
 
