@@ -92,7 +92,7 @@ firstWeekDayMonday: true
 
 ### Linting
 
-I also use GO professionally and as a result I have linter and style checking software running on my system, which report masses of warnings and errors wih the current code. I have cleaned up the code and adapted it according to SolarLint and GO best practices so that my IDE and build tools are clear again and new, real errors are visible.
+I also use GO professionally and as a result I have linter and style checking software running on my system, which report masses of warnings and errors with the current code. I have cleaned up the code and adapted it according to SolarLint and GO best practices so that my IDE and build tools are clear again and new, real errors are visible.
 
 ### Time Parsing
 
