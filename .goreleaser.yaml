@@ -1,4 +1,5 @@
 # .goreleaser.yaml
+version: 2
 builds:
   -
     env:
@@ -30,4 +31,12 @@ builds:
         goarm: arm64
       - goos: plan9
         goarm: arm64
+changelog:
+  disable: false
+  use: github
+  format: "{{.SHA}}: {{.Message}} (@{{.AuthorUsername}})"
+  sort: asc
+  abbrev: -1
+release:
+  footer: ""
 
