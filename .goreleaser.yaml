@@ -4,6 +4,8 @@ builds:
   -
     env:
       - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X z.version={{.Version}} -X z.commit={{.Commit}} -X z.date={{.Date}}
     goos:
       - darwin
       - dragonfly
