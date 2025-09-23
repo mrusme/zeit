@@ -1,5 +1,4 @@
-Zeit
-----
+## Zeit
 
 ![zeit](documentation/zeit.png)
 
@@ -13,31 +12,28 @@ here](https://マリウス.com/zeit-erfassen-a-cli-activity-time-tracker/).
 [Download the latest version for macOS, Linux, FreeBSD, NetBSD, OpenBSD & Plan9
 here](https://github.com/mrusme/zeit/releases/latest).
 
-
 ## Build
 
 ```sh
 make
 ```
 
-**Info**: This will build using the version 0.0.0. You can prefix the `make` 
-command with `VERSION=x.y.z` and set `x`, `y` and `z` accordingly if you want 
+**Info**: This will build using the version 0.0.0. You can prefix the `make`
+command with `VERSION=x.y.z` and set `x`, `y` and `z` accordingly if you want
 the version in `zeit --help` to be a different one.
-
 
 ## Usage
 
 ![zeit](documentation/header.jpg)
 
-Please make sure to `export ZEIT_DB=~/.config/zeit.db` (or whatever location 
-you would like to have the zeit database at).
+Please make sure to `export ZEIT_DB=~/.config/zeit.db` (or whatever location you
+would like to have the zeit database at).
 
-*zeit*'s data structure contains of the following key entities: `project`, 
-`task` and `entry`. An `entry` consists of a `project` and a `task`. These
-don't have to pre-exist and can be created on-the-fly inside a new `entry` using
-e.g. `zeit track --project "New Project" --task "New Task"`. In order to
-configure them, the `zeit project` and the `zeit task` commands can be utilised.
-
+_zeit_'s data structure contains of the following key entities: `project`,
+`task` and `entry`. An `entry` consists of a `project` and a `task`. These don't
+have to pre-exist and can be created on-the-fly inside a new `entry` using e.g.
+`zeit track --project "New Project" --task "New Task"`. In order to configure
+them, the `zeit project` and the `zeit task` commands can be utilised.
 
 ### Projects
 
@@ -56,7 +52,6 @@ information in that color (if your terminal supports colours):
 zeit project --color '#d3d3d3' "cool project"
 ```
 
-
 ### Task
 
 A task can be configured using `zeit task`:
@@ -67,18 +62,17 @@ zeit task --help
 
 #### Examples:
 
-Setting up a Git repository to have commit messages automatically imported
-into the activity notes when an activity is finished:
+Setting up a Git repository to have commit messages automatically imported into
+the activity notes when an activity is finished:
 
 ```sh
 zeit task --git ~/my/git/repository "development"
 ```
 
-**Info:** You will have to have the `git` binary available in your `PATH` for 
-this to work. *zeit* automatically limits the commit log to the exact time of 
-the activity's beginning- and finish-time. Commit messages before or after these 
+**Info:** You will have to have the `git` binary available in your `PATH` for
+this to work. _zeit_ automatically limits the commit log to the exact time of
+the activity's beginning- and finish-time. Commit messages before or after these
 times won't be imported.
-
 
 ### Track activity
 
@@ -94,13 +88,11 @@ Begin tracking a new activity and reset the start time to 15 minutes ago:
 zeit track --project project --task task --begin -0:15
 ```
 
-
 ### Show current activity
 
 ```sh
 zeit tracking
 ```
-
 
 ### Finish tracking activity
 
@@ -122,13 +114,12 @@ Finish tracking the currently tracked activity and change its task:
 zeit finish --task other-task
 ```
 
-Finish tracking the currently tracked activity and adjust its start time to 
-4 PM:
+Finish tracking the currently tracked activity and adjust its start time to 4
+PM:
 
 ```sh
 zeit finish --begin 16:00
 ```
-
 
 ### List tracked activity
 
@@ -162,13 +153,12 @@ List only projects and tasks (relational):
 zeit list --only-projects-and-tasks
 ```
 
-List only projects and tasks (relational) that were tracked since a specific 
+List only projects and tasks (relational) that were tracked since a specific
 date/time:
 
 ```sh
 zeit list --only-projects-and-tasks --since "2020-10-14T00:00:01+01:00"
 ```
-
 
 ### Display/update activity
 
@@ -190,7 +180,6 @@ Update a tracked activity:
 zeit entry --finish "2020-09-02T18:16:00+01:00" 14037730-5c2d-44ff-b70e-81f1dcd4eb5f
 ```
 
-
 ### Erase tracked activity
 
 ```sh
@@ -205,7 +194,6 @@ Erase a tracked activity by its internal ID:
 zeit erase 14037730-5c2d-44ff-b70e-81f1dcd4eb5f
 ```
 
-
 ### Statistics
 
 ![zeit stats](documentation/zeit_stats.jpg)
@@ -213,7 +201,6 @@ zeit erase 14037730-5c2d-44ff-b70e-81f1dcd4eb5f
 ```sh
 zeit stats
 ```
-
 
 ### Import tracked activities
 
@@ -225,7 +212,7 @@ The following formats are supported as of right now:
 
 #### `tyme`: Tyme 3 JSON
 
-It is possible to import JSON exports from [Tyme 3](https://www.tyme-app.com). 
+It is possible to import JSON exports from [Tyme 3](https://www.tyme-app.com).
 It is important that the JSON is exported with the following options set/unset:
 
 ![Tyme 3 JSON export](documentation/tyme3json.png)
@@ -238,10 +225,10 @@ It is important that the JSON is exported with the following options set/unset:
 - `Filter Projects & Tasks` can be set as required
 - `Combine times by day & task` **must** be unchecked
 
-During import, *zeit* will create SHA1 sums for every Tyme 3 entry, which 
-allows it to identify every imported activity. This way *zeit* won't import the 
-exact same entry twice. Keep this in mind if you change entries in Tyme and 
-then import them again into *zeit*.
+During import, _zeit_ will create SHA1 sums for every Tyme 3 entry, which allows
+it to identify every imported activity. This way _zeit_ won't import the exact
+same entry twice. Keep this in mind if you change entries in Tyme and then
+import them again into _zeit_.
 
 #### Examples:
 
@@ -251,7 +238,6 @@ Import a Tyme 3 JSON export:
 zeit import --format tyme ./tyme.export.json
 ```
 
-
 ### Export tracked activities
 
 ```sh
@@ -260,15 +246,15 @@ zeit export --help
 
 The following formats are supported as of right now:
 
-#### `zeit`: *zeit* JSON
+#### `zeit`: _zeit_ JSON
 
-The *zeit* internal JSON format. Basically a dump of the database including
-only tracked activities.
+The _zeit_ internal JSON format. Basically a dump of the database including only
+tracked activities.
 
 #### `tyme`: Tyme 3 JSON
 
 It is possible to export JSON compatible to the Tyme 3 JSON format. Fields that
-are not available in *zeit* will be filled with dummy values, e.g.
+are not available in _zeit_ will be filled with dummy values, e.g.
 `Billing: "UNBILLED"`.
 
 #### Examples:
@@ -281,21 +267,21 @@ zeit export --format tyme --project "my project" --since "2020-04-01T15:04:05+07
 
 ## Integrations
 
-Here are a few integrations and extensions built by myself as well as other 
+Here are a few integrations and extensions built by myself as well as other
 people that make use of `zeit`:
 
-- [`zeit-waybar-bemenu.sh`](https://github.com/mrusme/zeit/blob/main/extras/zeit-waybar-bemenu.sh), 
+- [`zeit-waybar-bemenu.sh`](https://github.com/mrusme/zeit/blob/main/extras/zeit-waybar-bemenu.sh),
   a script for integrating `zeit` into
   [waybar](https://github.com/Alexays/Waybar), using
   [bemenu](https://github.com/Cloudef/bemenu)
-- [`zeit-waybar-wofi.sh`](https://github.com/mrusme/zeit/blob/main/extras/zeit-waybar-wofi.sh), 
+- [`zeit-waybar-wofi.sh`](https://github.com/mrusme/zeit/blob/main/extras/zeit-waybar-wofi.sh),
   a script for integrating `zeit` into
   [waybar](https://github.com/Alexays/Waybar), using
   [wofi](https://hg.sr.ht/~scoopta/wofi)
-- [`zeit.1m.sh`](https://github.com/mrusme/zeit/blob/main/extras/zeit.1m.sh), 
-  an [`xbar`](https://github.com/matryer/xbar) plugin for `zeit`
-- [`zeit-status.sh`](https://github.com/khughitt/dotfiles/blob/master/polybar/scripts/zeit-status.sh), 
-  a [Polybar](https://github.com/polybar/polybar) integration for `zeit` by 
-  [@khughitt](https://github.com/khughitt) 
-  (see [#1](https://github.com/mrusme/zeit/issues/1))
+- [`zeit.1m.sh`](https://github.com/mrusme/zeit/blob/main/extras/zeit.1m.sh), an
+  [`xbar`](https://github.com/matryer/xbar) plugin for `zeit`
+- [`zeit-status.sh`](https://github.com/khughitt/dotfiles/blob/master/polybar/scripts/zeit-status.sh),
+  a [Polybar](https://github.com/polybar/polybar) integration for `zeit` by
+  [@khughitt](https://github.com/khughitt) (see
+  [#1](https://github.com/mrusme/zeit/issues/1))
 - your link here, feel free to PR! :-)
