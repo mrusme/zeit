@@ -35,6 +35,24 @@ have to pre-exist and can be created on-the-fly inside a new `entry` using e.g.
 `zeit track --project "New Project" --task "New Task"`. In order to configure
 them, the `zeit project` and the `zeit task` commands can be utilised.
 
+### Auto-Completion
+
+_zeit_ can generate auto-completion scripts for your shell of choice. You can
+load completions into your current session via:
+
+```sh
+source <(zeit completion bash)
+```
+
+(replace `bash` with your shell, e.g. `zsh`, `fish`, `powershell`)
+
+To load completions for every new session, add them to your completions
+directory, e.g.:
+
+```
+sudo zeit completion bash > /etc/bash_completion.d/zeit
+```
+
 ### Projects
 
 A project can be configured using `zeit project`:
