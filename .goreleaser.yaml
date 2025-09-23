@@ -6,10 +6,11 @@ builds:
       - CGO_ENABLED=0
     goos:
       - darwin
+      - dragonfly
+      - freebsd
       - linux
       - netbsd
       - openbsd
-      - freebsd
       - plan9
       - windows
     goarch:
@@ -17,20 +18,31 @@ builds:
       - amd64
       - arm
       - arm64
+      - riscv64
     goarm:
-      - 6
-      - 7
+      - "6"
+      - "7"
     ignore:
       - goos: darwin
         goarch: 386
       - goos: darwin
         goarch: arm
+      - goos: darwin
+        goarch: riscv64
       - goos: netbsd
         goarch: arm64
+      - goos: netbsd
+        goarch: riscv64
       - goos: freebsd
         goarm: arm64
       - goos: plan9
+        goarm: arm
+      - goos: plan9
         goarm: arm64
+      - goos: plan9
+        goarch: riscv64
+      - goos: windows
+        goarch: riscv64
 changelog:
   disable: false
   use: github
