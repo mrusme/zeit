@@ -1,0 +1,118 @@
+package runtime
+
+import (
+	"log/slog"
+	"os"
+	"path"
+
+	"github.com/adrg/xdg"
+	"github.com/mrusme/zeit/database"
+	"github.com/mrusme/zeit/helpers/log"
+	"github.com/spf13/cobra"
+)
+
+var DATABASE_ENV_VAR = "ZEIT_DATABASE"
+
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
+type Build struct {
+	Version string
+	Commit  string
+	Date    string
+}
+
+type Runtime struct {
+	Build    Build
+	Logger   *log.Logger
+	Database *database.Database
+	Config   *Config
+}
+
+func New(lvl slog.Level) *Runtime {
+	var err error
+
+	rt := new(Runtime)
+
+	rt.Build.Version = version
+	rt.Build.Commit = commit
+	rt.Build.Date = date
+
+	// TODO: Output to file
+	rt.Logger = log.New(lvl)
+
+	var dbdir string
+	var found bool
+	if dbdir, found = os.LookupEnv(DATABASE_ENV_VAR); found == false {
+		dbdir, err = xdg.DataFile(path.Join("zeit", "db"))
+		rt.Logger.NilOrDie(err, "Could not get database directory: "+
+			DATABASE_ENV_VAR+" not set and XDG DataFile reported error!")
+		rt.Logger.Debug("Using XDG DataFile directory for database",
+			"directory", dbdir,
+		)
+	} else {
+		rt.Logger.Debug("Using "+DATABASE_ENV_VAR+" directory for database",
+			"directory", dbdir,
+		)
+	}
+
+	rt.Database, err = database.New(rt.Logger, dbdir)
+	rt.Logger.NilOrDie(err, "Error initializing database")
+
+	rt.Logger.Debug("Loading runtime config ...")
+	cfg := new(Config)
+	err = rt.Database.GetRowAsStruct(CONFIG_KEY, cfg)
+	if err != nil {
+		if rt.Database.ErrIsKeyNotFound(err) {
+			// Create runtime config and store it
+			rt.Logger.Info("No runtime config available; Creating default config ...")
+
+			cfg, err = DefaultConfig()
+			rt.Logger.NilOrDie(err, "Error creating runtime config")
+
+			cfg.SetKey(CONFIG_KEY)
+			err = rt.Database.UpsertRowAsStruct(cfg)
+			rt.Logger.NilOrDie(err, "Error persisting runtime config")
+		} else {
+			rt.Logger.NilOrDie(err, "Error loading runtime config")
+		}
+	}
+	rt.Config = cfg
+	rt.Logger.Debug("Runtime config loaded")
+
+	return rt
+}
+
+func (rt *Runtime) End() {
+	rt.Logger.Debug("Ending runtime ...")
+	rt.Database.Close()
+}
+
+func (rt *Runtime) GetStringFlag(cmd *cobra.Command, flagname string) string {
+	flag, err := cmd.Flags().GetString(flagname)
+	rt.Logger.NilOrDie(err, "Could not get "+flagname+" flag")
+	return flag
+}
+
+func (rt *Runtime) GetIntFlag(cmd *cobra.Command, flagname string) int {
+	flag, err := cmd.Flags().GetInt(flagname)
+	rt.Logger.NilOrDie(err, "Could not get "+flagname+" flag")
+	return flag
+}
+
+func (rt *Runtime) GetBoolFlag(cmd *cobra.Command, flagname string) bool {
+	flag, err := cmd.Flags().GetBool(flagname)
+	rt.Logger.NilOrDie(err, "Could not get "+flagname+" flag")
+	return flag
+}
+
+func (rt *Runtime) GetDebugFlag(cmd *cobra.Command) bool {
+	return rt.GetBoolFlag(cmd, "debug")
+}
+
+func (rt *Runtime) GetColorFlag(cmd *cobra.Command) string {
+	return rt.GetStringFlag(cmd, "color")
+}
