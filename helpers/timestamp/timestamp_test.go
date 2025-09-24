@@ -30,6 +30,23 @@ func TestParse(t *testing.T) {
 				12, 00, 00, 00, time.Local).Format(testFmt),
 		},
 		{
+			Parse: "9/16/2025 12:00",
+			Result: time.Date(2025, 9, 16,
+				12, 00, 00, 00, time.Local).Format(testFmt),
+		},
+		{
+			Parse:  "-1.5h",
+			Result: time.Now().Add(-(90 * time.Minute)).Format(testFmt),
+		},
+		{
+			Parse:  "-0.25h",
+			Result: time.Now().Add(-(15 * time.Minute)).Format(testFmt),
+		},
+		{
+			Parse:  "-15m",
+			Result: time.Now().Add(-(15 * time.Minute)).Format(testFmt),
+		},
+		{
 			Parse:  "20 minutes ago",
 			Result: time.Now().Add(-(20 * time.Minute)).Format(testFmt),
 		},
