@@ -1,0 +1,313 @@
+A command line time tracker.
+
+Usage:
+  zeit [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  entry       Display or update activity
+  erase       Erase activity
+  export      Export tracked activities
+  finish      Finish currently running activity
+  help        Help about any command
+  import      Import tracked activities
+  list        List activities
+  project     Project settings
+  report      report times an day / project / task level
+  resume      Resume last task
+  stats       Display activity statistics
+  switch      switch to another task
+  switchback  switchback to the task before the last one
+  task        Task settings
+  track       Tracking time
+  tracking    Currently tracking activity
+  version     Display what Zeit it is
+
+Flags:
+      --config string   config file (default is $XDG_CONFIG_HOME/zeit.[yaml|toml
+  -d, --debug           Display debugging output in the console. (default: false)
+  -h, --help            help for zeit
+      --no-colors       Do not use colors in output
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// entry                                                                    ///
+////////////////////////////////////////////////////////////////////////////////
+Display or update tracked activity.
+
+Usage:
+  zeit entry ([flags]) [id]
+
+Flags:
+  -b, --begin string     Update date/time the activity began at
+      --decimal          Show fractional hours in decimal format instead of minutes
+  -s, --finish string    Update date/time the activity finished at
+  -h, --help             help for entry
+  -n, --notes string     Update activity notes
+  -p, --project string   Update activity project
+  -t, --task string      Update activity task
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// erase                                                                    ///
+////////////////////////////////////////////////////////////////////////////////
+Erase tracked activity.
+
+Usage:
+  zeit erase ([flags]) [id]
+
+Flags:
+  -h, --help   help for erase
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// export                                                                   ///
+////////////////////////////////////////////////////////////////////////////////
+Export tracked activities to various formats.
+
+Usage:
+  zeit export ([flags])
+
+Flags:
+      --format string    Format to export, possible values: zeit, tyme (default "zeit")
+  -h, --help             help for export
+  -p, --project string   Project to be exported
+      --range string     Shortcut for --since and --until that accepts: today, yesterday, thisWeek, lastWeek, thisMonth, lastMonth
+      --since string     Date/time to start the export from
+  -t, --task string      Task to be exported
+      --until string     Date/time to export until
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// finish                                                                   ///
+////////////////////////////////////////////////////////////////////////////////
+Finishing tracking of currently running activity.
+
+Usage:
+  zeit finish [flags]
+
+Flags:
+  -b, --begin string     Time the activity should begin at
+
+                         Either in the formats 16:00 / 4:00PM
+                         or relative to the current time,
+                         e.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).
+  -s, --finish string    Time the activity should finish at
+
+                         Either in the formats 16:00 / 4:00PM
+                         or relative to the current time,
+                         e.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).
+                         Must be after --begin time.
+  -h, --help             help for finish
+  -n, --notes string     Activity notes
+  -p, --project string   Project to be assigned
+  -t, --task string      Task to be assigned
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// import                                                                   ///
+////////////////////////////////////////////////////////////////////////////////
+Import tracked activities from various formats.
+
+Usage:
+  zeit import ([flags]) [file]
+
+Flags:
+      --format string   Format to import, possible values: zeit, tyme (default "zeit")
+  -h, --help            help for import
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// list                                                                     ///
+////////////////////////////////////////////////////////////////////////////////
+List all tracked activities.
+
+Usage:
+  zeit list [flags]
+
+Flags:
+      --append-project-id-to-task   Append project ID to tasks in the list
+      --decimal                     Show fractional hours in decimal format instead of minutes
+  -h, --help                        help for list
+      --only-projects-and-tasks     Only list projects and their tasks, no entries
+      --only-tasks                  Only list tasks, no projects nor entries
+  -p, --project string              Project to be listed
+      --range string                Shortcut for --since and --until that accepts: today, yesterday, thisWeek, lastWeek, thisMonth, lastMonth
+      --since string                Date/time to start the list from
+  -t, --task string                 Task to be listed
+      --total                       Show total time of hours for listed activities
+      --until string                Date/time to list until
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// project                                                                  ///
+////////////////////////////////////////////////////////////////////////////////
+Configure project settings.
+
+Usage:
+  zeit project ([flags]) [project]
+
+Flags:
+  -c, --color string   Set the color of the project (hex code, e.g. #121212)
+  -h, --help           help for project
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// report                                                                   ///
+////////////////////////////////////////////////////////////////////////////////
+Reporting summaries on daily, project, task level for a given range
+
+Usage:
+  zeit report [flags]
+
+Flags:
+  -h, --help             help for report
+      --monthly          Print summary of monthly hours
+      --no-tasks         Print only summary bot no task details
+      --notes            Print notes for the task
+  -p, --project string   Project to be listed
+      --range string     shortcut to set since/until for a given range (today, yesterday, thisWeek, lastWeek, thisMonth, lastMonth)
+      --since string     Date/time to start the list from
+  -t, --task string      Task to be listed
+      --until string     Date/time to list until
+      --weekly           Print summary of weekly hours
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// resume                                                                   ///
+////////////////////////////////////////////////////////////////////////////////
+Track new activity with all parameters of the last task (based on begin time)
+
+Usage:
+  zeit resume [flags]
+
+Flags:
+  -b, --begin string    Time the activity should begin at
+
+                        Either in the formats 16:00 / 4:00PM
+                        or relative to the current time,
+                        e.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).
+  -s, --finish string   Time the activity should finish at
+
+                        Either in the formats 16:00 / 4:00PM
+                        or relative to the current time,
+                        e.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).
+                        Must be after --begin time.
+  -h, --help            help for resume
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// stats                                                                    ///
+////////////////////////////////////////////////////////////////////////////////
+Display statistics on all tracked activities.
+
+Usage:
+  zeit stats [flags]
+
+Flags:
+      --decimal   Show fractional hours in decimal format instead of minutes
+  -h, --help      help for stats
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// switch                                                                   ///
+////////////////////////////////////////////////////////////////////////////////
+End running activity and track new activity, which can either be kept running until 'finish' is being called or parameterized to be a finished activity.
+
+Usage:
+  zeit switch [flags]
+
+Flags:
+  -b, --begin string     Time the new activity should begin at and the old one ends
+
+                         Either in the formats 16:00 / 4:00PM
+                         or relative to the current time,
+                         e.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).
+  -h, --help             help for switch
+  -n, --notes string     Activity notes
+  -p, --project string   Project to be assigned
+  -t, --task string      Task to be assigned
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// switchback                                                               ///
+////////////////////////////////////////////////////////////////////////////////
+End running activity and resume the task which was before, which can either be kept running until 'finish' is being called or parameterized to be a finished activity.
+
+Usage:
+  zeit switchback [flags]
+
+Flags:
+  -b, --begin string   Time the new activity should begin at and the old one ends
+
+                       Either in the formats 16:00 / 4:00PM
+                       or relative to the current time,
+                       e.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).
+  -h, --help           help for switchback
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// task                                                                     ///
+////////////////////////////////////////////////////////////////////////////////
+Configure task settings.
+
+Usage:
+  zeit task ([flags]) [task]
+
+Flags:
+  -g, --git string   Set the task's Git repository to enable commit message importing into activity notes.
+                     Set to an empty string '' to remove a previously set repository and disable git log imports. (default "-")
+  -h, --help         help for task
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// track                                                                    ///
+////////////////////////////////////////////////////////////////////////////////
+Track new activity, which can either be kept running until 'finish' is being called or parameterized to be a finished activity.
+
+Usage:
+  zeit track [flags]
+
+Flags:
+  -b, --begin string     Time the activity should begin at
+
+                         Either in the formats 16:00 / 4:00PM
+                         or relative to the current time,
+                         e.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).
+  -s, --finish string    Time the activity should finish at
+
+                         Either in the formats 16:00 / 4:00PM
+                         or relative to the current time,
+                         e.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).
+                         Must be after --begin time.
+  -f, --force            Force begin tracking of a new task
+                         even though another one is still running
+                         (ONLY IF YOU KNOW WHAT YOU'RE DOING!)
+  -h, --help             help for track
+  -n, --notes string     Activity notes
+  -p, --project string   Project to be assigned
+  -t, --task string      Task to be assigned
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// tracking                                                                 ///
+////////////////////////////////////////////////////////////////////////////////
+Show currently tracking activity.
+
+Usage:
+  zeit tracking [flags]
+
+Flags:
+  -h, --help   help for tracking
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// version                                                                  ///
+////////////////////////////////////////////////////////////////////////////////
+The version of Zeit.
+
+Usage:
+  zeit version [flags]
+
+Flags:
+  -h, --help   help for version

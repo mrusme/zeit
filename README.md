@@ -1,6 +1,6 @@
 ## Zeit
 
-![zeit](documentation/zeit.png)
+![zeit](.README.md/zeit.png)
 
 [<img src="https://xn--gckvb8fzb.com/images/chatroom.png" width="275">](https://xn--gckvb8fzb.com/contact/)
 
@@ -23,8 +23,6 @@ command with `VERSION=x.y.z` and set `x`, `y` and `z` accordingly if you want
 the version in `zeit --help` to be a different one.
 
 ## Usage
-
-![zeit](documentation/header.jpg)
 
 Please make sure to `export ZEIT_DB=~/.config/zeit.db` (or whatever location you
 would like to have the zeit database at).
@@ -214,8 +212,6 @@ zeit erase 14037730-5c2d-44ff-b70e-81f1dcd4eb5f
 
 ### Statistics
 
-![zeit stats](documentation/zeit_stats.jpg)
-
 ```sh
 zeit stats
 ```
@@ -232,8 +228,6 @@ The following formats are supported as of right now:
 
 It is possible to import JSON exports from [Tyme 3](https://www.tyme-app.com).
 It is important that the JSON is exported with the following options set/unset:
-
-![Tyme 3 JSON export](documentation/tyme3json.png)
 
 - `Start`/`End` can be set as required
 - `Format` has to be `JSON`
