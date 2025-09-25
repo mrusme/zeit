@@ -17,7 +17,7 @@ var Cmd = &cobra.Command{
 		defer rt.End()
 		rt.Out.Put(out.Info,
 			"%s %s\n  %s %s\n  %s %s\n",
-			rt.Out.FGBG(out.ColorYellow, out.ColorBrightBlack, "zeit"),
+			rt.Out.Stylize(out.Style{FG: out.ColorYellow, BG: out.ColorBrightBlack}, "zeit"),
 			rt.Build.Version,
 			rt.Out.FG(out.ColorBrightBlack, "Commit:"),
 			rt.Build.Commit,

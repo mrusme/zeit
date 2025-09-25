@@ -58,14 +58,9 @@ var OutputProps = []OutputProp{
 	},
 }
 
-var OutputChars = []string{
-	"",
-	"●",
-	"▲",
-	"◆",
-	"▶",
-	"■",
-	"◀",
+type Style struct {
+	FG color.Color
+	BG color.Color
 }
 
 type OutputColor int
@@ -133,31 +128,26 @@ func (o *Out) InColor() bool {
 }
 
 func (o *Out) FG(c color.Color, format string, a ...any) string {
-	text := fmt.Sprintf(format, a...)
-	if o.InColor() {
-		style := lipgloss.NewStyle().Foreground(c)
-		return style.Render(text)
-	}
-	return text
+	return o.Stylize(Style{FG: c}, format, a...)
 }
 
 func (o *Out) BG(c color.Color, format string, a ...any) string {
-	text := fmt.Sprintf(format, a...)
-	if o.InColor() {
-		style := lipgloss.NewStyle().Background(c)
-		return style.Render(text)
-	}
-	return text
+	return o.Stylize(Style{BG: c}, format, a...)
 }
 
-func (o *Out) FGBG(
-	fgc color.Color,
-	bgc color.Color,
+func (o *Out) Stylize(
+	st Style,
 	format string, a ...any,
 ) string {
 	text := fmt.Sprintf(format, a...)
 	if o.InColor() {
-		style := lipgloss.NewStyle().Foreground(fgc).Background(bgc)
+		style := lipgloss.NewStyle()
+		if st.FG != nil {
+			style = style.Foreground(st.FG)
+		}
+		if st.BG != nil {
+			style = style.Background(st.BG)
+		}
 		return style.Render(text)
 	}
 	return text
