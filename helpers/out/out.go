@@ -2,6 +2,7 @@ package out
 
 import (
 	"fmt"
+	"image/color"
 	"os"
 
 	"github.com/charmbracelet/lipgloss/v2"
@@ -76,6 +77,25 @@ const (
 )
 
 const (
+	ColorRed           = lipgloss.Red
+	ColorYellow        = lipgloss.Yellow
+	ColorGreen         = lipgloss.Green
+	ColorBlue          = lipgloss.Blue
+	ColorCyan          = lipgloss.Cyan
+	ColorMagenta       = lipgloss.Magenta
+	ColorWhite         = lipgloss.White
+	ColorBlack         = lipgloss.Black
+	ColorBrightRed     = lipgloss.BrightRed
+	ColorBrightYellow  = lipgloss.BrightYellow
+	ColorBrightGreen   = lipgloss.BrightGreen
+	ColorBrightBlue    = lipgloss.BrightBlue
+	ColorBrightCyan    = lipgloss.BrightCyan
+	ColorBrightMagenta = lipgloss.BrightMagenta
+	ColorBrightWhite   = lipgloss.BrightWhite
+	ColorBrightBlack   = lipgloss.BrightBlack
+)
+
+const (
 	CharOk    = "●"
 	CharError = "▲"
 	CharTrack = "▶"
@@ -104,18 +124,43 @@ func New(oc OutputColor) *Out {
 }
 
 func (o *Out) isPiped() bool {
-	// info, err := os.Stdout.Stat()
-	// if err != nil {
-	// 	return false
-	// }
-	// return (info.Mode() & os.ModeNamedPipe) != 0
-
 	return isatty.IsTerminal(os.Stdout.Fd()) == false &&
 		isatty.IsCygwinTerminal(os.Stdout.Fd()) == false
 }
 
 func (o *Out) InColor() bool {
 	return o.oc == ColorAlways
+}
+
+func (o *Out) FG(c color.Color, format string, a ...any) string {
+	text := fmt.Sprintf(format, a...)
+	if o.InColor() {
+		style := lipgloss.NewStyle().Foreground(c)
+		return style.Render(text)
+	}
+	return text
+}
+
+func (o *Out) BG(c color.Color, format string, a ...any) string {
+	text := fmt.Sprintf(format, a...)
+	if o.InColor() {
+		style := lipgloss.NewStyle().Background(c)
+		return style.Render(text)
+	}
+	return text
+}
+
+func (o *Out) FGBG(
+	fgc color.Color,
+	bgc color.Color,
+	format string, a ...any,
+) string {
+	text := fmt.Sprintf(format, a...)
+	if o.InColor() {
+		style := lipgloss.NewStyle().Foreground(fgc).Background(bgc)
+		return style.Render(text)
+	}
+	return text
 }
 
 func (o *Out) Put(ot OutputType, format string, a ...any) {
