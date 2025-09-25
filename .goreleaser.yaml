@@ -5,7 +5,7 @@ builds:
     env:
       - CGO_ENABLED=0
     ldflags:
-      - -s -w -X z.version={{.Version}} -X z.commit={{.Commit}} -X z.date={{.Date}}
+      - -s -w -X github.com/mrusme/zeit/runtime.Version={{.Version}} -X github.com/mrusme/zeit/runtime.Commit={{.Commit}} -X github.com/mrusme/zeit/runtime.Date={{.Date}}
     goos:
       - darwin
       - dragonfly
