@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"os"
+	"time"
 
 	"github.com/charmbracelet/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
@@ -22,12 +23,12 @@ const (
 	Erase
 )
 
-type OutputProp struct {
+type outputPrefix struct {
 	Char  string
 	Color ansi.BasicColor
 }
 
-var OutputProps = []OutputProp{
+var outputPrefixes = []outputPrefix{
 	{
 		Char:  "",
 		Color: lipgloss.White,
@@ -102,6 +103,13 @@ const (
 	CharInfo  = "◆"
 )
 
+type Opts struct {
+	Type      OutputType
+	NoNL      bool
+	NL        string
+	Typewrite time.Duration
+}
+
 type Out struct {
 	oc OutputColor
 }
@@ -156,30 +164,53 @@ func (o *Out) Stylize(
 	return text
 }
 
-func (o *Out) Put(ot OutputType, format string, a ...any) {
+func (o *Out) Put(opts Opts, format string, a ...any) {
 	var formatted string = fmt.Sprintf(format, a...)
+	var nl string = "\n"
+	var output string = ""
+
+	if opts.NoNL == true {
+		nl = ""
+	} else {
+		if opts.NL != "" {
+			nl = opts.NL
+		}
+	}
 
 	if o.oc == ColorAlways {
 		style := lipgloss.NewStyle().Foreground(lipgloss.BrightBlack)
-		fmt.Printf("%s %s\n",
-			style.Render(OutputProps[ot].Char),
+		output = fmt.Sprintf("%s %s%s",
+			style.Render(outputPrefixes[opts.Type].Char),
 			formatted,
+			nl,
 		)
 	} else {
-		fmt.Printf("%s %s\n",
-			OutputProps[ot].Char,
-			formatted)
+		output = fmt.Sprintf("%s %s%s",
+			outputPrefixes[opts.Type].Char,
+			formatted,
+			nl,
+		)
+	}
+
+	if o.isPiped() == false && opts.Typewrite > 0 {
+		for _, char := range output {
+			fmt.Printf("%c", char)
+			time.Sleep(time.Millisecond * opts.Typewrite)
+		}
+		time.Sleep(time.Millisecond * opts.Typewrite * 2)
+	} else {
+		fmt.Printf(output)
 	}
 }
 
 func (o *Out) NilOrDie(err error, format string, a ...any) {
 	if err != nil {
-		o.Put(Error, format, a...)
+		o.Put(Opts{Type: Error}, format, a...)
 		os.Exit(1)
 	}
 }
 
 func (o *Out) Die(format string, a ...any) {
-	o.Put(Error, format, a...)
+	o.Put(Opts{Type: Error}, format, a...)
 	os.Exit(1)
 }
