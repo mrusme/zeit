@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	versionCmd "github.com/mrusme/zeit/cli/version/cmd"
 	"github.com/mrusme/zeit/runtime"
 	"github.com/spf13/cobra"
 )
@@ -18,7 +19,7 @@ var rootCmd = &cobra.Command{
 	Long: "Zeit, erfassen. A command line tool for tracking time spent on " +
 		" activities.\n\n",
 	Run: func(cmd *cobra.Command, args []string) {
-		rt := runtime.New(runtime.GetLogLevel(cmd))
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
 		defer rt.End()
 	},
 }
@@ -31,6 +32,8 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.AddCommand(versionCmd.Cmd)
+
 	rootCmd.PersistentFlags().BoolVar(
 		&flagDebug,
 		"debug",

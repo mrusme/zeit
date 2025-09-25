@@ -8,15 +8,16 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/helpers/log"
+	"github.com/mrusme/zeit/helpers/out"
 	"github.com/spf13/cobra"
 )
 
 var DATABASE_ENV_VAR = "ZEIT_DATABASE"
 
 var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
+	Version string
+	Commit  string
+	Date    string
 )
 
 type Build struct {
@@ -28,21 +29,24 @@ type Build struct {
 type Runtime struct {
 	Build    Build
 	Logger   *log.Logger
+	Out      *out.Out
 	Database *database.Database
 	Config   *Config
 }
 
-func New(lvl slog.Level) *Runtime {
+func New(lvl slog.Level, oc out.OutputColor) *Runtime {
 	var err error
 
 	rt := new(Runtime)
 
-	rt.Build.Version = version
-	rt.Build.Commit = commit
-	rt.Build.Date = date
+	rt.Build.Version = Version
+	rt.Build.Commit = Commit
+	rt.Build.Date = Date
 
 	// TODO: Output to file
 	rt.Logger = log.New(lvl)
+
+	rt.Out = out.New(oc)
 
 	var dbdir string
 	var found bool
@@ -89,6 +93,10 @@ func New(lvl slog.Level) *Runtime {
 func (rt *Runtime) End() {
 	rt.Logger.Debug("Ending runtime ...")
 	rt.Database.Close()
+}
+
+func (rt *Runtime) GetUserKey() string {
+	return rt.Config.UserKey
 }
 
 func (rt *Runtime) GetStringFlag(cmd *cobra.Command, flagname string) string {
