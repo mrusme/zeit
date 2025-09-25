@@ -88,6 +88,9 @@ const (
 	ColorBrightMagenta = lipgloss.BrightMagenta
 	ColorBrightWhite   = lipgloss.BrightWhite
 	ColorBrightBlack   = lipgloss.BrightBlack
+
+	ColorPrimary   = ColorYellow
+	ColorSecondary = ColorBrightBlack
 )
 
 const (

@@ -17,11 +17,13 @@ var Cmd = &cobra.Command{
 		defer rt.End()
 		rt.Out.Put(out.Info,
 			"%s %s\n  %s %s\n  %s %s\n",
-			rt.Out.Stylize(out.Style{FG: out.ColorYellow, BG: out.ColorBrightBlack}, "zeit"),
+			rt.Out.Stylize(
+				out.Style{FG: out.ColorPrimary, BG: out.ColorSecondary},
+				"zeit"),
 			rt.Build.Version,
-			rt.Out.FG(out.ColorBrightBlack, "Commit:"),
+			rt.Out.FG(out.ColorSecondary, "Commit:"),
 			rt.Build.Commit,
-			rt.Out.FG(out.ColorBrightBlack, "Build date:"),
+			rt.Out.FG(out.ColorSecondary, "Build date:"),
 			rt.Build.Date,
 		)
 	},
