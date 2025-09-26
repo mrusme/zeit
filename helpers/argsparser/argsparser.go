@@ -120,23 +120,27 @@ func (pa *ParsedArgs) Process() error {
 	}
 
 	if pa.TimestampStart != "" {
-		pa.timestampStart, err = timestamp.Parse(pa.TimestampStart)
+		ts, err := timestamp.Parse(pa.TimestampStart)
 		if err != nil {
 			return &ErrParsingTimestamp{
 				Message:   err.Error(),
 				Timestamp: pa.TimestampStart,
 			}
 		}
+
+		pa.timestampStart = ts.Time
 	}
 
 	if pa.TimestampEnd != "" {
-		pa.timestampEnd, err = timestamp.Parse(pa.TimestampEnd)
+		ts, err := timestamp.Parse(pa.TimestampEnd)
 		if err != nil {
 			return &ErrParsingTimestamp{
 				Message:   err.Error(),
 				Timestamp: pa.TimestampEnd,
 			}
 		}
+
+		pa.timestampEnd = ts.Time
 	}
 
 	if pa.timestampEnd.IsZero() == false &&

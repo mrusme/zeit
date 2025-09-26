@@ -12,7 +12,7 @@ type TestDate struct {
 
 func TestParse(t *testing.T) {
 	var err error
-	var tm time.Time
+	var tm *Timestamp
 
 	testFmt := "2006-01-02 15:04:05 -0700"
 
@@ -20,7 +20,7 @@ func TestParse(t *testing.T) {
 
 	testdates := []TestDate{
 		{
-			Parse: "12:00",
+			Parse: "today 12:00",
 			Result: time.Date(now.Year(), now.Month(), now.Day(),
 				12, 00, 00, 00, time.Local).Format(testFmt),
 		},
@@ -75,7 +75,7 @@ func TestParse(t *testing.T) {
 			return
 		}
 
-		tmf := tm.Format(testFmt)
+		tmf := tm.Time.Format(testFmt)
 		if testdate.Result != tmf {
 			t.Errorf("Expected '%s', got '%s'\n", testdate.Result, tmf)
 			return

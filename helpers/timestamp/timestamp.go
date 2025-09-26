@@ -7,17 +7,27 @@ import (
 	"github.com/markusmobius/go-dateparser/date"
 )
 
-func Parse(str string) (time.Time, error) {
+type Timestamp struct {
+	Time    time.Time
+	ToTime  time.Time
+	IsRange bool
+}
+
+func Parse(str string) (*Timestamp, error) {
 	var err error
 	var dt date.Date
+
+	ts := new(Timestamp)
 
 	cfg := dateparser.Configuration{
 		DefaultTimezone: time.Local,
 	}
 
 	if dt, err = dateparser.Parse(&cfg, str); err != nil {
-		return time.Now(), err
+		return nil, err
 	}
 
-	return dt.Time, nil
+	ts.Time = dt.Time
+
+	return ts, nil
 }
