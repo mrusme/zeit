@@ -50,6 +50,28 @@ func (db *Database) GetRowAsStruct(key string, v Model) error {
 	return nil
 }
 
+func (db *Database) GetAllRowsAsBytes() (map[string][]byte, error) {
+	var ret map[string][]byte = make(map[string][]byte)
+	err := db.engine.View(func(txn *badger.Txn) error {
+		it := txn.NewIterator(badger.DefaultIteratorOptions)
+		defer it.Close()
+		for it.Rewind(); it.Valid(); it.Next() {
+			item := it.Item()
+			key := item.Key()
+			err := item.Value(func(val []byte) error {
+				ret[string(key)] = val
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	return ret, err
+}
+
 func (db *Database) GetPrefixedRowsAsBytes(prefix string) (map[string][]byte, error) {
 	var ret map[string][]byte = make(map[string][]byte)
 	err := db.engine.View(func(txn *badger.Txn) error {
