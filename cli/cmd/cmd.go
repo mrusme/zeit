@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	exportCmd "github.com/mrusme/zeit/cli/export/cmd"
 	startCmd "github.com/mrusme/zeit/cli/start/cmd"
 	versionCmd "github.com/mrusme/zeit/cli/version/cmd"
 	"github.com/mrusme/zeit/runtime"
@@ -34,6 +35,7 @@ func Execute() {
 
 func init() {
 	rootCmd.AddCommand(startCmd.Cmd)
+	rootCmd.AddCommand(exportCmd.Cmd)
 	rootCmd.AddCommand(versionCmd.Cmd)
 
 	rootCmd.PersistentFlags().BoolVar(
