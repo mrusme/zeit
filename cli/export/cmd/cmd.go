@@ -22,7 +22,7 @@ var Cmd = &cobra.Command{
 	Aliases:   []string{"ex", "x", "dump"},
 	Short:     "zeit export",
 	Long:      "Export the zeit database to various formats",
-	Example:   "zeit export myproject/mytask from 2 days ago until now",
+	Example:   "zeit export all of myproject/mytask from 2 days ago until now",
 	ValidArgs: []string{"from", "until"},
 	Run: func(cmd *cobra.Command, args []string) {
 		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
@@ -85,11 +85,13 @@ var Cmd = &cobra.Command{
 			}
 
 			for key, b := range blockMap {
-				if filterByTimestamp == true &&
+				if (filterByTimestamp == true &&
 					((b.TimestampStart.Before(pargs.GetTimestampStart()) ||
 						b.TimestampStart.After(pargs.GetTimestampEnd())) ||
 						(b.TimestampEnd.Before(pargs.GetTimestampStart()) ||
-							b.TimestampEnd.After(pargs.GetTimestampEnd()))) {
+							b.TimestampEnd.After(pargs.GetTimestampEnd())))) ||
+					(pargs.ProjectSID != "" && b.ProjectSID != pargs.ProjectSID) ||
+					(pargs.TaskSID != "" && b.TaskSID != pargs.TaskSID) {
 					continue
 				} else {
 					keys = append(keys, key)

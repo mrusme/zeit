@@ -50,9 +50,10 @@ func Parse(command string, args []string) (*ParsedArgs, error) {
 	for i := 0; i < len(args); i++ {
 		word := strings.ToLower(args[i])
 		if word == "block" ||
-			word == "working" || word == "work" || word == "wrk" {
+			word == "working" || word == "work" || word == "wrk" ||
+			word == "all" {
 			continue
-		} else if word == "on" || word == "to" {
+		} else if word == "on" || word == "to" || word == "of" {
 			if len(args) > i+1 {
 				pst := strings.ToLower(args[i+1])
 				found := false
@@ -82,7 +83,7 @@ func Parse(command string, args []string) (*ParsedArgs, error) {
 				return nil, ErrMissingAttrOrVal
 			}
 		} else {
-			if word == "at" {
+			if word == "at" || word == "from" {
 				continue
 			}
 
@@ -90,7 +91,8 @@ func Parse(command string, args []string) (*ParsedArgs, error) {
 			for j := i; j < len(args); j++ {
 				nextWord := strings.ToLower(args[j])
 				endMarker = -1
-				if nextWord == "end" || nextWord == "ends" || nextWord == "ended" {
+				if nextWord == "end" || nextWord == "ends" || nextWord == "ended" ||
+					nextWord == "til" || nextWord == "until" {
 					endMarker = j
 					break
 				}
