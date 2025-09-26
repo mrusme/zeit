@@ -129,9 +129,13 @@ func (pa *ParsedArgs) Process() error {
 		}
 
 		pa.timestampStart = ts.Time
+
+		if ts.IsRange == true {
+			pa.timestampEnd = ts.ToTime
+		}
 	}
 
-	if pa.TimestampEnd != "" {
+	if pa.TimestampEnd != "" && pa.timestampEnd.IsZero() {
 		ts, err := timestamp.Parse(pa.TimestampEnd)
 		if err != nil {
 			return &ErrParsingTimestamp{
