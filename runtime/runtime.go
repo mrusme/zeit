@@ -95,6 +95,11 @@ func (rt *Runtime) End() {
 	rt.Database.Close()
 }
 
+func (rt *Runtime) Exit(code int) {
+	rt.End()
+	os.Exit(code)
+}
+
 func (rt *Runtime) GetUserKey() string {
 	return rt.Config.UserKey
 }

@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	startCmd "github.com/mrusme/zeit/cli/start/cmd"
 	versionCmd "github.com/mrusme/zeit/cli/version/cmd"
 	"github.com/mrusme/zeit/runtime"
 	"github.com/spf13/cobra"
@@ -32,6 +33,7 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.AddCommand(startCmd.Cmd)
 	rootCmd.AddCommand(versionCmd.Cmd)
 
 	rootCmd.PersistentFlags().BoolVar(

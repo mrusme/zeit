@@ -6,8 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var flagMachine string
-
 var Cmd = &cobra.Command{
 	Use:   "version",
 	Short: "zeit version",
