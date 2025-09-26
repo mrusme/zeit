@@ -18,8 +18,8 @@ const (
 	Ok
 	Error
 	Info
-	Track
-	Stop
+	Start
+	End
 	Erase
 )
 
@@ -92,15 +92,6 @@ const (
 
 	ColorPrimary   = ColorYellow
 	ColorSecondary = ColorBrightBlack
-)
-
-const (
-	CharOk    = "●"
-	CharError = "▲"
-	CharTrack = "▶"
-	CharStop  = "■"
-	CharErase = "◀"
-	CharInfo  = "◆"
 )
 
 type Opts struct {
