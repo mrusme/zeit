@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/adrg/xdg"
 	"github.com/mrusme/zeit/database"
@@ -102,6 +103,14 @@ func (rt *Runtime) Exit(code int) {
 
 func (rt *Runtime) GetUserKey() string {
 	return rt.Config.UserKey
+}
+
+func (rt *Runtime) GetCommandCall(cmd *cobra.Command) string {
+	calledAs := strings.ToLower(cmd.CalledAs())
+	if calledAs == "" {
+		calledAs = strings.ToLower(cmd.Name())
+	}
+	return calledAs
 }
 
 func (rt *Runtime) GetStringFlag(cmd *cobra.Command, flagname string) string {

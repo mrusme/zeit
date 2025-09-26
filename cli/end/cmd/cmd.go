@@ -12,9 +12,15 @@ import (
 
 var flags *argsparser.ParsedArgs
 
+var aliasMap = runtime.AliasMap{
+	"end":   {"en", "e"},
+	"stop":  {"stop", "sto", "stp"},
+	"pause": {"pause", "ps", "p"},
+}
+
 var Cmd = &cobra.Command{
 	Use:       "end [flags] [arguments]",
-	Aliases:   []string{"ended", "en", "e"},
+	Aliases:   aliasMap.GetAliases(),
 	Short:     "zeit end",
 	Long:      "End tracking",
 	Example:   "zeit end with note \"Issue ID 123\" 5 minutes ago",
@@ -22,6 +28,9 @@ var Cmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
 		defer rt.End()
+
+		calledAs := rt.GetCommandCall(cmd)
+		cmdName := aliasMap.GetCommandNameForAlias(calledAs)
 
 		pargs, err := argsparser.Parse("end", args)
 		if err != nil {
@@ -64,7 +73,14 @@ var Cmd = &cobra.Command{
 			rt.Exit(1)
 		}
 
-		rt.Out.Put(out.Opts{Type: out.End}, "Ended tracking")
+		switch cmdName {
+		case "end":
+			rt.Out.Put(out.Opts{Type: out.End}, "Ended tracking")
+		case "stop":
+			rt.Out.Put(out.Opts{Type: out.End}, "Stopped tracking")
+		case "pause":
+			rt.Out.Put(out.Opts{Type: out.Pause}, "Paused tracking")
+		}
 		return
 	},
 }

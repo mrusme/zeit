@@ -19,7 +19,10 @@ const (
 	Error
 	Info
 	Start
+	Switch
+	Resume
 	End
+	Pause
 	Erase
 )
 
@@ -50,7 +53,19 @@ var outputPrefixes = []outputPrefix{
 		Color: lipgloss.Cyan,
 	},
 	{
+		Char:  "▰",
+		Color: lipgloss.Cyan,
+	},
+	{
+		Char:  "►",
+		Color: lipgloss.Cyan,
+	},
+	{
 		Char:  "■",
+		Color: lipgloss.Magenta,
+	},
+	{
+		Char:  "▮",
 		Color: lipgloss.Magenta,
 	},
 	{

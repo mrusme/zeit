@@ -2,8 +2,6 @@ package startCmd
 
 import (
 	"fmt"
-	"slices"
-	"strings"
 
 	"github.com/mrusme/zeit/helpers/argsparser"
 	"github.com/mrusme/zeit/helpers/out"
@@ -14,15 +12,15 @@ import (
 
 var flags *argsparser.ParsedArgs
 
-var (
-	aliasesStart  = []string{"started", "sta", "str", "s"}
-	aliasesSwitch = []string{"switched", "switch", "sw"}
-	aliasesResume = []string{"resume", "re"}
-)
+var aliasMap = runtime.AliasMap{
+	"start":  {"started", "sta", "str", "s"},
+	"switch": {"switched", "switch", "sw"},
+	"resume": {"resume", "re"},
+}
 
 var Cmd = &cobra.Command{
 	Use:       "start [flags] [arguments]",
-	Aliases:   slices.Concat(aliasesStart, aliasesSwitch, aliasesResume),
+	Aliases:   aliasMap.GetAliases(),
 	Short:     "zeit start",
 	Long:      "Start tracking",
 	Example:   "zeit start work with note \"Hello World\" on myproject/mytask",
@@ -31,18 +29,8 @@ var Cmd = &cobra.Command{
 		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
 		defer rt.End()
 
-		calledAs := strings.ToLower(cmd.CalledAs())
-		if calledAs == "" {
-			calledAs = strings.ToLower(cmd.Name())
-		}
-		var cmdName string
-		if calledAs == "start" || slices.Contains(aliasesStart, calledAs) {
-			cmdName = "start"
-		} else if slices.Contains(aliasesSwitch, calledAs) {
-			cmdName = "switch"
-		} else if slices.Contains(aliasesResume, calledAs) {
-			cmdName = "resume"
-		}
+		calledAs := rt.GetCommandCall(cmd)
+		cmdName := aliasMap.GetCommandNameForAlias(calledAs)
 
 		pargs, err := argsparser.Parse("start", args)
 		if err != nil {
@@ -101,11 +89,11 @@ var Cmd = &cobra.Command{
 			rt.Out.Put(out.Opts{Type: out.Start}, "Switched tracking ...")
 		case "resume":
 			if err = block.Resume(rt, b); err != nil {
-				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
+				rt.Out.Put(out.Opts{Type: out.Switch}, err.Error())
 				rt.Exit(1)
 			}
 
-			rt.Out.Put(out.Opts{Type: out.Start}, "Resumed tracking ...")
+			rt.Out.Put(out.Opts{Type: out.Resume}, "Resumed tracking ...")
 		}
 		return
 	},
