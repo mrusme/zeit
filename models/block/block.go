@@ -168,6 +168,10 @@ func End(rt *runtime.Runtime, b *Block) error {
 	// We have found our Block, let's end it. However, we will only end the
 	// Block if it hasn't been ended already.
 	if eb.TimestampEnd.IsZero() == true {
+		if b.TimestampEnd.IsZero() {
+			b.TimestampEnd = time.Now()
+		}
+
 		if b.TimestampEnd.Before(eb.TimestampStart) {
 			return ErrEndBeforeStart
 		}

@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	endCmd "github.com/mrusme/zeit/cli/end/cmd"
 	exportCmd "github.com/mrusme/zeit/cli/export/cmd"
 	startCmd "github.com/mrusme/zeit/cli/start/cmd"
 	versionCmd "github.com/mrusme/zeit/cli/version/cmd"
@@ -35,6 +36,7 @@ func Execute() {
 
 func init() {
 	rootCmd.AddCommand(startCmd.Cmd)
+	rootCmd.AddCommand(endCmd.Cmd)
 	rootCmd.AddCommand(exportCmd.Cmd)
 	rootCmd.AddCommand(versionCmd.Cmd)
 
