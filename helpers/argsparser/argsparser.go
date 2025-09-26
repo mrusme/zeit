@@ -6,10 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/mrusme/zeit/helpers/timestamp"
 )
 
-var ErrMissingProjectOrTaskID error = errors.New(
+var ErrMissingProjectOrTaskSID error = errors.New(
 	"'on' requires a projectID/taskID, " +
 		"e.g. 'on myproject/mytask'",
 )
@@ -33,35 +34,37 @@ func (e *ErrParsingTimestamp) Error() string {
 }
 
 type ParsedArgs struct {
-	ProjectID      string
-	TaskID         string
-	Note           string
-	TimestampStart time.Time
-	TimestampEnd   time.Time
+	ProjectSID     string    `validate:"omitempty,required_with=TaskSID,alphanum,max=64"`
+	TaskSID        string    `validate:"omitempty,required_with=ProjectSID,alphanum,max=64"`
+	Note           string    `validate:"max=65536"`
+	TimestampStart string    `validate:""`
+	timestampStart time.Time `validate:""`
+	TimestampEnd   string    `validate:""`
+	timestampEnd   time.Time `validate:""`
+	processed      bool
 }
 
 func Parse(command string, args []string) (*ParsedArgs, error) {
-	var tstampStart, tstampEnd string
-	var err error
 	pa := new(ParsedArgs)
 
 	for i := 0; i < len(args); i++ {
 		word := strings.ToLower(args[i])
-		if word == "block" || word == "working" || word == "work" || word == "wrk" {
+		if word == "block" ||
+			word == "working" || word == "work" || word == "wrk" {
 			continue
-		} else if word == "on" {
+		} else if word == "on" || word == "to" {
 			if len(args) > i+1 {
 				pst := strings.ToLower(args[i+1])
 				found := false
-				pa.ProjectID, pa.TaskID, found = strings.Cut(pst, "/")
+				pa.ProjectSID, pa.TaskSID, found = strings.Cut(pst, "/")
 				if found == false {
-					return nil, ErrMissingProjectOrTaskID
+					return nil, ErrMissingProjectOrTaskSID
 				} else {
 					i += 1
 					continue
 				}
 			} else {
-				return nil, ErrMissingProjectOrTaskID
+				return nil, ErrMissingProjectOrTaskSID
 			}
 		} else if word == "with" || word == "w" {
 			if len(args) > i+2 {
@@ -94,37 +97,88 @@ func Parse(command string, args []string) (*ParsedArgs, error) {
 			}
 
 			if endMarker > -1 {
-				tstampStart = strings.Join(args[i:endMarker], " ")
-				tstampEnd = strings.Join(args[endMarker+1:], " ")
+				pa.TimestampStart = strings.Join(args[i:endMarker], " ")
+				pa.TimestampEnd = strings.Join(args[endMarker+1:], " ")
 			} else {
-				tstampStart = strings.Join(args[i:], " ")
+				pa.TimestampStart = strings.Join(args[i:], " ")
 			}
 			break
 		}
 	}
 
-	fmt.Printf("Project ID: %s\nTask ID: %s\nStart Timestamp: %s\nEnd Timestamp: %s\n",
-		pa.ProjectID, pa.TaskID, tstampStart, tstampEnd)
-
-	if tstampStart != "" {
-		pa.TimestampStart, err = timestamp.Parse(tstampStart)
-		if err != nil {
-			return nil, &ErrParsingTimestamp{
-				Message:   err.Error(),
-				Timestamp: tstampStart,
-			}
-		}
-	}
-
-	if tstampEnd != "" {
-		pa.TimestampEnd, err = timestamp.Parse(tstampEnd)
-		if err != nil {
-			return nil, &ErrParsingTimestamp{
-				Message:   err.Error(),
-				Timestamp: tstampEnd,
-			}
-		}
-	}
-
 	return pa, nil
+}
+
+func (pa *ParsedArgs) Process() error {
+	var err error
+
+	validate := validator.New()
+	if err = validate.Struct(*pa); err != nil {
+		return err
+	}
+
+	if pa.TimestampStart != "" {
+		pa.timestampStart, err = timestamp.Parse(pa.TimestampStart)
+		if err != nil {
+			return &ErrParsingTimestamp{
+				Message:   err.Error(),
+				Timestamp: pa.TimestampStart,
+			}
+		}
+	}
+
+	if pa.TimestampEnd != "" {
+		pa.timestampEnd, err = timestamp.Parse(pa.TimestampEnd)
+		if err != nil {
+			return &ErrParsingTimestamp{
+				Message:   err.Error(),
+				Timestamp: pa.TimestampEnd,
+			}
+		}
+	}
+
+	if pa.timestampEnd.IsZero() == false &&
+		pa.timestampEnd.Before(pa.timestampStart) {
+		return &ErrParsingTimestamp{
+			Message:   "End is before start",
+			Timestamp: pa.TimestampEnd,
+		}
+	}
+
+	pa.processed = true
+	return nil
+}
+
+func (pa *ParsedArgs) WasProcessed() bool {
+	return pa.processed
+}
+
+func (pa *ParsedArgs) GetTimestampStart() time.Time {
+	return pa.timestampStart
+}
+
+func (pa *ParsedArgs) GetTimestampEnd() time.Time {
+	return pa.timestampEnd
+}
+
+func (pa *ParsedArgs) OverrideWith(spa *ParsedArgs) {
+	// TODO: Maybe use https://github.com/darccio/mergo ?
+
+	if spa.ProjectSID != "" {
+		pa.ProjectSID = spa.ProjectSID
+	}
+	if spa.TaskSID != "" {
+		pa.TaskSID = spa.TaskSID
+	}
+	if spa.Note != "" {
+		pa.Note = spa.Note
+	}
+	if spa.TimestampStart != "" {
+		pa.TimestampStart = spa.TimestampStart
+	}
+	if spa.TimestampEnd != "" {
+		pa.TimestampEnd = spa.TimestampEnd
+	}
+
+	return
 }
