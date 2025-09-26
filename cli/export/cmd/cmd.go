@@ -1,6 +1,7 @@
 package exportCmd
 
 import (
+	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/helpers/out"
 	"github.com/mrusme/zeit/runtime"
 	"github.com/spf13/cobra"
@@ -23,12 +24,19 @@ var Cmd = &cobra.Command{
 			rt.Exit(1)
 		}
 
-		for key, row := range all {
+		var keys []string
+		for key := range all {
+			keys = append(keys, key)
+		}
+
+		database.SortKeys(keys)
+
+		for _, key := range keys {
 			rt.Out.Put(out.Opts{Type: out.Info},
 				"%s %s",
 				rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
 					"%s", key),
-				row,
+				all[key],
 			)
 		}
 	},
