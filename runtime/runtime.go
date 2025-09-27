@@ -69,22 +69,9 @@ func New(lvl slog.Level, oc out.OutputColor) *Runtime {
 	rt.Logger.NilOrDie(err, "Error initializing database")
 
 	rt.Logger.Debug("Loading runtime config ...")
-	cfg := new(config.Config)
-	err = rt.Database.GetRowAsStruct(config.KEY, cfg)
+	cfg, err := config.Get(rt.Database)
 	if err != nil {
-		if rt.Database.ErrIsKeyNotFound(err) {
-			// Create runtime config and store it
-			rt.Logger.Info("No runtime config available; Creating default config ...")
-
-			cfg, err = config.DefaultConfig()
-			rt.Logger.NilOrDie(err, "Error creating runtime config")
-
-			cfg.SetKey(config.KEY)
-			err = rt.Database.UpsertRowAsStruct(cfg)
-			rt.Logger.NilOrDie(err, "Error persisting runtime config")
-		} else {
-			rt.Logger.NilOrDie(err, "Error loading runtime config")
-		}
+		rt.Logger.NilOrDie(err, "Error loading runtime config")
 	}
 	rt.Config = cfg
 	rt.Logger.Debug("Runtime config loaded")
