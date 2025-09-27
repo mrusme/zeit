@@ -36,9 +36,9 @@ builds:
       - goos: netbsd
         goarch: riscv64
       - goos: freebsd
-        goarm: arm64
+        goarch: arm64
       - goos: plan9
-        goarm: arm
+        goarch: arm
       - goos: plan9
         goarm: arm64
       - goos: plan9
