@@ -41,8 +41,6 @@ var Cmd = &cobra.Command{
 
 		var pargs *argsparser.ParsedArgs
 		var blockMap map[string]*block.Block = make(map[string]*block.Block)
-		var projectMap map[string]*project.Project = make(map[string]*project.Project)
-		var taskMap map[string]*task.Task = make(map[string]*task.Task)
 		var dump map[string]interface{} = make(map[string]interface{})
 
 		var err error
@@ -98,45 +96,13 @@ var Cmd = &cobra.Command{
 			}
 		}
 
-		var cfg *config.Config
-		var ab *activeblock.ActiveBlock
-
 		if flagBackup == true {
 			if flagFormat == FormatUnspecified {
 				flagFormat = FormatJSON
 			}
 
-			// ------------------------- Static Key Entries ----------------------- //
-			cfg, err = config.Get(rt.Database)
+			err = InjectBackupData(rt, &keys, &dump)
 			rt.NilOrDie(err)
-
-			ab, err = activeblock.Get(rt.Database)
-			rt.NilOrDie(err)
-
-			keys = append(keys,
-				config.KEY,
-				activeblock.KEY,
-			)
-			dump[config.KEY] = cfg
-			dump[activeblock.KEY] = ab
-
-			// ------------------------------ Projects ---------------------------- //
-			projectMap, err = project.List(rt.Database)
-			rt.NilOrDie(err)
-
-			for key := range projectMap {
-				keys = append(keys, key)
-				dump[key] = projectMap[key]
-			}
-
-			// -------------------------------- Tasks ----------------------------- //
-			taskMap, err = task.List(rt.Database)
-			rt.NilOrDie(err)
-
-			for key := range taskMap {
-				keys = append(keys, key)
-				dump[key] = taskMap[key]
-			}
 		}
 
 		database.SortKeys(keys)
@@ -150,6 +116,56 @@ var Cmd = &cobra.Command{
 			outputJSON(rt, dump, keys)
 		}
 	},
+}
+
+func InjectBackupData(
+	rt *runtime.Runtime,
+	keys *[]string,
+	dump *map[string]interface{},
+) error {
+	var cfg *config.Config
+	var ab *activeblock.ActiveBlock
+	var projectMap map[string]*project.Project = make(map[string]*project.Project)
+	var taskMap map[string]*task.Task = make(map[string]*task.Task)
+	var err error
+
+	// ------------------------- Static Key Entries ----------------------- //
+	if cfg, err = config.Get(rt.Database); err != nil {
+		return err
+	}
+
+	if ab, err = activeblock.Get(rt.Database); err != nil {
+		return err
+	}
+
+	*keys = append(*keys,
+		config.KEY,
+		activeblock.KEY,
+	)
+	(*dump)[config.KEY] = cfg
+	(*dump)[activeblock.KEY] = ab
+
+	// ------------------------------ Projects ---------------------------- //
+	if projectMap, err = project.List(rt.Database); err != nil {
+		return err
+	}
+
+	for key := range projectMap {
+		*keys = append(*keys, key)
+		(*dump)[key] = projectMap[key]
+	}
+
+	// -------------------------------- Tasks ----------------------------- //
+	if taskMap, err = task.List(rt.Database); err != nil {
+		return err
+	}
+
+	for key := range taskMap {
+		*keys = append(*keys, key)
+		(*dump)[key] = taskMap[key]
+	}
+
+	return nil
 }
 
 func outputCLI(
