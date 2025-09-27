@@ -184,7 +184,7 @@ func (o *Out) Put(opts Opts, format string, a ...any) {
 	}
 
 	if o.oc == ColorAlways {
-		style := lipgloss.NewStyle().Foreground(lipgloss.BrightBlack)
+		style := lipgloss.NewStyle().Foreground(outputPrefixes[opts.Type].Color)
 		output = fmt.Sprintf("%s %s%s",
 			style.Render(outputPrefixes[opts.Type].Char),
 			formatted,

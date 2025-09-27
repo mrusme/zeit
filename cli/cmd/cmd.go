@@ -47,7 +47,7 @@ var rootCmd = &cobra.Command{
 					out.Style{FG: out.ColorPrimary},
 					b.TaskSID),
 				rt.Out.Stylize(
-					out.Style{FG: out.ColorBlue},
+					out.Style{FG: out.ColorCyan},
 					fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)),
 			)
 		} else {
