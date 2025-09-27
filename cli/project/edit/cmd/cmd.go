@@ -13,7 +13,7 @@ var (
 )
 
 var Cmd = &cobra.Command{
-	Use:     "edit [flags] sid",
+	Use:     "edit [flags] project-sid",
 	Aliases: []string{},
 	Short:   "zeit project edit",
 	Long:    "Edit zeit projects",

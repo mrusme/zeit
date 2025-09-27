@@ -9,6 +9,7 @@ import (
 	exportCmd "github.com/mrusme/zeit/cli/export/cmd"
 	projectCmd "github.com/mrusme/zeit/cli/project/cmd"
 	startCmd "github.com/mrusme/zeit/cli/start/cmd"
+	taskCmd "github.com/mrusme/zeit/cli/task/cmd"
 	versionCmd "github.com/mrusme/zeit/cli/version/cmd"
 	"github.com/mrusme/zeit/helpers/out"
 	"github.com/mrusme/zeit/models/block"
@@ -71,6 +72,7 @@ func init() {
 	rootCmd.AddCommand(startCmd.Cmd)
 	rootCmd.AddCommand(endCmd.Cmd)
 	rootCmd.AddCommand(projectCmd.Cmd)
+	rootCmd.AddCommand(taskCmd.Cmd)
 	rootCmd.AddCommand(exportCmd.Cmd)
 	rootCmd.AddCommand(versionCmd.Cmd)
 
