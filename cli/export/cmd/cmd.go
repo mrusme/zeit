@@ -36,38 +36,20 @@ var Cmd = &cobra.Command{
 	Example:   "zeit export all of myproject/mytask from 2 days ago until now",
 	ValidArgs: []string{"from", "until"},
 	Run: func(cmd *cobra.Command, args []string) {
-		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
-		defer rt.End()
-
 		var pargs *argsparser.ParsedArgs
 		var blockMap map[string]*block.Block = make(map[string]*block.Block)
 		var dump map[string]interface{} = make(map[string]interface{})
-
-		var err error
 		var keys []string
+		var err error
+
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+		defer rt.End()
 
 		flagFormat = strings.ToLower(flagFormat)
 
 		if flagBackup == false {
-			pargs, err = argsparser.Parse("export", args)
+			pargs, err = argsparser.POP("export", flags, args, rt.Logger)
 			rt.NilOrDie(err)
-
-			pargs.OverrideWith(flags)
-
-			rt.Logger.Debug("Parsed args",
-				"pargs", pargs,
-				"GetTimestampStart", pargs.GetTimestampStart(),
-				"GetTimestampEnd", pargs.GetTimestampEnd(),
-			)
-
-			err := pargs.Process()
-			rt.NilOrDie(err)
-
-			rt.Logger.Debug("Processed args",
-				"pargs", pargs,
-				"GetTimestampStart", pargs.GetTimestampStart(),
-				"GetTimestampEnd", pargs.GetTimestampEnd(),
-			)
 		}
 
 		blockMap, err = block.List(rt.Database)

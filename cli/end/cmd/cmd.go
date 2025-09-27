@@ -24,31 +24,17 @@ var Cmd = &cobra.Command{
 	Example:   "zeit end with note \"Issue ID 123\" 5 minutes ago",
 	ValidArgs: []string{"block", "work", "with"},
 	Run: func(cmd *cobra.Command, args []string) {
+		var pargs *argsparser.ParsedArgs
+		var err error
+
 		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
 		defer rt.End()
 
 		calledAs := rt.GetCommandCall(cmd)
 		cmdName := aliasMap.GetCommandNameForAlias(calledAs)
 
-		pargs, err := argsparser.Parse("end", args)
+		pargs, err = argsparser.POP("end", flags, args, rt.Logger)
 		rt.NilOrDie(err)
-
-		pargs.OverrideWith(flags)
-
-		rt.Logger.Debug("Parsed args",
-			"pargs", pargs,
-			"GetTimestampStart", pargs.GetTimestampStart(),
-			"GetTimestampEnd", pargs.GetTimestampEnd(),
-		)
-
-		err = pargs.Process()
-		rt.NilOrDie(err)
-
-		rt.Logger.Debug("Processed args",
-			"pargs", pargs,
-			"GetTimestampStart", pargs.GetTimestampStart(),
-			"GetTimestampEnd", pargs.GetTimestampEnd(),
-		)
 
 		b, err := block.New(rt.Config.UserKey)
 		rt.NilOrDie(err)

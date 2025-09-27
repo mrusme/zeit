@@ -26,6 +26,8 @@ var rootCmd = &cobra.Command{
 	Long: "Zeit, erfassen. A command line tool for tracking time spent on " +
 		" activities.\n\n",
 	Run: func(cmd *cobra.Command, args []string) {
+		var err error
+
 		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
 		defer rt.End()
 

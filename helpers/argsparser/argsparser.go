@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/mrusme/zeit/helpers/log"
 	"github.com/mrusme/zeit/helpers/timestamp"
 )
 
@@ -191,4 +192,42 @@ func (pa *ParsedArgs) OverrideWith(spa *ParsedArgs) {
 	}
 
 	return
+}
+
+func POP(
+	cmdName string,
+	flags *ParsedArgs,
+	args []string,
+	logger *log.Logger,
+) (*ParsedArgs, error) {
+	var pargs *ParsedArgs
+	var err error
+
+	if pargs, err = Parse(cmdName, args); err != nil {
+		return nil, err
+	}
+
+	pargs.OverrideWith(flags)
+
+	if logger != nil {
+		logger.Debug("Parsed args",
+			"pargs", pargs,
+			"GetTimestampStart", pargs.GetTimestampStart(),
+			"GetTimestampEnd", pargs.GetTimestampEnd(),
+		)
+	}
+
+	if err = pargs.Process(); err != nil {
+		return nil, err
+	}
+
+	if logger != nil {
+		logger.Debug("Processed args",
+			"pargs", pargs,
+			"GetTimestampStart", pargs.GetTimestampStart(),
+			"GetTimestampEnd", pargs.GetTimestampEnd(),
+		)
+	}
+
+	return pargs, nil
 }
