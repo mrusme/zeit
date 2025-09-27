@@ -1,6 +1,7 @@
 package argsparser
 
 import (
+	"regexp"
 	"strings"
 	"time"
 
@@ -11,8 +12,8 @@ import (
 )
 
 type ParsedArgs struct {
-	ProjectSID     string    `validate:"omitempty,required_with=TaskSID,alphanum,max=64"`
-	TaskSID        string    `validate:"omitempty,required_with=ProjectSID,alphanum,max=64"`
+	ProjectSID     string    `validate:"omitempty,required_with=TaskSID,sid,max=64"`
+	TaskSID        string    `validate:"omitempty,required_with=ProjectSID,sid,max=64"`
 	Note           string    `validate:"max=65536"`
 	TimestampStart string    `validate:""`
 	timestampStart time.Time `validate:""`
@@ -88,16 +89,29 @@ func Parse(command string, args []string) (*ParsedArgs, error) {
 	return pa, nil
 }
 
+func IsValidSID(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+
+	re := regexp.MustCompile(`^[a-zA-Z0-9\-\_\.]+$`)
+
+	return re.MatchString(value)
+}
+
 func (pa *ParsedArgs) Process() error {
 	var err error
 
 	validate := validator.New()
+	validate.RegisterValidation("sid", IsValidSID)
 	if err = validate.Struct(*pa); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			if err.Tag() == "alphanum" {
-				return errs.ErrSIDOnlyAlphanum
-			} else if err.Field() == "Note" && err.Tag() == "max" {
-				return errs.ErrNoteTooLarge
+			if err.Tag() == "sid" {
+				return errs.ErrInvalidSID
+			} else if err.Tag() == "max" {
+				if err.Field() == "Note" {
+					return errs.ErrNoteTooLarge
+				} else if err.Field() == "ProjectSID" || err.Field() == "TaskSID" {
+					return errs.ErrSIDTooLarge
+				}
 			}
 		}
 

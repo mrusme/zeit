@@ -25,13 +25,17 @@ var ErrMissingAttrOrVal error = errors.New(
 		"e.g. 'with note \"Issue ID: 123\"'",
 )
 
-var ErrSIDOnlyAlphanum error = errors.New(
-	"The Simplified-ID (SID) may only contain letters and numbers " +
-		"and no spaces",
+var ErrInvalidSID error = errors.New(
+	"The Simplified-ID (SID) may only contain letters, numbers, dashes, " +
+		"underscores, and periods",
 )
 
 var ErrNoteTooLarge error = errors.New(
 	"The note is too large",
+)
+
+var ErrSIDTooLarge error = errors.New(
+	"The SID is too large",
 )
 
 type ErrParsingTimestamp struct {
