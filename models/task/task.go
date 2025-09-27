@@ -1,14 +1,12 @@
 package task
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/mrusme/zeit/database"
+	"github.com/mrusme/zeit/errs"
 	"github.com/mrusme/zeit/helpers/out"
 )
-
-var ErrSIDNotFound error = errors.New("SID not found")
 
 type Task struct {
 	key         string `json:"-"`
@@ -66,7 +64,7 @@ func Get(db *database.Database, sid string) (*Task, error) {
 		}
 	}
 
-	return nil, ErrSIDNotFound
+	return nil, errs.ErrSIDNotFound
 }
 
 func Set(db *database.Database, tk *Task) error {
@@ -82,9 +80,9 @@ func InsertIfNone(db *database.Database, ownerKey string, sid string) (*Task, er
 	var err error
 
 	tk, err = Get(db, sid)
-	if err != nil && err != ErrSIDNotFound {
+	if err != nil && err != errs.ErrSIDNotFound {
 		return nil, err
-	} else if err != nil && err == ErrSIDNotFound {
+	} else if err != nil && err == errs.ErrSIDNotFound {
 		tk, _ = New(ownerKey, sid)
 		if err = Set(db, tk); err != nil {
 			return nil, err

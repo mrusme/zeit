@@ -1,14 +1,12 @@
 package project
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/mrusme/zeit/database"
+	"github.com/mrusme/zeit/errs"
 	"github.com/mrusme/zeit/helpers/out"
 )
-
-var ErrSIDNotFound error = errors.New("SID not found")
 
 type Project struct {
 	key         string `json:"-"`
@@ -66,7 +64,7 @@ func Get(db *database.Database, sid string) (*Project, error) {
 		}
 	}
 
-	return nil, ErrSIDNotFound
+	return nil, errs.ErrSIDNotFound
 }
 
 func Set(db *database.Database, pj *Project) error {
@@ -82,9 +80,9 @@ func InsertIfNone(db *database.Database, ownerKey string, sid string) (*Project,
 	var err error
 
 	pj, err = Get(db, sid)
-	if err != nil && err != ErrSIDNotFound {
+	if err != nil && err != errs.ErrSIDNotFound {
 		return nil, err
-	} else if err != nil && err == ErrSIDNotFound {
+	} else if err != nil && err == errs.ErrSIDNotFound {
 		pj, _ = New(ownerKey, sid)
 		if err = Set(db, pj); err != nil {
 			return nil, err

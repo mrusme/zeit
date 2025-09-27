@@ -1,38 +1,14 @@
 package argsparser
 
 import (
-	"errors"
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/mrusme/zeit/errs"
 	"github.com/mrusme/zeit/helpers/log"
 	"github.com/mrusme/zeit/helpers/timestamp"
 )
-
-var ErrMissingProjectOrTaskSID error = errors.New(
-	"'on' requires a projectID/taskID, " +
-		"e.g. 'on myproject/mytask'",
-)
-
-var ErrMissingAttrOrVal error = errors.New(
-	"'with' requires an attribute and a value, " +
-		"e.g. 'with note \"Issue ID: 123\"'",
-)
-
-type ErrParsingTimestamp struct {
-	Message   string
-	Timestamp string
-}
-
-func (e *ErrParsingTimestamp) Error() string {
-	return fmt.Sprintf(
-		"Error parsing timestamp: %s\nTimestamp: %s\n",
-		e.Message,
-		e.Timestamp,
-	)
-}
 
 type ParsedArgs struct {
 	ProjectSID     string    `validate:"omitempty,required_with=TaskSID,alphanum,max=64"`
@@ -60,13 +36,13 @@ func Parse(command string, args []string) (*ParsedArgs, error) {
 				found := false
 				pa.ProjectSID, pa.TaskSID, found = strings.Cut(pst, "/")
 				if found == false {
-					return nil, ErrMissingProjectOrTaskSID
+					return nil, errs.ErrMissingProjectOrTaskSID
 				} else {
 					i += 1
 					continue
 				}
 			} else {
-				return nil, ErrMissingProjectOrTaskSID
+				return nil, errs.ErrMissingProjectOrTaskSID
 			}
 		} else if word == "with" || word == "w" {
 			if len(args) > i+2 {
@@ -81,7 +57,7 @@ func Parse(command string, args []string) (*ParsedArgs, error) {
 				i += 2
 				continue
 			} else {
-				return nil, ErrMissingAttrOrVal
+				return nil, errs.ErrMissingAttrOrVal
 			}
 		} else {
 			if word == "at" || word == "from" {
@@ -117,13 +93,21 @@ func (pa *ParsedArgs) Process() error {
 
 	validate := validator.New()
 	if err = validate.Struct(*pa); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			if err.Tag() == "alphanum" {
+				return errs.ErrSIDOnlyAlphanum
+			} else if err.Field() == "Note" && err.Tag() == "max" {
+				return errs.ErrNoteTooLarge
+			}
+		}
+
 		return err
 	}
 
 	if pa.TimestampStart != "" {
 		ts, err := timestamp.Parse(pa.TimestampStart)
 		if err != nil {
-			return &ErrParsingTimestamp{
+			return &errs.ErrParsingTimestamp{
 				Message:   err.Error(),
 				Timestamp: pa.TimestampStart,
 			}
@@ -139,7 +123,7 @@ func (pa *ParsedArgs) Process() error {
 	if pa.TimestampEnd != "" && pa.timestampEnd.IsZero() {
 		ts, err := timestamp.Parse(pa.TimestampEnd)
 		if err != nil {
-			return &ErrParsingTimestamp{
+			return &errs.ErrParsingTimestamp{
 				Message:   err.Error(),
 				Timestamp: pa.TimestampEnd,
 			}
@@ -150,7 +134,7 @@ func (pa *ParsedArgs) Process() error {
 
 	if pa.timestampEnd.IsZero() == false &&
 		pa.timestampEnd.Before(pa.timestampStart) {
-		return &ErrParsingTimestamp{
+		return &errs.ErrParsingTimestamp{
 			Message:   "End is before start",
 			Timestamp: pa.TimestampEnd,
 		}

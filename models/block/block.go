@@ -5,16 +5,9 @@ import (
 	"time"
 
 	"github.com/mrusme/zeit/database"
+	"github.com/mrusme/zeit/errs"
 	"github.com/mrusme/zeit/helpers/argsparser"
 	"github.com/mrusme/zeit/models/activeblock"
-)
-
-var (
-	ErrKeyNotFound     error = errors.New("Key not found")
-	ErrEndBeforeStart  error = errors.New("End is before start")
-	ErrAlreadyRunning  error = errors.New("Tracker is already running")
-	ErrNothingToEnd    error = errors.New("Nothing to end")
-	ErrNothingToResume error = errors.New("Nothing to resume")
 )
 
 type Block struct {
@@ -80,7 +73,7 @@ func Get(db *database.Database, key string) (*Block, error) {
 		// We encountered an error which is not KeyNotFound
 		return nil, err
 	} else if err != nil && db.IsErrKeyNotFound(err) == true {
-		return nil, ErrKeyNotFound
+		return nil, errs.ErrKeyNotFound
 	}
 
 	return b, nil
@@ -114,10 +107,10 @@ func GetActive(db *database.Database) (
 
 	var eb *Block
 	eb, err = Get(db, ab.GetActiveBlockKey())
-	if err != nil && err != ErrKeyNotFound {
+	if err != nil && err != errs.ErrKeyNotFound {
 		// We encountered an error which is not KeyNotFound
 		return false, ab, nil, err
-	} else if err != nil && err == ErrKeyNotFound {
+	} else if err != nil && err == errs.ErrKeyNotFound {
 		// We encountered a situation in which there is an ActiveBlock for a
 		// Block that doesn't seem to exist anymore. Let's clear the ActiveBlock.
 		ab.ClearActiveBlockKey()
@@ -140,14 +133,14 @@ func Start(db *database.Database, b *Block) error {
 	}
 
 	if b.TimestampEnd.IsZero() == false && b.TimestampEnd.Before(b.TimestampStart) {
-		return ErrEndBeforeStart
+		return errs.ErrEndBeforeStart
 	}
 
 	// We call End first to End any currently active Block
 	eb := new(Block)
 	eb.TimestampEnd = b.TimestampStart.Add(-1 * time.Second)
 	err = End(db, eb)
-	if err != nil && err != ErrNothingToEnd {
+	if err != nil && err != errs.ErrNothingToEnd {
 		return err
 	}
 
@@ -182,24 +175,24 @@ func Resume(db *database.Database, b *Block) error {
 	}
 
 	if ab.HasActiveBlockKey() == true {
-		return ErrAlreadyRunning
+		return errs.ErrAlreadyRunning
 	}
 
 	if ab.HasPreviousBlockKey() == false {
-		return ErrNothingToResume
+		return errs.ErrNothingToResume
 	}
 
 	pbk := ab.GetPreviousBlockKey()
 
 	var pb *Block
 	pb, err = Get(db, pbk)
-	if err != nil && err != ErrKeyNotFound {
+	if err != nil && err != errs.ErrKeyNotFound {
 		// We encountered an error which is not KeyNotFound
 		return err
-	} else if err != nil && err == ErrKeyNotFound {
+	} else if err != nil && err == errs.ErrKeyNotFound {
 		// The previous block apparently doesn't exist anymore, hence we cannot
 		// resume it:
-		return ErrNothingToResume
+		return errs.ErrNothingToResume
 	}
 
 	b.ProjectSID = pb.ProjectSID
@@ -217,7 +210,7 @@ func End(db *database.Database, b *Block) error {
 	}
 
 	if err == nil && found == false {
-		return ErrNothingToEnd
+		return errs.ErrNothingToEnd
 	}
 
 	// We have found our Block, let's end it. However, we will only end the
@@ -228,7 +221,7 @@ func End(db *database.Database, b *Block) error {
 		}
 
 		if b.TimestampEnd.Before(eb.TimestampStart) {
-			return ErrEndBeforeStart
+			return errs.ErrEndBeforeStart
 		}
 		eb.TimestampEnd = b.TimestampEnd
 
