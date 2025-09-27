@@ -140,13 +140,13 @@ func outputCLI(
 
 	for idx := range order {
 		rt.Out.Put(out.Opts{Type: out.Info},
-			"%s %s\n%s %s %s    %s %s",
+			"%s%s\n%s  %s %s %s %s",
 			rt.Out.Stylize(
-				out.Style{FG: out.Color(list[idx].Color)},
+				out.Style{BG: out.Color(list[idx].Color), FG: out.ColorBrightWhite, PX: 1},
 				"%s", list[idx].DisplayName,
 			),
 			rt.Out.Stylize(
-				out.Style{FG: out.ColorSecondary},
+				out.Style{BG: out.Color(list[idx].Color), FG: out.ColorBlack, PX: 1},
 				"[%s]", list[idx].SID,
 			),
 			rt.Out.Stylize(
@@ -159,7 +159,7 @@ func outputCLI(
 			),
 			rt.Out.Stylize(
 				out.Style{FG: out.ColorWhite},
-				"%d", list[idx].TotalBlocks,
+				"%-6d", list[idx].TotalBlocks,
 			),
 			rt.Out.Stylize(
 				out.Style{FG: out.ColorSecondary},
@@ -167,7 +167,7 @@ func outputCLI(
 			),
 			rt.Out.Stylize(
 				out.Style{FG: out.ColorWhite},
-				"%s", list[idx].TotalAmount.Round(time.Second).String(),
+				"%-12s", list[idx].TotalAmount.Round(time.Second).String(),
 			),
 		)
 
@@ -179,7 +179,7 @@ func outputCLI(
 				barcharsub = " "
 			}
 			rt.Out.Put(out.Opts{Type: out.Plain},
-				"%s %s %s\n%s   %s %s    %s %s",
+				"%s %s %s\n%s   %s %s %s %s",
 				rt.Out.Stylize(
 					out.Style{FG: out.OutputPrefixes[out.Info].Color},
 					"%s", barchar,
@@ -202,7 +202,7 @@ func outputCLI(
 				),
 				rt.Out.Stylize(
 					out.Style{FG: out.ColorWhite},
-					"%d", list[idx].Tasks[jdx].TotalBlocks,
+					"%-6d", list[idx].Tasks[jdx].TotalBlocks,
 				),
 				rt.Out.Stylize(
 					out.Style{FG: out.ColorSecondary},
@@ -210,7 +210,7 @@ func outputCLI(
 				),
 				rt.Out.Stylize(
 					out.Style{FG: out.ColorWhite},
-					"%s", list[idx].Tasks[jdx].TotalAmount.Round(time.Second).String(),
+					"%-12s", list[idx].Tasks[jdx].TotalAmount.Round(time.Second).String(),
 				),
 			)
 		}

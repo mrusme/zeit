@@ -77,6 +77,7 @@ var OutputPrefixes = []outputPrefix{
 type Style struct {
 	FG color.Color
 	BG color.Color
+	PX int
 }
 
 type OutputColor int
@@ -164,6 +165,9 @@ func (o *Out) Stylize(
 		}
 		if st.BG != nil {
 			style = style.Background(st.BG)
+		}
+		if st.PX > 0 {
+			style = style.PaddingLeft(st.PX).PaddingRight(st.PX)
 		}
 		return style.Render(text)
 	}
