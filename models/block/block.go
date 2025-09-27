@@ -75,9 +75,9 @@ func Start(rt *runtime.Runtime, b *Block) error {
 
 	// TODO: This should be one transaction
 	// {
-	ab, _ := activeblock.Get(rt)
+	ab, _ := activeblock.Get(rt.Database)
 	ab.SetActiveBlockKey(b.GetKey())
-	if err = activeblock.Set(rt, ab); err != nil {
+	if err = activeblock.Set(rt.Database, ab); err != nil {
 		// We couldn't upsert the ActiveBlock, so we fail fully
 		return err
 	}
@@ -99,7 +99,7 @@ func Resume(rt *runtime.Runtime, b *Block) error {
 	var ab *activeblock.ActiveBlock
 	var err error
 
-	if ab, err = activeblock.Get(rt); err != nil {
+	if ab, err = activeblock.Get(rt.Database); err != nil {
 		return err
 	}
 
@@ -136,7 +136,7 @@ func End(rt *runtime.Runtime, b *Block) error {
 	var ab *activeblock.ActiveBlock
 	var err error
 
-	if ab, err = activeblock.Get(rt); err != nil {
+	if ab, err = activeblock.Get(rt.Database); err != nil {
 		return err
 	}
 
@@ -157,7 +157,7 @@ func End(rt *runtime.Runtime, b *Block) error {
 		// We encountered a situation in which there is an ActiveBlock for a
 		// Block that doesn't seem to exist anymore. Let's clear the ActiveBlock.
 		ab.ClearActiveBlockKey()
-		if err = activeblock.Set(rt, ab); err != nil {
+		if err = activeblock.Set(rt.Database, ab); err != nil {
 			// Okay, well, that sucks
 			return err
 		}
@@ -194,7 +194,7 @@ func End(rt *runtime.Runtime, b *Block) error {
 	// We have persisted the change (or the Block was ended already -- weird!),
 	// so let's clear the ActiveBlock
 	ab.ClearActiveBlockKey()
-	if err = activeblock.Set(rt, ab); err != nil {
+	if err = activeblock.Set(rt.Database, ab); err != nil {
 		return err
 	}
 

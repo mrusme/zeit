@@ -1,6 +1,8 @@
 package activeblock
 
-import "github.com/mrusme/zeit/runtime"
+import (
+	"github.com/mrusme/zeit/database"
+)
 
 const KEY string = "activeblock"
 
@@ -56,12 +58,12 @@ func (ab *ActiveBlock) HasPreviousBlockKey() bool {
 	return ab.GetPreviousBlockKey() != ""
 }
 
-func Get(rt *runtime.Runtime) (*ActiveBlock, error) {
+func Get(db *database.Database) (*ActiveBlock, error) {
 	var err error
 
 	ab, _ := New()
-	err = rt.Database.GetRowAsStruct(ab.GetKey(), ab)
-	if err != nil && rt.Database.ErrIsKeyNotFound(err) == false {
+	err = db.GetRowAsStruct(ab.GetKey(), ab)
+	if err != nil && db.ErrIsKeyNotFound(err) == false {
 		// We encountered an error which is not KeyNotFound
 		return nil, err
 	}
@@ -73,8 +75,8 @@ func Get(rt *runtime.Runtime) (*ActiveBlock, error) {
 	return ab, nil
 }
 
-func Set(rt *runtime.Runtime, ab *ActiveBlock) error {
-	if err := rt.Database.UpsertRowAsStruct(ab); err != nil {
+func Set(db *database.Database, ab *ActiveBlock) error {
+	if err := db.UpsertRowAsStruct(ab); err != nil {
 		return err
 	}
 
