@@ -29,7 +29,7 @@ var rootCmd = &cobra.Command{
 		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
 		defer rt.End()
 
-		found, b, err := block.GetActive(rt.Database)
+		found, _, b, err := block.GetActive(rt.Database)
 		rt.NilOrDie(err)
 
 		if found == true {
