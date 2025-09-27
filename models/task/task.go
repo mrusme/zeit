@@ -52,6 +52,26 @@ func List(db *database.Database) (map[string]*Task, error) {
 	return rows, nil
 }
 
+func ListForProjectSID(
+	db *database.Database,
+	projectSID string,
+) (map[string]*Task, error) {
+	var lst map[string]*Task = make(map[string]*Task)
+
+	rows, err := List(db)
+	if err != nil {
+		return nil, err
+	}
+
+	for key := range rows {
+		if rows[key].ProjectSID == projectSID {
+			lst[key] = rows[key]
+		}
+	}
+
+	return lst, nil
+}
+
 func Get(db *database.Database, key string) (*Task, error) {
 	var err error
 

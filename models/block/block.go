@@ -64,6 +64,48 @@ func List(db *database.Database) (map[string]*Block, error) {
 	return rows, nil
 }
 
+func ListForProjectSID(
+	db *database.Database,
+	projectSID string,
+) (map[string]*Block, error) {
+	var lst map[string]*Block = make(map[string]*Block)
+
+	rows, err := List(db)
+	if err != nil {
+		return nil, err
+	}
+
+	for key := range rows {
+		if rows[key].ProjectSID == projectSID {
+			lst[key] = rows[key]
+		}
+	}
+
+	return lst, nil
+}
+
+func ListForProjectTaskSID(
+	db *database.Database,
+	projectSID string,
+	taskSID string,
+) (map[string]*Block, error) {
+	var lst map[string]*Block = make(map[string]*Block)
+
+	rows, err := List(db)
+	if err != nil {
+		return nil, err
+	}
+
+	for key := range rows {
+		if rows[key].ProjectSID == projectSID &&
+			rows[key].TaskSID == taskSID {
+			lst[key] = rows[key]
+		}
+	}
+
+	return lst, nil
+}
+
 func Get(db *database.Database, key string) (*Block, error) {
 	var err error
 
