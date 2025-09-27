@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	ErrKeyNotFound     error = errors.New("Key not found")
 	ErrEndBeforeStart  error = errors.New("End is before start")
 	ErrAlreadyRunning  error = errors.New("Tracker is already running")
 	ErrNothingToResume error = errors.New("Nothing to resume")
@@ -55,6 +56,44 @@ func (b *Block) FromProcessedArgs(pa *argsparser.ParsedArgs) error {
 	return nil
 }
 
+func List(db *database.Database) (map[string]*Block, error) {
+	var err error
+
+	var rows map[string]*Block = make(map[string]*Block)
+	if err = database.GetPrefixedRowsAsStruct(
+		db,
+		database.PrefixForModel(&Block{}),
+		rows,
+	); err != nil {
+		return nil, err
+	}
+
+	return rows, nil
+}
+
+func Get(db *database.Database, key string) (*Block, error) {
+	var err error
+
+	b := new(Block)
+	err = db.GetRowAsStruct(key, b)
+	if err != nil && db.ErrIsKeyNotFound(err) == false {
+		// We encountered an error which is not KeyNotFound
+		return nil, err
+	} else if err != nil && db.ErrIsKeyNotFound(err) == true {
+		return nil, ErrKeyNotFound
+	}
+
+	return b, nil
+}
+
+func Set(db *database.Database, b *Block) error {
+	if err := db.UpsertRowAsStruct(b); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func Start(rt *runtime.Runtime, b *Block) error {
 	var err error
 
@@ -82,7 +121,7 @@ func Start(rt *runtime.Runtime, b *Block) error {
 		return err
 	}
 
-	if err = rt.Database.UpsertRowAsStruct(b); err != nil {
+	if err = Set(rt.Database, b); err != nil {
 		// We couldn't upsert the Block, so we fail fully
 		return err
 	}
@@ -113,14 +152,12 @@ func Resume(rt *runtime.Runtime, b *Block) error {
 
 	pbk := ab.GetPreviousBlockKey()
 
-	pb := new(Block)
-	err = rt.Database.GetRowAsStruct(pbk, pb)
-	if err != nil && rt.Database.ErrIsKeyNotFound(err) == false {
+	var pb *Block
+	pb, err = Get(rt.Database, pbk)
+	if err != nil && err != ErrKeyNotFound {
 		// We encountered an error which is not KeyNotFound
 		return err
-	}
-
-	if err != nil && rt.Database.ErrIsKeyNotFound(err) == true {
+	} else if err != nil && err == ErrKeyNotFound {
 		// The previous block apparently doesn't exist anymore, hence we cannot
 		// resume it:
 		return ErrNothingToResume
@@ -146,14 +183,12 @@ func End(rt *runtime.Runtime, b *Block) error {
 		return nil
 	}
 
-	eb := new(Block)
-	err = rt.Database.GetRowAsStruct(abk, eb)
-	if err != nil && rt.Database.ErrIsKeyNotFound(err) == false {
+	var eb *Block
+	eb, err = Get(rt.Database, abk)
+	if err != nil && err != ErrKeyNotFound {
 		// We encountered an error which is not KeyNotFound
 		return err
-	}
-
-	if err != nil && rt.Database.ErrIsKeyNotFound(err) == true {
+	} else if err != nil && err == ErrKeyNotFound {
 		// We encountered a situation in which there is an ActiveBlock for a
 		// Block that doesn't seem to exist anymore. Let's clear the ActiveBlock.
 		ab.ClearActiveBlockKey()
@@ -185,7 +220,7 @@ func End(rt *runtime.Runtime, b *Block) error {
 		// a block? It could be handy, it might however overcomplicate things.
 		// Adjustments could instead be made from a dedicated `edit` command.
 
-		if err = rt.Database.UpsertRowAsStruct(eb); err != nil {
+		if err = Set(rt.Database, eb); err != nil {
 			// We couldn't persist the change, so we're keeping the ActiveBlock as it is
 			return err
 		}
