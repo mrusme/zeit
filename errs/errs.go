@@ -38,6 +38,14 @@ var ErrSIDTooLarge error = errors.New(
 	"The SID is too large",
 )
 
+var ErrDisplayNameTooLarge error = errors.New(
+	"The display name is too large",
+)
+
+var ErrInvalidColor error = errors.New(
+	"The color must be in hex format (#FFFFFF)",
+)
+
 type ErrParsingTimestamp struct {
 	Message   string
 	Timestamp string

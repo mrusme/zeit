@@ -1,11 +1,11 @@
 package argsparser
 
 import (
-	"regexp"
 	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/mrusme/zeit/common"
 	"github.com/mrusme/zeit/errs"
 	"github.com/mrusme/zeit/helpers/log"
 	"github.com/mrusme/zeit/helpers/timestamp"
@@ -89,19 +89,11 @@ func Parse(command string, args []string) (*ParsedArgs, error) {
 	return pa, nil
 }
 
-func IsValidSID(fl validator.FieldLevel) bool {
-	value := fl.Field().String()
-
-	re := regexp.MustCompile(`^[a-zA-Z0-9\-\_\.]+$`)
-
-	return re.MatchString(value)
-}
-
 func (pa *ParsedArgs) Process() error {
 	var err error
 
 	validate := validator.New()
-	validate.RegisterValidation("sid", IsValidSID)
+	validate.RegisterValidation("sid", common.IsValidSID)
 	if err = validate.Struct(*pa); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			if err.Tag() == "sid" {

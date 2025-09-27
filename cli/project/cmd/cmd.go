@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	projectEditCmd "github.com/mrusme/zeit/cli/project/edit/cmd"
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/helpers/out"
 	"github.com/mrusme/zeit/models/block"
@@ -230,6 +231,8 @@ func outputJSON(
 }
 
 func init() {
+	Cmd.AddCommand(projectEditCmd.Cmd)
+
 	Cmd.PersistentFlags().StringVarP(
 		&flagFormat,
 		"format",
