@@ -63,7 +63,7 @@ func Get(db *database.Database) (*ActiveBlock, error) {
 
 	ab, _ := New()
 	err = db.GetRowAsStruct(ab.GetKey(), ab)
-	if err != nil && db.ErrIsKeyNotFound(err) == false {
+	if err != nil && db.IsErrKeyNotFound(err) == false {
 		// We encountered an error which is not KeyNotFound
 		return nil, err
 	}

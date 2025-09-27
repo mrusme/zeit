@@ -50,6 +50,6 @@ func (db *Database) Close() {
 	db.engine.Close()
 }
 
-func (db *Database) ErrIsKeyNotFound(err error) bool {
+func (db *Database) IsErrKeyNotFound(err error) bool {
 	return errors.Is(err, badger.ErrKeyNotFound)
 }
