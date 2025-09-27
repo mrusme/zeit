@@ -58,3 +58,14 @@ func SortKeys(keys []string) {
 		return tsI < tsJ
 	})
 }
+
+func GetOrderedKeys[T Model](v map[string]T) []string {
+	var order []string
+
+	for vkey := range v {
+		order = append(order, vkey)
+	}
+	SortKeys(order)
+
+	return order
+}

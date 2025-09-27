@@ -31,45 +31,45 @@ type outputPrefix struct {
 	Color ansi.BasicColor
 }
 
-var outputPrefixes = []outputPrefix{
+var OutputPrefixes = []outputPrefix{
 	{
 		Char:  "",
 		Color: lipgloss.White,
 	},
 	{
-		Char:  "●",
+		Char:  "● ",
 		Color: lipgloss.Green,
 	},
 	{
-		Char:  "▲",
+		Char:  "▲ ",
 		Color: lipgloss.Red,
 	},
 	{
-		Char:  "◆",
+		Char:  "◆ ",
 		Color: lipgloss.BrightBlack,
 	},
 	{
-		Char:  "▶",
+		Char:  "▶ ",
 		Color: lipgloss.Cyan,
 	},
 	{
-		Char:  "▰",
+		Char:  "▰ ",
 		Color: lipgloss.Cyan,
 	},
 	{
-		Char:  "►",
+		Char:  "► ",
 		Color: lipgloss.Cyan,
 	},
 	{
-		Char:  "■",
+		Char:  "■ ",
 		Color: lipgloss.Magenta,
 	},
 	{
-		Char:  "▮",
+		Char:  "▮ ",
 		Color: lipgloss.Magenta,
 	},
 	{
-		Char:  "◀",
+		Char:  "◀ ",
 		Color: lipgloss.BrightRed,
 	},
 }
@@ -184,15 +184,15 @@ func (o *Out) Put(opts Opts, format string, a ...any) {
 	}
 
 	if o.oc == ColorAlways {
-		style := lipgloss.NewStyle().Foreground(outputPrefixes[opts.Type].Color)
-		output = fmt.Sprintf("%s %s%s",
-			style.Render(outputPrefixes[opts.Type].Char),
+		style := lipgloss.NewStyle().Foreground(OutputPrefixes[opts.Type].Color)
+		output = fmt.Sprintf("%s%s%s",
+			style.Render(OutputPrefixes[opts.Type].Char),
 			formatted,
 			nl,
 		)
 	} else {
-		output = fmt.Sprintf("%s %s%s",
-			outputPrefixes[opts.Type].Char,
+		output = fmt.Sprintf("%s%s%s",
+			OutputPrefixes[opts.Type].Char,
 			formatted,
 			nl,
 		)
