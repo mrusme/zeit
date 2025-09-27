@@ -72,6 +72,29 @@ func (db *Database) GetAllRowsAsBytes() (map[string][]byte, error) {
 	return ret, err
 }
 
+func GetAllRowsAsStruct[T Model](db *Database, v map[string]T) error {
+	errstr := ""
+
+	rows, err := db.GetAllRowsAsBytes()
+	if err != nil {
+		return err
+	}
+
+	for key := range rows {
+		var t T
+		if err := json.Unmarshal(rows[key], &t); err != nil {
+			return err
+		}
+		t.SetKey(key)
+		v[key] = t
+	}
+
+	if errstr != "" {
+		return errors.New(errstr)
+	}
+	return nil
+}
+
 func (db *Database) GetPrefixedRowsAsBytes(prefix string) (map[string][]byte, error) {
 	var ret map[string][]byte = make(map[string][]byte)
 	err := db.engine.View(func(txn *badger.Txn) error {
