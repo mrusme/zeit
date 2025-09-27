@@ -19,10 +19,7 @@ const (
 	FormatJSON        = "json"
 )
 
-var (
-	flagFormat string
-	flagBackup bool
-)
+var flagFormat string
 
 type ProjectView struct {
 	SID         string            `json:"sid"`
@@ -42,7 +39,7 @@ type ProjectTaskView struct {
 }
 
 var Cmd = &cobra.Command{
-	Use:     "project",
+	Use:     "project [flags] [sid]",
 	Aliases: []string{"projects", "proj", "prj", "pj"},
 	Short:   "zeit project",
 	Long:    "View and manage zeit projects",
@@ -239,12 +236,5 @@ func init() {
 		"f",
 		"",
 		"Export format (cli, json) (default \"cli\")",
-	)
-	Cmd.PersistentFlags().BoolVarP(
-		&flagBackup,
-		"backup",
-		"b",
-		false,
-		"Export entire database as backup",
 	)
 }

@@ -29,7 +29,7 @@ var (
 )
 
 var Cmd = &cobra.Command{
-	Use:       "export",
+	Use:       "export [flags] [arguments]",
 	Aliases:   []string{"ex", "x", "dump"},
 	Short:     "zeit export",
 	Long:      "Export the zeit database to various formats",
