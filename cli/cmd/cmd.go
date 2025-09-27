@@ -3,11 +3,14 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	endCmd "github.com/mrusme/zeit/cli/end/cmd"
 	exportCmd "github.com/mrusme/zeit/cli/export/cmd"
 	startCmd "github.com/mrusme/zeit/cli/start/cmd"
 	versionCmd "github.com/mrusme/zeit/cli/version/cmd"
+	"github.com/mrusme/zeit/helpers/out"
+	"github.com/mrusme/zeit/models/block"
 	"github.com/mrusme/zeit/runtime"
 	"github.com/spf13/cobra"
 )
@@ -25,6 +28,31 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
 		defer rt.End()
+
+		found, b, err := block.GetActive(rt.Database)
+		rt.NilOrDie(err)
+
+		if found == true {
+			duration := time.Now().Sub(b.TimestampStart)
+			hours := int(duration.Hours())
+			minutes := int(duration.Minutes()) % 60
+			seconds := int(duration.Seconds()) % 60
+
+			rt.Out.Put(out.Opts{Type: out.Start},
+				"Tracking on %s/%s for %s",
+				rt.Out.Stylize(
+					out.Style{FG: out.ColorPrimary},
+					b.ProjectSID),
+				rt.Out.Stylize(
+					out.Style{FG: out.ColorPrimary},
+					b.TaskSID),
+				rt.Out.Stylize(
+					out.Style{FG: out.ColorBlue},
+					fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)),
+			)
+		} else {
+			rt.Out.Put(out.Opts{Type: out.End}, "Not tracking")
+		}
 	},
 }
 

@@ -13,6 +13,7 @@ var (
 	ErrKeyNotFound     error = errors.New("Key not found")
 	ErrEndBeforeStart  error = errors.New("End is before start")
 	ErrAlreadyRunning  error = errors.New("Tracker is already running")
+	ErrNothingToEnd    error = errors.New("Nothing to end")
 	ErrNothingToResume error = errors.New("Nothing to resume")
 )
 
@@ -93,6 +94,39 @@ func Set(db *database.Database, b *Block) error {
 	return nil
 }
 
+func GetActive(db *database.Database) (bool, *Block, error) {
+	var ab *activeblock.ActiveBlock
+	var err error
+
+	if ab, err = activeblock.Get(db); err != nil {
+		return false, nil, err
+	}
+
+	if ab.HasActiveBlockKey() == false {
+		// No active block, we're done
+		return false, nil, nil
+	}
+
+	var eb *Block
+	eb, err = Get(db, ab.GetActiveBlockKey())
+	if err != nil && err != ErrKeyNotFound {
+		// We encountered an error which is not KeyNotFound
+		return false, nil, err
+	} else if err != nil && err == ErrKeyNotFound {
+		// We encountered a situation in which there is an ActiveBlock for a
+		// Block that doesn't seem to exist anymore. Let's clear the ActiveBlock.
+		ab.ClearActiveBlockKey()
+		if err = activeblock.Set(db, ab); err != nil {
+			// Okay, well, that sucks
+			return false, nil, err
+		}
+		// We have cleared the ActiveBlock, hence we're done
+		return false, nil, nil
+	}
+
+	return true, eb, nil
+}
+
 func Start(db *database.Database, b *Block) error {
 	var err error
 
@@ -107,7 +141,8 @@ func Start(db *database.Database, b *Block) error {
 	// We call End first to End any currently active Block
 	eb := new(Block)
 	eb.TimestampEnd = b.TimestampStart.Add(-1 * time.Second)
-	if err = End(db, eb); err != nil {
+	err = End(db, eb)
+	if err != nil && err != ErrNothingToEnd {
 		return err
 	}
 
@@ -172,31 +207,13 @@ func End(db *database.Database, b *Block) error {
 	var ab *activeblock.ActiveBlock
 	var err error
 
-	if ab, err = activeblock.Get(db); err != nil {
+	found, eb, err := GetActive(db)
+	if err != nil {
 		return err
 	}
 
-	abk := ab.GetActiveBlockKey()
-	if abk == "" {
-		// No active block, we're done
-		return nil
-	}
-
-	var eb *Block
-	eb, err = Get(db, abk)
-	if err != nil && err != ErrKeyNotFound {
-		// We encountered an error which is not KeyNotFound
-		return err
-	} else if err != nil && err == ErrKeyNotFound {
-		// We encountered a situation in which there is an ActiveBlock for a
-		// Block that doesn't seem to exist anymore. Let's clear the ActiveBlock.
-		ab.ClearActiveBlockKey()
-		if err = activeblock.Set(db, ab); err != nil {
-			// Okay, well, that sucks
-			return err
-		}
-		// We have cleared the ActiveBlock, hence we're done
-		return nil
+	if found == false && err == nil {
+		return ErrNothingToEnd
 	}
 
 	// We have found our Block, let's end it. However, we will only end the
