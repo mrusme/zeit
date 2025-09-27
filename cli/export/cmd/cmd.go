@@ -2,7 +2,7 @@ package exportCmd
 
 import (
 	"encoding/json"
-	"fmt"
+	"strings"
 
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/helpers/argsparser"
@@ -44,6 +44,8 @@ var Cmd = &cobra.Command{
 		var err error
 		var keys []string
 
+		flagFormat = strings.ToLower(flagFormat)
+
 		if flagBackup == false {
 			pargs, err = argsparser.Parse("export", args)
 			if err != nil {
@@ -53,24 +55,22 @@ var Cmd = &cobra.Command{
 
 			pargs.OverrideWith(flags)
 
-			fmt.Printf("Project ID: %s\n",
-				pargs.ProjectSID)
-			fmt.Printf("Task ID: %s\n",
-				pargs.TaskSID)
-			fmt.Printf("Start Timestamp: %s\n",
-				pargs.TimestampStart)
-			fmt.Printf("End Timestamp: %s\n",
-				pargs.TimestampEnd)
+			rt.Logger.Debug("Parsed args",
+				"pargs", pargs,
+				"GetTimestampStart", pargs.GetTimestampStart(),
+				"GetTimestampEnd", pargs.GetTimestampEnd(),
+			)
 
 			if err := pargs.Process(); err != nil {
 				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
 				rt.Exit(1)
 			}
 
-			fmt.Printf("Start Timestamp (time): %s\n",
-				pargs.GetTimestampStart())
-			fmt.Printf("End Timestamp (time): %s\n",
-				pargs.GetTimestampEnd())
+			rt.Logger.Debug("Processed args",
+				"pargs", pargs,
+				"GetTimestampStart", pargs.GetTimestampStart(),
+				"GetTimestampEnd", pargs.GetTimestampEnd(),
+			)
 		}
 
 		err = database.GetPrefixedRowsAsStruct(rt.Database, "block:", blockMap)
@@ -208,7 +208,7 @@ func init() {
 		"format",
 		"f",
 		"",
-		"Export format (cli, json)",
+		"Export format (cli, json) (default \"cli\")",
 	)
 	Cmd.PersistentFlags().BoolVarP(
 		&flagBackup,

@@ -1,8 +1,6 @@
 package startCmd
 
 import (
-	"fmt"
-
 	"github.com/mrusme/zeit/helpers/argsparser"
 	"github.com/mrusme/zeit/helpers/out"
 	"github.com/mrusme/zeit/models/block"
@@ -40,26 +38,22 @@ var Cmd = &cobra.Command{
 
 		pargs.OverrideWith(flags)
 
-		fmt.Printf("Project ID: %s\n",
-			pargs.ProjectSID)
-		fmt.Printf("Task ID: %s\n",
-			pargs.TaskSID)
-		fmt.Printf("Note: %s\n",
-			pargs.Note)
-		fmt.Printf("Start Timestamp: %s\n",
-			pargs.TimestampStart)
-		fmt.Printf("End Timestamp: %s\n",
-			pargs.TimestampEnd)
+		rt.Logger.Debug("Parsed args",
+			"pargs", pargs,
+			"GetTimestampStart", pargs.GetTimestampStart(),
+			"GetTimestampEnd", pargs.GetTimestampEnd(),
+		)
 
 		if err := pargs.Process(); err != nil {
 			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
 			rt.Exit(1)
 		}
 
-		fmt.Printf("Start Timestamp (time): %s\n",
-			pargs.GetTimestampStart())
-		fmt.Printf("End Timestamp (time): %s\n",
-			pargs.GetTimestampEnd())
+		rt.Logger.Debug("Processed args",
+			"pargs", pargs,
+			"GetTimestampStart", pargs.GetTimestampStart(),
+			"GetTimestampEnd", pargs.GetTimestampEnd(),
+		)
 
 		b, err := block.New(rt.Config.UserKey)
 		if err != nil {

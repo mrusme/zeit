@@ -123,6 +123,10 @@ func (rt *Runtime) GetDebugFlag(cmd *cobra.Command) bool {
 	return rt.GetBoolFlag(cmd, "debug")
 }
 
+func (rt *Runtime) IsDebug(cmd *cobra.Command) bool {
+	return rt.GetDebugFlag(cmd)
+}
+
 func (rt *Runtime) GetColorFlag(cmd *cobra.Command) string {
 	return rt.GetStringFlag(cmd, "color")
 }
