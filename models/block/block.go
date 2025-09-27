@@ -7,7 +7,6 @@ import (
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/helpers/argsparser"
 	"github.com/mrusme/zeit/models/activeblock"
-	"github.com/mrusme/zeit/runtime"
 )
 
 var (
@@ -94,7 +93,7 @@ func Set(db *database.Database, b *Block) error {
 	return nil
 }
 
-func Start(rt *runtime.Runtime, b *Block) error {
+func Start(db *database.Database, b *Block) error {
 	var err error
 
 	if b.TimestampStart.IsZero() {
@@ -108,20 +107,20 @@ func Start(rt *runtime.Runtime, b *Block) error {
 	// We call End first to End any currently active Block
 	eb := new(Block)
 	eb.TimestampEnd = b.TimestampStart.Add(-1 * time.Second)
-	if err = End(rt, eb); err != nil {
+	if err = End(db, eb); err != nil {
 		return err
 	}
 
 	// TODO: This should be one transaction
 	// {
-	ab, _ := activeblock.Get(rt.Database)
+	ab, _ := activeblock.Get(db)
 	ab.SetActiveBlockKey(b.GetKey())
-	if err = activeblock.Set(rt.Database, ab); err != nil {
+	if err = activeblock.Set(db, ab); err != nil {
 		// We couldn't upsert the ActiveBlock, so we fail fully
 		return err
 	}
 
-	if err = Set(rt.Database, b); err != nil {
+	if err = Set(db, b); err != nil {
 		// We couldn't upsert the Block, so we fail fully
 		return err
 	}
@@ -130,15 +129,15 @@ func Start(rt *runtime.Runtime, b *Block) error {
 	return nil
 }
 
-func Switch(rt *runtime.Runtime, b *Block) error {
-	return Start(rt, b)
+func Switch(db *database.Database, b *Block) error {
+	return Start(db, b)
 }
 
-func Resume(rt *runtime.Runtime, b *Block) error {
+func Resume(db *database.Database, b *Block) error {
 	var ab *activeblock.ActiveBlock
 	var err error
 
-	if ab, err = activeblock.Get(rt.Database); err != nil {
+	if ab, err = activeblock.Get(db); err != nil {
 		return err
 	}
 
@@ -153,7 +152,7 @@ func Resume(rt *runtime.Runtime, b *Block) error {
 	pbk := ab.GetPreviousBlockKey()
 
 	var pb *Block
-	pb, err = Get(rt.Database, pbk)
+	pb, err = Get(db, pbk)
 	if err != nil && err != ErrKeyNotFound {
 		// We encountered an error which is not KeyNotFound
 		return err
@@ -166,14 +165,14 @@ func Resume(rt *runtime.Runtime, b *Block) error {
 	b.ProjectSID = pb.ProjectSID
 	b.TaskSID = pb.TaskSID
 
-	return Start(rt, b)
+	return Start(db, b)
 }
 
-func End(rt *runtime.Runtime, b *Block) error {
+func End(db *database.Database, b *Block) error {
 	var ab *activeblock.ActiveBlock
 	var err error
 
-	if ab, err = activeblock.Get(rt.Database); err != nil {
+	if ab, err = activeblock.Get(db); err != nil {
 		return err
 	}
 
@@ -184,7 +183,7 @@ func End(rt *runtime.Runtime, b *Block) error {
 	}
 
 	var eb *Block
-	eb, err = Get(rt.Database, abk)
+	eb, err = Get(db, abk)
 	if err != nil && err != ErrKeyNotFound {
 		// We encountered an error which is not KeyNotFound
 		return err
@@ -192,7 +191,7 @@ func End(rt *runtime.Runtime, b *Block) error {
 		// We encountered a situation in which there is an ActiveBlock for a
 		// Block that doesn't seem to exist anymore. Let's clear the ActiveBlock.
 		ab.ClearActiveBlockKey()
-		if err = activeblock.Set(rt.Database, ab); err != nil {
+		if err = activeblock.Set(db, ab); err != nil {
 			// Okay, well, that sucks
 			return err
 		}
@@ -220,7 +219,7 @@ func End(rt *runtime.Runtime, b *Block) error {
 		// a block? It could be handy, it might however overcomplicate things.
 		// Adjustments could instead be made from a dedicated `edit` command.
 
-		if err = Set(rt.Database, eb); err != nil {
+		if err = Set(db, eb); err != nil {
 			// We couldn't persist the change, so we're keeping the ActiveBlock as it is
 			return err
 		}
@@ -229,7 +228,7 @@ func End(rt *runtime.Runtime, b *Block) error {
 	// We have persisted the change (or the Block was ended already -- weird!),
 	// so let's clear the ActiveBlock
 	ab.ClearActiveBlockKey()
-	if err = activeblock.Set(rt.Database, ab); err != nil {
+	if err = activeblock.Set(db, ab); err != nil {
 		return err
 	}
 

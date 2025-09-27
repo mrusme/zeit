@@ -66,7 +66,7 @@ var Cmd = &cobra.Command{
 			rt.Exit(1)
 		}
 
-		if err = block.End(rt, b); err != nil {
+		if err = block.End(rt.Database, b); err != nil {
 			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
 			rt.Exit(1)
 		}

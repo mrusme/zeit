@@ -82,21 +82,21 @@ var Cmd = &cobra.Command{
 
 		switch cmdName {
 		case "start":
-			if err = block.Start(rt, b); err != nil {
+			if err = block.Start(rt.Database, b); err != nil {
 				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
 				rt.Exit(1)
 			}
 
 			rt.Out.Put(out.Opts{Type: out.Start}, "Started tracking ...")
 		case "switch":
-			if err = block.Switch(rt, b); err != nil {
+			if err = block.Switch(rt.Database, b); err != nil {
 				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
 				rt.Exit(1)
 			}
 
 			rt.Out.Put(out.Opts{Type: out.Start}, "Switched tracking ...")
 		case "resume":
-			if err = block.Resume(rt, b); err != nil {
+			if err = block.Resume(rt.Database, b); err != nil {
 				rt.Out.Put(out.Opts{Type: out.Switch}, err.Error())
 				rt.Exit(1)
 			}
