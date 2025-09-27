@@ -45,7 +45,6 @@ func New(lvl slog.Level, oc out.OutputColor) *Runtime {
 	rt.Build.Commit = Commit
 	rt.Build.Date = Date
 
-	// TODO: Output to file
 	rt.Logger = log.New(lvl)
 
 	rt.Out = out.New(oc)

@@ -33,7 +33,7 @@ func (amap *AliasMap) GetCommandNameForAlias(alias string) string {
 }
 
 func GetLogLevel(cmd *cobra.Command) slog.Level {
-	var lvl slog.Level = slog.LevelInfo
+	var lvl slog.Level = slog.LevelError
 	flagDebug, _ := cmd.Flags().GetBool("debug")
 	if flagDebug {
 		lvl = slog.LevelDebug
