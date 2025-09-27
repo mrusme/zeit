@@ -2,9 +2,11 @@ package projectCmd
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/helpers/out"
+	"github.com/mrusme/zeit/models/block"
 	"github.com/mrusme/zeit/models/project"
 	"github.com/mrusme/zeit/models/task"
 	"github.com/mrusme/zeit/runtime"
@@ -27,12 +29,16 @@ type ProjectView struct {
 	DisplayName string            `json:"display_name"`
 	Color       string            `json:"color"`
 	Tasks       []ProjectTaskView `json:"tasks"`
+	TotalBlocks int               `json:"total_blocks"`
+	TotalAmount time.Duration     `json:"total_amount"`
 }
 
 type ProjectTaskView struct {
-	SID         string `json:"sid"`
-	DisplayName string `json:"display_name"`
-	Color       string `json:"color"`
+	SID         string        `json:"sid"`
+	DisplayName string        `json:"display_name"`
+	Color       string        `json:"color"`
+	TotalBlocks int           `json:"total_blocks"`
+	TotalAmount time.Duration `json:"total_amount"`
 }
 
 var Cmd = &cobra.Command{
@@ -71,14 +77,35 @@ var Cmd = &cobra.Command{
 			rt.NilOrDie(err)
 
 			var tkvs []ProjectTaskView
+			var pTotalBlocks int
+			var pTotalAmount time.Duration
 
 			torder := database.GetOrderedKeys(tks)
 			for _, tkey := range torder {
+				bs, err := block.ListForProjectTaskSID(rt.Database, dump[key].SID, tks[tkey].SID)
+				rt.NilOrDie(err)
+
+				var totalAmount time.Duration
+				for bkey := range bs {
+					if bs[bkey].TimestampStart.IsZero() == false &&
+						bs[bkey].TimestampEnd.IsZero() == false {
+						duration := bs[bkey].TimestampEnd.Sub(bs[bkey].TimestampStart)
+						totalAmount += duration
+					}
+				}
+
+				totalBlocks := len(bs)
+
 				tkvs = append(tkvs, ProjectTaskView{
 					SID:         tks[tkey].SID,
 					DisplayName: tks[tkey].DisplayName,
 					Color:       tks[tkey].Color,
+					TotalBlocks: totalBlocks,
+					TotalAmount: totalAmount,
 				})
+
+				pTotalBlocks += totalBlocks
+				pTotalAmount += totalAmount
 			}
 
 			pjvs = append(pjvs, ProjectView{
@@ -86,6 +113,8 @@ var Cmd = &cobra.Command{
 				DisplayName: dump[key].DisplayName,
 				Color:       dump[key].Color,
 				Tasks:       tkvs,
+				TotalBlocks: pTotalBlocks,
+				TotalAmount: pTotalAmount,
 			})
 		}
 
@@ -105,9 +134,13 @@ func outputCLI(
 	list []ProjectView,
 	order []string,
 ) {
+	var bcs string = "│"
+	var bcc string = "├──"
+	var bce string = "└──"
+
 	for idx := range order {
 		rt.Out.Put(out.Opts{Type: out.Info},
-			"%s %s",
+			"%s %s\n%s %s %s    %s %s",
 			rt.Out.Stylize(
 				out.Style{FG: out.Color(list[idx].Color)},
 				"%s", list[idx].DisplayName,
@@ -116,15 +149,37 @@ func outputCLI(
 				out.Style{FG: out.ColorSecondary},
 				"[%s]", list[idx].SID,
 			),
+			rt.Out.Stylize(
+				out.Style{FG: out.OutputPrefixes[out.Info].Color},
+				"%s", bcs,
+			),
+			rt.Out.Stylize(
+				out.Style{FG: out.ColorSecondary},
+				"⮻",
+			),
+			rt.Out.Stylize(
+				out.Style{FG: out.ColorWhite},
+				"%d", list[idx].TotalBlocks,
+			),
+			rt.Out.Stylize(
+				out.Style{FG: out.ColorSecondary},
+				"⭘",
+			),
+			rt.Out.Stylize(
+				out.Style{FG: out.ColorWhite},
+				"%s", list[idx].TotalAmount.Round(time.Second).String(),
+			),
 		)
 
 		for jdx := range list[idx].Tasks {
-			barchar := "├──"
+			barchar := bcc
+			barcharsub := bcs
 			if jdx == len(list[idx].Tasks)-1 {
-				barchar = "└──"
+				barchar = bce
+				barcharsub = " "
 			}
 			rt.Out.Put(out.Opts{Type: out.Plain},
-				"%s %s %s",
+				"%s %s %s\n%s   %s %s    %s %s",
 				rt.Out.Stylize(
 					out.Style{FG: out.OutputPrefixes[out.Info].Color},
 					"%s", barchar,
@@ -136,6 +191,26 @@ func outputCLI(
 				rt.Out.Stylize(
 					out.Style{FG: out.ColorSecondary},
 					"[%s]", list[idx].Tasks[jdx].SID,
+				),
+				rt.Out.Stylize(
+					out.Style{FG: out.OutputPrefixes[out.Info].Color},
+					"%s", barcharsub,
+				),
+				rt.Out.Stylize(
+					out.Style{FG: out.ColorSecondary},
+					"⮻",
+				),
+				rt.Out.Stylize(
+					out.Style{FG: out.ColorWhite},
+					"%d", list[idx].Tasks[jdx].TotalBlocks,
+				),
+				rt.Out.Stylize(
+					out.Style{FG: out.ColorSecondary},
+					"⭘",
+				),
+				rt.Out.Stylize(
+					out.Style{FG: out.ColorWhite},
+					"%s", list[idx].Tasks[jdx].TotalAmount.Round(time.Second).String(),
 				),
 			)
 		}
