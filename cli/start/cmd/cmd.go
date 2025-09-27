@@ -60,6 +60,7 @@ var Cmd = &cobra.Command{
 				_, err = task.InsertIfNone(
 					rt.Database,
 					rt.Config.UserKey,
+					b.ProjectSID,
 					b.TaskSID,
 				)
 				rt.NilOrDie(err)

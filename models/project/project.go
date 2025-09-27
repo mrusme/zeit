@@ -50,7 +50,22 @@ func List(db *database.Database) (map[string]*Project, error) {
 	return rows, nil
 }
 
-func Get(db *database.Database, sid string) (*Project, error) {
+func Get(db *database.Database, key string) (*Project, error) {
+	var err error
+
+	pj := new(Project)
+	err = db.GetRowAsStruct(key, pj)
+	if err != nil && db.IsErrKeyNotFound(err) == false {
+		// We encountered an error which is not KeyNotFound
+		return nil, err
+	} else if err != nil && db.IsErrKeyNotFound(err) == true {
+		return nil, errs.ErrKeyNotFound
+	}
+
+	return pj, nil
+}
+
+func GetBySID(db *database.Database, sid string) (*Project, error) {
 	var err error
 
 	var rows map[string]*Project = make(map[string]*Project)
@@ -79,7 +94,7 @@ func InsertIfNone(db *database.Database, ownerKey string, sid string) (*Project,
 	var pj *Project
 	var err error
 
-	pj, err = Get(db, sid)
+	pj, err = GetBySID(db, sid)
 	if err != nil && err != errs.ErrSIDNotFound {
 		return nil, err
 	} else if err != nil && err == errs.ErrSIDNotFound {
