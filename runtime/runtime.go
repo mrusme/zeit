@@ -10,6 +10,7 @@ import (
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/helpers/log"
 	"github.com/mrusme/zeit/helpers/out"
+	"github.com/mrusme/zeit/models/config"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +33,7 @@ type Runtime struct {
 	Logger   *log.Logger
 	Out      *out.Out
 	Database *database.Database
-	Config   *Config
+	Config   *config.Config
 }
 
 func New(lvl slog.Level, oc out.OutputColor) *Runtime {
@@ -68,17 +69,17 @@ func New(lvl slog.Level, oc out.OutputColor) *Runtime {
 	rt.Logger.NilOrDie(err, "Error initializing database")
 
 	rt.Logger.Debug("Loading runtime config ...")
-	cfg := new(Config)
-	err = rt.Database.GetRowAsStruct(CONFIG_KEY, cfg)
+	cfg := new(config.Config)
+	err = rt.Database.GetRowAsStruct(config.KEY, cfg)
 	if err != nil {
 		if rt.Database.ErrIsKeyNotFound(err) {
 			// Create runtime config and store it
 			rt.Logger.Info("No runtime config available; Creating default config ...")
 
-			cfg, err = DefaultConfig()
+			cfg, err = config.DefaultConfig()
 			rt.Logger.NilOrDie(err, "Error creating runtime config")
 
-			cfg.SetKey(CONFIG_KEY)
+			cfg.SetKey(config.KEY)
 			err = rt.Database.UpsertRowAsStruct(cfg)
 			rt.Logger.NilOrDie(err, "Error persisting runtime config")
 		} else {

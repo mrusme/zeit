@@ -1,10 +1,10 @@
-package runtime
+package config
 
 import (
 	"github.com/google/uuid"
 )
 
-var CONFIG_KEY string = "config"
+const KEY string = "config"
 
 type Config struct {
 	key     string
