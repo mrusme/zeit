@@ -10,6 +10,7 @@ import (
 	"github.com/mrusme/zeit/models/activeblock"
 	"github.com/mrusme/zeit/models/block"
 	"github.com/mrusme/zeit/models/config"
+	"github.com/mrusme/zeit/models/project"
 	"github.com/mrusme/zeit/runtime"
 	"github.com/spf13/cobra"
 )
@@ -39,6 +40,7 @@ var Cmd = &cobra.Command{
 
 		var pargs *argsparser.ParsedArgs
 		var blockMap map[string]*block.Block = make(map[string]*block.Block)
+		var projectMap map[string]*project.Project = make(map[string]*project.Project)
 		var dump map[string]interface{} = make(map[string]interface{})
 
 		var err error
@@ -73,7 +75,10 @@ var Cmd = &cobra.Command{
 			)
 		}
 
-		err = database.GetPrefixedRowsAsStruct(rt.Database, "block:", blockMap)
+		err = database.GetPrefixedRowsAsStruct(
+			rt.Database,
+			database.PrefixForModel(&block.Block{}),
+			blockMap)
 		if err != nil {
 			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
 			rt.Exit(1)
@@ -127,6 +132,20 @@ var Cmd = &cobra.Command{
 			)
 			dump[config.KEY] = cfg
 			dump[activeblock.KEY] = ab
+
+			err = database.GetPrefixedRowsAsStruct(
+				rt.Database,
+				database.PrefixForModel(&project.Project{}),
+				projectMap)
+			if err != nil {
+				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
+				rt.Exit(1)
+			}
+
+			for key := range projectMap {
+				keys = append(keys, key)
+				dump[key] = projectMap[key]
+			}
 		}
 
 		database.SortKeys(keys)

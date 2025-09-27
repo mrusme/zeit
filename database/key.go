@@ -10,19 +10,26 @@ import (
 )
 
 func NewKey(v Model) string {
+	uu, err := uuid.NewV7()
+	if err != nil {
+		panic(err)
+	}
+
+	return fmt.Sprintf("%s%s", PrefixForModel(v), uu.String())
+}
+
+func EntityNameForModel(v Model) string {
 	var modelName string
 	if t := reflect.TypeOf(v); t.Kind() == reflect.Ptr {
 		modelName = t.Elem().Name()
 	} else {
 		modelName = t.Name()
 	}
+	return strings.ToLower(modelName)
+}
 
-	uu, err := uuid.NewV7()
-	if err != nil {
-		panic(err)
-	}
-
-	return fmt.Sprintf("%s:%s", strings.ToLower(modelName), uu.String())
+func PrefixForModel(v Model) string {
+	return EntityNameForModel(v) + ":"
 }
 
 func extractTimestamp(key string) uint64 {
