@@ -37,7 +37,7 @@ func (pj *Project) GetKey() string {
 	return pj.key
 }
 
-func Get(db *database.Database, sid string) (*Project, error) {
+func List(db *database.Database) (map[string]*Project, error) {
 	var err error
 
 	var rows map[string]*Project = make(map[string]*Project)
@@ -46,6 +46,17 @@ func Get(db *database.Database, sid string) (*Project, error) {
 		database.PrefixForModel(&Project{}),
 		rows,
 	); err != nil {
+		return nil, err
+	}
+
+	return rows, nil
+}
+
+func Get(db *database.Database, sid string) (*Project, error) {
+	var err error
+
+	var rows map[string]*Project = make(map[string]*Project)
+	if rows, err = List(db); err != nil {
 		return nil, err
 	}
 
