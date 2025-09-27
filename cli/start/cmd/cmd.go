@@ -5,6 +5,7 @@ import (
 	"github.com/mrusme/zeit/helpers/out"
 	"github.com/mrusme/zeit/models/block"
 	"github.com/mrusme/zeit/models/project"
+	"github.com/mrusme/zeit/models/task"
 	"github.com/mrusme/zeit/runtime"
 	"github.com/spf13/cobra"
 )
@@ -67,16 +68,31 @@ var Cmd = &cobra.Command{
 			rt.Exit(1)
 		}
 
-		if cmdName != "resume" && b.ProjectSID != "" {
-			// Insert new project if it doesn't exist yet
-			_, err = project.InsertIfNone(
-				rt.Database,
-				rt.Config.UserKey,
-				b.ProjectSID,
-			)
-			if err != nil {
-				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-				rt.Exit(1)
+		if cmdName != "resume" {
+			if b.ProjectSID != "" {
+				// Insert new project if it doesn't exist yet
+				_, err = project.InsertIfNone(
+					rt.Database,
+					rt.Config.UserKey,
+					b.ProjectSID,
+				)
+				if err != nil {
+					rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
+					rt.Exit(1)
+				}
+			}
+
+			if b.TaskSID != "" {
+				// Insert new task if it doesn't exist yet
+				_, err = task.InsertIfNone(
+					rt.Database,
+					rt.Config.UserKey,
+					b.TaskSID,
+				)
+				if err != nil {
+					rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
+					rt.Exit(1)
+				}
 			}
 		}
 
