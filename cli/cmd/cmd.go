@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	endCmd "github.com/mrusme/zeit/cli/end/cmd"
@@ -30,6 +31,7 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
+		fmt.Errorf("%s\n", err.Error())
 		os.Exit(1)
 	}
 }

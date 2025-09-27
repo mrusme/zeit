@@ -31,10 +31,7 @@ var Cmd = &cobra.Command{
 		cmdName := aliasMap.GetCommandNameForAlias(calledAs)
 
 		pargs, err := argsparser.Parse("end", args)
-		if err != nil {
-			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-			rt.Exit(1)
-		}
+		rt.NilOrDie(err)
 
 		pargs.OverrideWith(flags)
 
@@ -44,10 +41,8 @@ var Cmd = &cobra.Command{
 			"GetTimestampEnd", pargs.GetTimestampEnd(),
 		)
 
-		if err := pargs.Process(); err != nil {
-			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-			rt.Exit(1)
-		}
+		err = pargs.Process()
+		rt.NilOrDie(err)
 
 		rt.Logger.Debug("Processed args",
 			"pargs", pargs,
@@ -56,20 +51,13 @@ var Cmd = &cobra.Command{
 		)
 
 		b, err := block.New(rt.Config.UserKey)
-		if err != nil {
-			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-			rt.Exit(1)
-		}
+		rt.NilOrDie(err)
 
-		if err = b.FromProcessedArgs(pargs); err != nil {
-			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-			rt.Exit(1)
-		}
+		err = b.FromProcessedArgs(pargs)
+		rt.NilOrDie(err)
 
-		if err = block.End(rt.Database, b); err != nil {
-			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-			rt.Exit(1)
-		}
+		err = block.End(rt.Database, b)
+		rt.NilOrDie(err)
 
 		switch cmdName {
 		case "end":

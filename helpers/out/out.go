@@ -208,15 +208,3 @@ func (o *Out) Put(opts Opts, format string, a ...any) {
 		fmt.Printf(output)
 	}
 }
-
-func (o *Out) NilOrDie(err error, format string, a ...any) {
-	if err != nil {
-		o.Put(Opts{Type: Error}, format, a...)
-		os.Exit(1)
-	}
-}
-
-func (o *Out) Die(format string, a ...any) {
-	o.Put(Opts{Type: Error}, format, a...)
-	os.Exit(1)
-}

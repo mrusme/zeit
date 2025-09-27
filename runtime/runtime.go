@@ -70,6 +70,7 @@ func New(lvl slog.Level, oc out.OutputColor) *Runtime {
 	rt.Logger.Debug("Loading runtime config ...")
 	cfg, err := config.Get(rt.Database)
 	if err != nil {
+		rt.End()
 		rt.Logger.NilOrDie(err, "Error loading runtime config")
 	}
 	rt.Config = cfg
@@ -88,6 +89,13 @@ func (rt *Runtime) Exit(code int) {
 	os.Exit(code)
 }
 
+func (rt *Runtime) NilOrDie(err error) {
+	if err != nil {
+		rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
+		rt.Exit(1)
+	}
+}
+
 func (rt *Runtime) GetUserKey() string {
 	return rt.Config.UserKey
 }
@@ -102,19 +110,34 @@ func (rt *Runtime) GetCommandCall(cmd *cobra.Command) string {
 
 func (rt *Runtime) GetStringFlag(cmd *cobra.Command, flagname string) string {
 	flag, err := cmd.Flags().GetString(flagname)
-	rt.Logger.NilOrDie(err, "Could not get "+flagname+" flag")
+	if err != nil {
+		rt.Logger.Error("Could not get flag",
+			"flag", flagname,
+			"error", err)
+		return ""
+	}
 	return flag
 }
 
 func (rt *Runtime) GetIntFlag(cmd *cobra.Command, flagname string) int {
 	flag, err := cmd.Flags().GetInt(flagname)
-	rt.Logger.NilOrDie(err, "Could not get "+flagname+" flag")
+	if err != nil {
+		rt.Logger.Error("Could not get flag",
+			"flag", flagname,
+			"error", err)
+		return 0
+	}
 	return flag
 }
 
 func (rt *Runtime) GetBoolFlag(cmd *cobra.Command, flagname string) bool {
 	flag, err := cmd.Flags().GetBool(flagname)
-	rt.Logger.NilOrDie(err, "Could not get "+flagname+" flag")
+	if err != nil {
+		rt.Logger.Error("Could not get flag",
+			"flag", flagname,
+			"error", err)
+		return false
+	}
 	return flag
 }
 

@@ -33,10 +33,7 @@ var Cmd = &cobra.Command{
 		cmdName := aliasMap.GetCommandNameForAlias(calledAs)
 
 		pargs, err := argsparser.Parse("start", args)
-		if err != nil {
-			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-			rt.Exit(1)
-		}
+		rt.NilOrDie(err)
 
 		pargs.OverrideWith(flags)
 
@@ -46,10 +43,8 @@ var Cmd = &cobra.Command{
 			"GetTimestampEnd", pargs.GetTimestampEnd(),
 		)
 
-		if err := pargs.Process(); err != nil {
-			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-			rt.Exit(1)
-		}
+		err = pargs.Process()
+		rt.NilOrDie(err)
 
 		rt.Logger.Debug("Processed args",
 			"pargs", pargs,
@@ -58,15 +53,10 @@ var Cmd = &cobra.Command{
 		)
 
 		b, err := block.New(rt.Config.UserKey)
-		if err != nil {
-			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-			rt.Exit(1)
-		}
+		rt.NilOrDie(err)
 
-		if err = b.FromProcessedArgs(pargs); err != nil {
-			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-			rt.Exit(1)
-		}
+		err = b.FromProcessedArgs(pargs)
+		rt.NilOrDie(err)
 
 		if cmdName != "resume" {
 			if b.ProjectSID != "" {
@@ -76,10 +66,7 @@ var Cmd = &cobra.Command{
 					rt.Config.UserKey,
 					b.ProjectSID,
 				)
-				if err != nil {
-					rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-					rt.Exit(1)
-				}
+				rt.NilOrDie(err)
 			}
 
 			if b.TaskSID != "" {
@@ -89,33 +76,24 @@ var Cmd = &cobra.Command{
 					rt.Config.UserKey,
 					b.TaskSID,
 				)
-				if err != nil {
-					rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-					rt.Exit(1)
-				}
+				rt.NilOrDie(err)
 			}
 		}
 
 		switch cmdName {
 		case "start":
-			if err = block.Start(rt.Database, b); err != nil {
-				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-				rt.Exit(1)
-			}
+			err = block.Start(rt.Database, b)
+			rt.NilOrDie(err)
 
 			rt.Out.Put(out.Opts{Type: out.Start}, "Started tracking ...")
 		case "switch":
-			if err = block.Switch(rt.Database, b); err != nil {
-				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-				rt.Exit(1)
-			}
+			err = block.Switch(rt.Database, b)
+			rt.NilOrDie(err)
 
 			rt.Out.Put(out.Opts{Type: out.Start}, "Switched tracking ...")
 		case "resume":
-			if err = block.Resume(rt.Database, b); err != nil {
-				rt.Out.Put(out.Opts{Type: out.Switch}, err.Error())
-				rt.Exit(1)
-			}
+			err = block.Resume(rt.Database, b)
+			rt.NilOrDie(err)
 
 			rt.Out.Put(out.Opts{Type: out.Resume}, "Resumed tracking ...")
 		}

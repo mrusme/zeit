@@ -52,10 +52,7 @@ var Cmd = &cobra.Command{
 
 		if flagBackup == false {
 			pargs, err = argsparser.Parse("export", args)
-			if err != nil {
-				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-				rt.Exit(1)
-			}
+			rt.NilOrDie(err)
 
 			pargs.OverrideWith(flags)
 
@@ -65,10 +62,8 @@ var Cmd = &cobra.Command{
 				"GetTimestampEnd", pargs.GetTimestampEnd(),
 			)
 
-			if err := pargs.Process(); err != nil {
-				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-				rt.Exit(1)
-			}
+			err := pargs.Process()
+			rt.NilOrDie(err)
 
 			rt.Logger.Debug("Processed args",
 				"pargs", pargs,
@@ -78,10 +73,7 @@ var Cmd = &cobra.Command{
 		}
 
 		blockMap, err = block.List(rt.Database)
-		if err != nil {
-			rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-			rt.Exit(1)
-		}
+		rt.NilOrDie(err)
 
 		var filterByTimestamp bool = false
 		if flagBackup == false &&
@@ -116,15 +108,10 @@ var Cmd = &cobra.Command{
 
 			// ------------------------- Static Key Entries ----------------------- //
 			cfg, err = config.Get(rt.Database)
-			if err != nil {
-				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-				rt.Exit(1)
-			}
+			rt.NilOrDie(err)
+
 			ab, err = activeblock.Get(rt.Database)
-			if err != nil {
-				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-				rt.Exit(1)
-			}
+			rt.NilOrDie(err)
 
 			keys = append(keys,
 				config.KEY,
@@ -135,10 +122,7 @@ var Cmd = &cobra.Command{
 
 			// ------------------------------ Projects ---------------------------- //
 			projectMap, err = project.List(rt.Database)
-			if err != nil {
-				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-				rt.Exit(1)
-			}
+			rt.NilOrDie(err)
 
 			for key := range projectMap {
 				keys = append(keys, key)
@@ -147,10 +131,7 @@ var Cmd = &cobra.Command{
 
 			// -------------------------------- Tasks ----------------------------- //
 			taskMap, err = task.List(rt.Database)
-			if err != nil {
-				rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-				rt.Exit(1)
-			}
+			rt.NilOrDie(err)
 
 			for key := range taskMap {
 				keys = append(keys, key)
@@ -192,10 +173,7 @@ func outputJSON(
 	sorting []string,
 ) {
 	prettyJSON, err := json.MarshalIndent(dump, "", "  ")
-	if err != nil {
-		rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
-		rt.Exit(1)
-	}
+	rt.NilOrDie(err)
 
 	rt.Out.Put(out.Opts{Type: out.Plain}, string(prettyJSON))
 }
