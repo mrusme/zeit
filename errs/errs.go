@@ -82,8 +82,8 @@ type ErrParsingTimestamp struct {
 
 func (e *ErrParsingTimestamp) Error() string {
 	return fmt.Sprintf(
-		"Error parsing timestamp: %s\nTimestamp: %s\n",
-		e.Message,
+		"Error parsing timestamp (\"%s\"): %s",
 		e.Timestamp,
+		e.Message,
 	)
 }
