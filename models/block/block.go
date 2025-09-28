@@ -213,7 +213,7 @@ func Start(db *database.Database, b *Block) (*Block, error) {
 	}
 
 	if b.TimestampEnd.IsZero() == false && b.TimestampEnd.Before(b.TimestampStart) {
-		return nil, errs.ErrEndBeforeStart
+		return nil, errs.ErrInvalidTimestampEnd
 	}
 
 	// Even though `Set()` will validate b, we have to do it manually before we
@@ -308,8 +308,9 @@ func End(db *database.Database, b *Block) error {
 			b.TimestampEnd = time.Now()
 		}
 
+		// TODO: Is this obsolete due to the validator check in Set?
 		if b.TimestampEnd.Before(eb.TimestampStart) {
-			return errs.ErrEndBeforeStart
+			return errs.ErrInvalidTimestampEnd
 		}
 		eb.TimestampEnd = b.TimestampEnd
 

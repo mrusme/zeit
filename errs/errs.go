@@ -6,61 +6,73 @@ import (
 )
 
 var (
-	ErrKeyNotFound     error = errors.New("Key not found")
-	ErrEndBeforeStart  error = errors.New("End is before start")
-	ErrAlreadyRunning  error = errors.New("Tracker is already running")
-	ErrNothingToEnd    error = errors.New("Nothing to end")
-	ErrNothingToResume error = errors.New("Nothing to resume")
-)
+	ErrKeyNotFound error = errors.New(
+		"Key not found",
+	)
 
-var ErrSIDNotFound error = errors.New("SID not found")
+	ErrAlreadyRunning error = errors.New(
+		"Tracker is already running",
+	)
 
-var ErrMissingProjectOrTaskSID error = errors.New(
-	"'on' requires a projectID/taskID, " +
-		"e.g. 'on myproject/mytask'",
-)
+	ErrNothingToEnd error = errors.New(
+		"Nothing to end",
+	)
 
-var ErrMissingAttrOrVal error = errors.New(
-	"'with' requires an attribute and a value, " +
-		"e.g. 'with note \"Issue ID: 123\"'",
-)
+	ErrNothingToResume error = errors.New(
+		"Nothing to resume",
+	)
 
-var ErrInvalidSID error = errors.New(
-	"The Simplified-ID (SID) may only contain letters, numbers, dashes, " +
-		"underscores, and periods. Certain reserved keywords like 'edit' are not " +
-		"allowed.",
-)
+	ErrSIDNotFound error = errors.New(
+		"SID not found",
+	)
 
-var ErrNoteTooLarge error = errors.New(
-	"The note is too large",
-)
+	ErrMissingProjectOrTaskSID error = errors.New(
+		"'on' requires a projectID/taskID, " +
+			"e.g. 'on myproject/mytask'",
+	)
 
-var ErrSIDTooLarge error = errors.New(
-	"The SID is too large",
-)
+	ErrMissingAttrOrVal error = errors.New(
+		"'with' requires an attribute and a value, " +
+			"e.g. 'with note \"Issue ID: 123\"'",
+	)
 
-var ErrProjectSIDRequired error = errors.New(
-	"A project SID is required",
-)
+	ErrInvalidSID error = errors.New(
+		"The Simplified-ID (SID) may only contain letters, numbers, dashes, " +
+			"underscores, and periods. Certain reserved keywords like 'edit' are " +
+			"not allowed.",
+	)
 
-var ErrTaskSIDRequired error = errors.New(
-	"A task SID is required",
-)
+	ErrNoteTooLarge error = errors.New(
+		"The note is too large",
+	)
 
-var ErrDisplayNameTooLarge error = errors.New(
-	"The display name is too large",
-)
+	ErrSIDTooLarge error = errors.New(
+		"The SID is too large",
+	)
 
-var ErrInvalidColor error = errors.New(
-	"The color must be in hex format (#FFFFFF)",
-)
+	ErrProjectSIDRequired error = errors.New(
+		"A project SID is required",
+	)
 
-var ErrInvalidTimestampStart error = errors.New(
-	"The start time/date must be before the end time/date and not be empty",
-)
+	ErrTaskSIDRequired error = errors.New(
+		"A task SID is required",
+	)
 
-var ErrInvalidTimestampEnd error = errors.New(
-	"The end time/date must be after the start time/date",
+	ErrDisplayNameTooLarge error = errors.New(
+		"The display name is too large",
+	)
+
+	ErrInvalidColor error = errors.New(
+		"The color must be in hex format (e.g. #FFFFFF)",
+	)
+
+	ErrInvalidTimestampStart error = errors.New(
+		"The start time/date must be before the end time/date and not be empty",
+	)
+
+	ErrInvalidTimestampEnd error = errors.New(
+		"The end time/date must be after the start time/date",
+	)
 )
 
 type ErrParsingTimestamp struct {
