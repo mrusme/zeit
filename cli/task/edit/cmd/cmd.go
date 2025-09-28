@@ -3,6 +3,7 @@ package taskEditCmd
 import (
 	"strings"
 
+	"github.com/mrusme/zeit/cli/task/shared"
 	"github.com/mrusme/zeit/helpers/out"
 	"github.com/mrusme/zeit/models/task"
 	"github.com/mrusme/zeit/runtime"
@@ -15,12 +16,13 @@ var (
 )
 
 var Cmd = &cobra.Command{
-	Use:     "edit [flags] project-sid[/]task-sid",
-	Aliases: []string{},
-	Short:   "zeit task edit",
-	Long:    "Edit zeit tasks",
-	Example: "zeit task edit myproject mytask",
-	Args:    cobra.RangeArgs(1, 2),
+	Use:               "edit [flags] project-sid[/]task-sid",
+	Aliases:           []string{},
+	Short:             "zeit task edit",
+	Long:              "Edit zeit tasks",
+	Example:           "zeit task edit myproject mytask",
+	Args:              cobra.RangeArgs(1, 2),
+	ValidArgsFunction: shared.DynamicArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var pj *task.Task
 		var err error

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	projectEditCmd "github.com/mrusme/zeit/cli/project/edit/cmd"
+	"github.com/mrusme/zeit/cli/project/shared"
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/helpers/out"
 	"github.com/mrusme/zeit/models/block"
@@ -40,12 +41,13 @@ type ProjectTaskView struct {
 }
 
 var Cmd = &cobra.Command{
-	Use:     "project [flags] [sid]",
-	Aliases: []string{"projects", "proj", "prj", "pj"},
-	Short:   "zeit project",
-	Long:    "View and manage zeit projects",
-	Example: "zeit project myproject",
-	Args:    cobra.RangeArgs(0, 1),
+	Use:               "project [flags] [sid]",
+	Aliases:           []string{"projects", "proj", "prj", "pj"},
+	Short:             "zeit project",
+	Long:              "View and manage zeit projects",
+	Example:           "zeit project myproject",
+	Args:              cobra.RangeArgs(0, 1),
+	ValidArgsFunction: shared.DynamicArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var dump map[string]*project.Project
 		var pjvs []ProjectView

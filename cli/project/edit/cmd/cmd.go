@@ -1,6 +1,7 @@
 package projectEditCmd
 
 import (
+	"github.com/mrusme/zeit/cli/project/shared"
 	"github.com/mrusme/zeit/helpers/out"
 	"github.com/mrusme/zeit/models/project"
 	"github.com/mrusme/zeit/runtime"
@@ -13,12 +14,13 @@ var (
 )
 
 var Cmd = &cobra.Command{
-	Use:     "edit [flags] project-sid",
-	Aliases: []string{},
-	Short:   "zeit project edit",
-	Long:    "Edit zeit projects",
-	Example: "zeit project edit myproject",
-	Args:    cobra.ExactArgs(1),
+	Use:               "edit [flags] project-sid",
+	Aliases:           []string{},
+	Short:             "zeit project edit",
+	Long:              "Edit zeit projects",
+	Example:           "zeit project edit myproject",
+	Args:              cobra.ExactArgs(1),
+	ValidArgsFunction: shared.DynamicArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var pj *project.Project
 		var err error

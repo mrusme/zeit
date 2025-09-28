@@ -1,6 +1,7 @@
 package startCmd
 
 import (
+	"github.com/mrusme/zeit/cli/start/shared"
 	"github.com/mrusme/zeit/helpers/argsparser"
 	"github.com/mrusme/zeit/helpers/out"
 	"github.com/mrusme/zeit/models/block"
@@ -19,12 +20,12 @@ var aliasMap = runtime.AliasMap{
 }
 
 var Cmd = &cobra.Command{
-	Use:       "start [flags] [arguments]",
-	Aliases:   aliasMap.GetAliases(),
-	Short:     "zeit start",
-	Long:      "Start tracking",
-	Example:   "zeit start work with note \"Hello World\" on myproject/mytask",
-	ValidArgs: []string{"block", "work", "on", "to", "with", "end"},
+	Use:               "start [flags] [arguments]",
+	Aliases:           aliasMap.GetAliases(),
+	Short:             "zeit start",
+	Long:              "Start tracking",
+	Example:           "zeit start work with note \"Hello World\" on myproject/mytask",
+	ValidArgsFunction: shared.DynamicArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var pargs *argsparser.ParsedArgs
 		var err error

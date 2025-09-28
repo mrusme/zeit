@@ -152,3 +152,19 @@ func (rt *Runtime) IsDebug(cmd *cobra.Command) bool {
 func (rt *Runtime) GetColorFlag(cmd *cobra.Command) string {
 	return rt.GetStringFlag(cmd, "color")
 }
+
+func (rt *Runtime) GetDynamicSuggestions(
+	prefix string,
+	possibleArgs []string,
+) []string {
+	var suggestions []string
+
+	for _, name := range possibleArgs {
+		if len(prefix) == 0 ||
+			(len(name) >= len(prefix) && name[:len(prefix)] == prefix) {
+			suggestions = append(suggestions, name)
+		}
+	}
+
+	return suggestions
+}

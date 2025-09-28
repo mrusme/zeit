@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/mrusme/zeit/cli/import/shared"
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/helpers/importer"
 	"github.com/mrusme/zeit/helpers/out"
@@ -19,13 +20,13 @@ import (
 var flagFormat string
 
 var Cmd = &cobra.Command{
-	Use:       "import [flags] file",
-	Aliases:   []string{"imp", "im", "i"},
-	Short:     "zeit import",
-	Long:      "Import data into the zeit database from various formats",
-	Example:   "zeit import -f v0 ./zeit-v0-export.json",
-	ValidArgs: []string{},
-	Args:      cobra.ExactArgs(1),
+	Use:               "import [flags] file",
+	Aliases:           []string{"imp", "im", "i"},
+	Short:             "zeit import",
+	Long:              "Import data into the zeit database from various formats",
+	Example:           "zeit import -f v0 ./zeit-v0-export.json",
+	ValidArgsFunction: shared.DynamicArgs,
+	Args:              cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var im *importer.Importer
 		var err error

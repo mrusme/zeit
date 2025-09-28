@@ -6,6 +6,7 @@ import (
 	"time"
 
 	taskEditCmd "github.com/mrusme/zeit/cli/task/edit/cmd"
+	"github.com/mrusme/zeit/cli/task/shared"
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/helpers/out"
 	"github.com/mrusme/zeit/models/block"
@@ -46,6 +47,7 @@ var Cmd = &cobra.Command{
 	Long:    "View and manage zeit tasks",
 	Example: "zeit task myproject mytask",
 	Args:    cobra.RangeArgs(0, 1),
+	ValidArgsFunction: shared.DynamicArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var dump map[string]*task.Task
 		var tkvs []TaskView
