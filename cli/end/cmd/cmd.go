@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var flags *argsparser.ParsedArgs
+var flags *argsparser.ParsedArgs = &argsparser.ParsedArgs{}
 
 var aliasMap = runtime.AliasMap{
 	"end":   {"en", "e"},

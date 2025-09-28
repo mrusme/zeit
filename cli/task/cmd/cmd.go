@@ -185,15 +185,6 @@ func outputCLI(
 				barcharsub = " "
 			}
 
-			note := list[idx].Blocks[jdx].Note
-			if note == "" {
-				note = "// no note added"
-			}
-			note = strings.ReplaceAll(note, "\n", "⏎")
-			if len(note) > 80 {
-				note = note[0:73] + "..."
-			}
-
 			rt.Out.Put(out.Opts{Type: out.Plain},
 				"%s %s  %s %s\n%s   %s %s %s\n%s   %s",
 				rt.Out.Stylize(
@@ -238,7 +229,7 @@ func outputCLI(
 				),
 				rt.Out.Stylize(
 					out.Style{FG: out.ColorBrightBlack},
-					"%s", note,
+					"%s", block.GetNotePreview(list[idx].Blocks[jdx].Note, 0),
 				),
 			)
 		}

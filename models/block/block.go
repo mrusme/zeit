@@ -2,6 +2,7 @@ package block
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/mrusme/zeit/database"
@@ -41,13 +42,43 @@ func (b *Block) FromProcessedArgs(pa *argsparser.ParsedArgs) error {
 		return errors.New("Unprocessed ParsedArgs")
 	}
 
-	b.ProjectSID = pa.ProjectSID
-	b.TaskSID = pa.TaskSID
-	b.Note = pa.Note
-	b.TimestampStart = pa.GetTimestampStart()
-	b.TimestampEnd = pa.GetTimestampEnd()
+	if pa.ProjectSID != "" {
+		b.ProjectSID = pa.ProjectSID
+	}
+	if pa.TaskSID != "" {
+		b.TaskSID = pa.TaskSID
+	}
+	if pa.Note != "" {
+		b.Note = pa.Note
+	}
+
+	start := pa.GetTimestampStart()
+	if start.IsZero() == false {
+		b.TimestampStart = start
+	}
+
+	end := pa.GetTimestampEnd()
+	if end.IsZero() == false {
+		b.TimestampEnd = end
+	}
 
 	return nil
+}
+
+func GetNotePreview(note string, length int) string {
+	if length == 0 {
+		length = 73
+	}
+
+	if note == "" {
+		note = "// no note added"
+	}
+	note = strings.ReplaceAll(note, "\n", "⏎")
+	if len(note) > length {
+		note = note[0:length] + "..."
+	}
+
+	return note
 }
 
 func List(db *database.Database) (map[string]*Block, error) {
