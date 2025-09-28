@@ -2,10 +2,16 @@ package val
 
 import (
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/mrusme/zeit/errs"
+)
+
+const (
+	VALID_SID_REGEX     = `^[a-zA-Z0-9\-\_\.]+$`
+	VALID_SID_REGEX_NEG = `[^a-zA-Z0-9\-\_\.]`
 )
 
 func Validate(s interface{}) error {
@@ -34,9 +40,39 @@ func IsValidSID(fl validator.FieldLevel) bool {
 		return false
 	}
 
-	re := regexp.MustCompile(`^[a-zA-Z0-9\-\_\.]+$`)
+	re := regexp.MustCompile(VALID_SID_REGEX)
 
 	return re.MatchString(value)
+}
+
+func ConvertTextToSID(txt string) string {
+	re, err := regexp.Compile(VALID_SID_REGEX_NEG)
+	if err != nil {
+		panic(err)
+	}
+	tmp := strings.ToLower(re.ReplaceAllString(txt, "_"))
+
+	re, err = regexp.Compile(`_+`)
+	if err != nil {
+		panic(err)
+	}
+
+	tmp = re.ReplaceAllString(tmp, "_")
+
+	if len(tmp) > 32 {
+		tmp = tmp[:32]
+	}
+
+	tmp = strings.Trim(tmp, "_")
+
+	return tmp
+}
+
+func FitDisplayName(dn string) string {
+	if len(dn) > 32 {
+		return dn[:32]
+	}
+	return dn
 }
 
 func IsValidTimestampStart(fl validator.FieldLevel) bool {

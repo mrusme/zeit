@@ -8,6 +8,7 @@ import (
 	blockCmd "github.com/mrusme/zeit/cli/block/cmd"
 	endCmd "github.com/mrusme/zeit/cli/end/cmd"
 	exportCmd "github.com/mrusme/zeit/cli/export/cmd"
+	importCmd "github.com/mrusme/zeit/cli/import/cmd"
 	projectCmd "github.com/mrusme/zeit/cli/project/cmd"
 	startCmd "github.com/mrusme/zeit/cli/start/cmd"
 	taskCmd "github.com/mrusme/zeit/cli/task/cmd"
@@ -75,6 +76,7 @@ func init() {
 	rootCmd.AddCommand(projectCmd.Cmd)
 	rootCmd.AddCommand(taskCmd.Cmd)
 	rootCmd.AddCommand(blockCmd.Cmd)
+	rootCmd.AddCommand(importCmd.Cmd)
 	rootCmd.AddCommand(exportCmd.Cmd)
 	rootCmd.AddCommand(versionCmd.Cmd)
 
