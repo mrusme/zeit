@@ -174,7 +174,7 @@ func GetActive(db *database.Database) (
 	return true, ab, eb, nil
 }
 
-func Start(db *database.Database, b *Block) error {
+func Start(db *database.Database, b *Block) (*Block, error) {
 	var err error
 
 	if b.TimestampStart.IsZero() {
@@ -182,7 +182,15 @@ func Start(db *database.Database, b *Block) error {
 	}
 
 	if b.TimestampEnd.IsZero() == false && b.TimestampEnd.Before(b.TimestampStart) {
-		return errs.ErrEndBeforeStart
+		return nil, errs.ErrEndBeforeStart
+	}
+
+	// Even though `Set()` will validate b, we have to do it manually before we
+	// call `End(db, eb)` (see below), as otherwise the currently tracking block
+	// might get stopped without the new block being started (created) due to
+	// a validation issue.
+	if err = val.Validate(*b); err != nil {
+		return nil, err
 	}
 
 	// We call End first to End any currently active Block
@@ -190,7 +198,7 @@ func Start(db *database.Database, b *Block) error {
 	eb.TimestampEnd = b.TimestampStart.Add(-1 * time.Second)
 	err = End(db, eb)
 	if err != nil && err != errs.ErrNothingToEnd {
-		return err
+		return nil, err
 	}
 
 	// TODO: This should be one transaction
@@ -199,36 +207,36 @@ func Start(db *database.Database, b *Block) error {
 	ab.SetActiveBlockKey(b.GetKey())
 	if err = activeblock.Set(db, ab); err != nil {
 		// We couldn't upsert the ActiveBlock, so we fail fully
-		return err
+		return nil, err
 	}
 
 	if err = Set(db, b); err != nil {
 		// We couldn't upsert the Block, so we fail fully
-		return err
+		return nil, err
 	}
 	// }
 
-	return nil
+	return b, nil
 }
 
-func Switch(db *database.Database, b *Block) error {
+func Switch(db *database.Database, b *Block) (*Block, error) {
 	return Start(db, b)
 }
 
-func Resume(db *database.Database, b *Block) error {
+func Resume(db *database.Database, b *Block) (*Block, error) {
 	var ab *activeblock.ActiveBlock
 	var err error
 
 	if ab, err = activeblock.Get(db); err != nil {
-		return err
+		return nil, err
 	}
 
 	if ab.HasActiveBlockKey() == true {
-		return errs.ErrAlreadyRunning
+		return nil, errs.ErrAlreadyRunning
 	}
 
 	if ab.HasPreviousBlockKey() == false {
-		return errs.ErrNothingToResume
+		return nil, errs.ErrNothingToResume
 	}
 
 	pbk := ab.GetPreviousBlockKey()
@@ -237,11 +245,11 @@ func Resume(db *database.Database, b *Block) error {
 	pb, err = Get(db, pbk)
 	if err != nil && err != errs.ErrKeyNotFound {
 		// We encountered an error which is not KeyNotFound
-		return err
+		return nil, err
 	} else if err != nil && err == errs.ErrKeyNotFound {
 		// The previous block apparently doesn't exist anymore, hence we cannot
 		// resume it:
-		return errs.ErrNothingToResume
+		return nil, errs.ErrNothingToResume
 	}
 
 	b.ProjectSID = pb.ProjectSID

@@ -39,6 +39,13 @@ func IsValidSID(fl validator.FieldLevel) bool {
 func TransformValidationError(err error) error {
 	for _, err := range err.(validator.ValidationErrors) {
 		switch err.Tag() {
+		case "required":
+			switch err.Field() {
+			case "ProjectSID":
+				return errs.ErrProjectSIDRequired
+			case "TaskSID":
+				return errs.ErrTaskSIDRequired
+			}
 		case "sid":
 			return errs.ErrInvalidSID
 		case "max":

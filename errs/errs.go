@@ -27,7 +27,8 @@ var ErrMissingAttrOrVal error = errors.New(
 
 var ErrInvalidSID error = errors.New(
 	"The Simplified-ID (SID) may only contain letters, numbers, dashes, " +
-		"underscores, and periods",
+		"underscores, and periods. Certain reserved keywords like 'edit' are not " +
+		"allowed.",
 )
 
 var ErrNoteTooLarge error = errors.New(
@@ -36,6 +37,14 @@ var ErrNoteTooLarge error = errors.New(
 
 var ErrSIDTooLarge error = errors.New(
 	"The SID is too large",
+)
+
+var ErrProjectSIDRequired error = errors.New(
+	"A project SID is required",
+)
+
+var ErrTaskSIDRequired error = errors.New(
+	"A task SID is required",
 )
 
 var ErrDisplayNameTooLarge error = errors.New(

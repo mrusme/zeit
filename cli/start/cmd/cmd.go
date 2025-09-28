@@ -67,22 +67,35 @@ var Cmd = &cobra.Command{
 			}
 		}
 
+		var nb *block.Block
 		switch cmdName {
 		case "start":
-			err = block.Start(rt.Database, b)
+			nb, err = block.Start(rt.Database, b)
 			rt.NilOrDie(err)
 
-			rt.Out.Put(out.Opts{Type: out.Start}, "Started tracking ...")
+			rt.Out.Put(out.Opts{Type: out.Start},
+				"Started tracking on %s ...",
+				rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
+					"%s/%s", nb.ProjectSID, nb.TaskSID),
+			)
 		case "switch":
-			err = block.Switch(rt.Database, b)
+			nb, err = block.Switch(rt.Database, b)
 			rt.NilOrDie(err)
 
-			rt.Out.Put(out.Opts{Type: out.Start}, "Switched tracking ...")
+			rt.Out.Put(out.Opts{Type: out.Start},
+				"Switched tracking to %s ...",
+				rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
+					"%s/%s", nb.ProjectSID, nb.TaskSID),
+			)
 		case "resume":
-			err = block.Resume(rt.Database, b)
+			nb, err = block.Resume(rt.Database, b)
 			rt.NilOrDie(err)
 
-			rt.Out.Put(out.Opts{Type: out.Resume}, "Resumed tracking ...")
+			rt.Out.Put(out.Opts{Type: out.Resume},
+				"Resumed tracking on %s ...",
+				rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
+					"%s/%s", nb.ProjectSID, nb.TaskSID),
+			)
 		}
 		return
 	},
