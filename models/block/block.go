@@ -7,15 +7,16 @@ import (
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/errs"
 	"github.com/mrusme/zeit/helpers/argsparser"
+	"github.com/mrusme/zeit/helpers/val"
 	"github.com/mrusme/zeit/models/activeblock"
 )
 
 type Block struct {
 	key            string    `json:"-"`
 	OwnerKey       string    `json:"owner_key"`
-	ProjectSID     string    `json:"project_sid"`
-	TaskSID        string    `json:"task_sid"`
-	Note           string    `json:"note"`
+	ProjectSID     string    `json:"project_sid" validate:"required,sid,max=32"`
+	TaskSID        string    `json:"task_sid" validate:"required,sid,max=32"`
+	Note           string    `json:"note" validate:"max=65536"`
 	TimestampStart time.Time `json:"start"`
 	TimestampEnd   time.Time `json:"end"`
 }
@@ -122,6 +123,12 @@ func Get(db *database.Database, key string) (*Block, error) {
 }
 
 func Set(db *database.Database, b *Block) error {
+	var err error
+
+	if err = val.Validate(*b); err != nil {
+		return err
+	}
+
 	if err := db.UpsertRowAsStruct(b); err != nil {
 		return err
 	}

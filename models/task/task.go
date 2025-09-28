@@ -111,6 +111,7 @@ func Set(db *database.Database, tk *Task) error {
 	if err = val.Validate(*tk); err != nil {
 		return err
 	}
+
 	if err = db.UpsertRowAsStruct(tk); err != nil {
 		return err
 	}
