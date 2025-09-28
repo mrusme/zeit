@@ -55,6 +55,14 @@ var ErrInvalidColor error = errors.New(
 	"The color must be in hex format (#FFFFFF)",
 )
 
+var ErrInvalidTimestampStart error = errors.New(
+	"The start time/date must be before the end time/date and not be empty",
+)
+
+var ErrInvalidTimestampEnd error = errors.New(
+	"The end time/date must be after the start time/date",
+)
+
 type ErrParsingTimestamp struct {
 	Message   string
 	Timestamp string

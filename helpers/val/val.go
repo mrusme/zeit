@@ -2,6 +2,7 @@ package val
 
 import (
 	"regexp"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/mrusme/zeit/errs"
@@ -12,6 +13,8 @@ func Validate(s interface{}) error {
 
 	validate := validator.New()
 	validate.RegisterValidation("sid", IsValidSID)
+	validate.RegisterValidation("timestamp_start", IsValidTimestampStart)
+	validate.RegisterValidation("timestamp_end", IsValidTimestampEnd)
 	if err = validate.Struct(s); err != nil {
 		return TransformValidationError(err)
 	}
@@ -36,9 +39,43 @@ func IsValidSID(fl validator.FieldLevel) bool {
 	return re.MatchString(value)
 }
 
+func IsValidTimestampStart(fl validator.FieldLevel) bool {
+	fi := fl.Field().Interface()
+	param := fl.Param()
+	ofi := fl.Parent().FieldByName(param).Interface()
+
+	ts, ok1 := fi.(time.Time)
+	ots, ok2 := ofi.(time.Time)
+	if ok1 == false || ok2 == false {
+		return false
+	}
+
+	return ts.IsZero() == false &&
+		(ts.Before(ots) || ots.IsZero() == true)
+}
+
+func IsValidTimestampEnd(fl validator.FieldLevel) bool {
+	fi := fl.Field().Interface()
+	param := fl.Param()
+	ofi := fl.Parent().FieldByName(param).Interface()
+
+	ts, ok1 := fi.(time.Time)
+	ots, ok2 := ofi.(time.Time)
+	if ok1 == false || ok2 == false {
+		return false
+	}
+
+	return ts.IsZero() == true ||
+		(ts.After(ots) && ots.IsZero() == false)
+}
+
 func TransformValidationError(err error) error {
 	for _, err := range err.(validator.ValidationErrors) {
 		switch err.Tag() {
+		case "timestamp_start":
+			return errs.ErrInvalidTimestampStart
+		case "timestamp_end":
+			return errs.ErrInvalidTimestampEnd
 		case "required":
 			switch err.Field() {
 			case "ProjectSID":

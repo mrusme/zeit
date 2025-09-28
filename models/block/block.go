@@ -18,8 +18,8 @@ type Block struct {
 	ProjectSID     string    `json:"project_sid" validate:"required,sid,max=32"`
 	TaskSID        string    `json:"task_sid" validate:"required,sid,max=32"`
 	Note           string    `json:"note" validate:"max=65536"`
-	TimestampStart time.Time `json:"start"`
-	TimestampEnd   time.Time `json:"end"`
+	TimestampStart time.Time `json:"start" validate:"timestamp_start=TimestampEnd"`
+	TimestampEnd   time.Time `json:"end" validate:"timestamp_end=TimestampStart"`
 }
 
 func New(ownerKey string) (*Block, error) {
