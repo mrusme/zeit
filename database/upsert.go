@@ -11,6 +11,7 @@ func (db *Database) UpsertRowAsBytes(key string, val []byte) error {
 		err := txn.Set([]byte(key), val)
 		return err
 	})
+
 	return err
 }
 

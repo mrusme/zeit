@@ -21,6 +21,7 @@ func New(logger badger.Logger, dbpath string) (*Database, error) {
 
 	bopt := badger.DefaultOptions(dbpath).
 		WithLogger(logger)
+		// WithChecksumVerificationMode(options.OnTableAndBlockRead)
 
 	// if encrypted {
 	// 	bopt = bopt.WithEncryptionKey("").WithIndexCacheSize(100 << 20)

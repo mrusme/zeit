@@ -59,7 +59,7 @@ func (db *Database) GetAllRowsAsBytes() (map[string][]byte, error) {
 			item := it.Item()
 			key := item.Key()
 			err := item.Value(func(val []byte) error {
-				ret[string(key)] = val
+				ret[string(key)] = append([]byte{}, val...)
 				return nil
 			})
 			if err != nil {
@@ -104,7 +104,7 @@ func (db *Database) GetPrefixedRowsAsBytes(prefix string) (map[string][]byte, er
 			item := it.Item()
 			key := item.Key()
 			err := item.Value(func(val []byte) error {
-				ret[string(key)] = val
+				ret[string(key)] = append([]byte{}, val...)
 				return nil
 			})
 			if err != nil {
