@@ -73,6 +73,10 @@ var (
 	ErrInvalidTimestampEnd error = errors.New(
 		"The end time/date must be after the start time/date",
 	)
+
+	ErrDataConversion error = errors.New(
+		"The data conversion failed",
+	)
 )
 
 type ErrParsingTimestamp struct {

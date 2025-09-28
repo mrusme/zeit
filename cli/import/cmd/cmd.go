@@ -7,17 +7,13 @@ import (
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/helpers/importer"
 	"github.com/mrusme/zeit/helpers/out"
+	"github.com/mrusme/zeit/models/activeblock"
 	"github.com/mrusme/zeit/models/block"
+	"github.com/mrusme/zeit/models/config"
 	"github.com/mrusme/zeit/models/project"
 	"github.com/mrusme/zeit/models/task"
 	"github.com/mrusme/zeit/runtime"
 	"github.com/spf13/cobra"
-)
-
-const (
-	FormatUnspecified = ""
-	FormatV0          = "v0"
-	FormatV1          = "v1"
 )
 
 var flagFormat string
@@ -42,7 +38,10 @@ var Cmd = &cobra.Command{
 		im, err = importer.New(importer.ImportFileType(flagFormat), args[0])
 		rt.NilOrDie(err)
 
-		im.Import(ImportCallback, rt)
+		err = im.Import(ImportCallback, rt)
+		rt.NilOrDie(err)
+
+		rt.Out.Put(out.Opts{Type: out.Ok}, "Import finished")
 	},
 }
 
@@ -68,6 +67,37 @@ func ImportCallback(
 	}
 
 	switch model := entry.(type) {
+	case *activeblock.ActiveBlock:
+		if err = activeblock.Set(rt.Database, model); err != nil {
+			rt.Out.Put(out.Opts{Type: out.Error},
+				"ActiveBlock could not be stored: %s",
+				err.Error(),
+			)
+			rt.Logger.Debug(err.Error(), "activeblock", model)
+			// TODO: Shall we ask for user confirmation to continue?
+		}
+	case *block.Block:
+		model.OwnerKey = rt.Config.UserKey
+		if err = block.Set(rt.Database, model); err != nil {
+			rt.Out.Put(out.Opts{Type: out.Error},
+				"Block with key %s for projectSID/taskSID '%s/%s' could not be stored: %s",
+				model.GetKey(),
+				model.ProjectSID,
+				model.TaskSID,
+				err.Error(),
+			)
+			rt.Logger.Debug(err.Error(), "block", model)
+			// TODO: Shall we ask for user confirmation to continue?
+		}
+	case *config.Config:
+		if err = config.Set(rt.Database, model); err != nil {
+			rt.Out.Put(out.Opts{Type: out.Error},
+				"Config could not be stored: %s",
+				err.Error(),
+			)
+			rt.Logger.Debug(err.Error(), "config", model)
+			// TODO: Shall we ask for user confirmation to continue?
+		}
 	case *project.Project:
 		model.OwnerKey = rt.Config.UserKey
 		if err = project.Set(rt.Database, model); err != nil {
@@ -88,19 +118,6 @@ func ImportCallback(
 				err.Error(),
 			)
 			rt.Logger.Debug(err.Error(), "task", model)
-			// TODO: Shall we ask for user confirmation to continue?
-		}
-	case *block.Block:
-		model.OwnerKey = rt.Config.UserKey
-		if err = block.Set(rt.Database, model); err != nil {
-			rt.Out.Put(out.Opts{Type: out.Error},
-				"Block with key %s for projectSID/taskSID '%s/%s' could not be stored: %s",
-				model.GetKey(),
-				model.ProjectSID,
-				model.TaskSID,
-				err.Error(),
-			)
-			rt.Logger.Debug(err.Error(), "block", model)
 			// TODO: Shall we ask for user confirmation to continue?
 		}
 	default:

@@ -21,8 +21,7 @@ func New() (*ActiveBlock, error) {
 }
 
 func (ab *ActiveBlock) SetKey(k string) {
-	// We won't allow this as this entity is a single static entry
-	return
+	ab.key = k
 }
 
 func (ab *ActiveBlock) GetKey() string {

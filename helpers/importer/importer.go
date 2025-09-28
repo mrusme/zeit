@@ -1,11 +1,11 @@
 package importer
 
 import (
-	"errors"
 	"os"
 
 	"github.com/mrusme/zeit/database"
 	v0 "github.com/mrusme/zeit/helpers/importer/engines/v0"
+	v1 "github.com/mrusme/zeit/helpers/importer/engines/v1"
 )
 
 type ImportFileType string
@@ -46,8 +46,9 @@ func New(ftype ImportFileType, file string) (*Importer, error) {
 			return nil, err
 		}
 	case TypeZeitV1:
-		// TODO
-		return nil, errors.New("TODO")
+		if im.Engine, err = v1.New(im.fd); err != nil {
+			return nil, err
+		}
 	}
 
 	return im, nil
