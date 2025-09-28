@@ -85,7 +85,8 @@ var Cmd = &cobra.Command{
 
 		order := database.GetOrderedKeys(dump)
 		for _, key := range order {
-			bs, err := block.ListForProjectTaskSID(rt.Database, projectSID, taskSID)
+			bs, err := block.ListForProjectTaskSID(rt.Database,
+				dump[key].ProjectSID, dump[key].SID)
 			rt.NilOrDie(err)
 
 			var bvs []TaskBlockView
@@ -200,7 +201,7 @@ func outputCLI(
 					"%s", barchar,
 				),
 				rt.Out.Stylize(
-					out.Style{FG: out.ColorPrimary},
+					out.Style{FG: out.ColorCyan},
 					"%s", list[idx].Blocks[jdx].Key,
 				),
 				rt.Out.Stylize(
