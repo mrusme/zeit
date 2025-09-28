@@ -4,16 +4,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-playground/validator/v10"
-	"github.com/mrusme/zeit/common"
 	"github.com/mrusme/zeit/errs"
 	"github.com/mrusme/zeit/helpers/log"
 	"github.com/mrusme/zeit/helpers/timestamp"
+	"github.com/mrusme/zeit/helpers/val"
 )
 
 type ParsedArgs struct {
-	ProjectSID     string    `validate:"omitempty,required_with=TaskSID,sid,max=64"`
-	TaskSID        string    `validate:"omitempty,required_with=ProjectSID,sid,max=64"`
+	ProjectSID     string    `validate:"omitempty,required_with=TaskSID,sid,max=32"`
+	TaskSID        string    `validate:"omitempty,required_with=ProjectSID,sid,max=32"`
 	Note           string    `validate:"max=65536"`
 	TimestampStart string    `validate:""`
 	timestampStart time.Time `validate:""`
@@ -92,21 +91,7 @@ func Parse(command string, args []string) (*ParsedArgs, error) {
 func (pa *ParsedArgs) Process() error {
 	var err error
 
-	validate := validator.New()
-	validate.RegisterValidation("sid", common.IsValidSID)
-	if err = validate.Struct(*pa); err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			if err.Tag() == "sid" {
-				return errs.ErrInvalidSID
-			} else if err.Tag() == "max" {
-				if err.Field() == "Note" {
-					return errs.ErrNoteTooLarge
-				} else if err.Field() == "ProjectSID" || err.Field() == "TaskSID" {
-					return errs.ErrSIDTooLarge
-				}
-			}
-		}
-
+	if err = val.Validate(*pa); err != nil {
 		return err
 	}
 

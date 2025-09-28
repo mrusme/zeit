@@ -3,18 +3,17 @@ package project
 import (
 	"strings"
 
-	"github.com/go-playground/validator/v10"
-	"github.com/mrusme/zeit/common"
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/errs"
 	"github.com/mrusme/zeit/helpers/out"
+	"github.com/mrusme/zeit/helpers/val"
 )
 
 type Project struct {
 	key         string `json:"-"`
 	OwnerKey    string `json:"owner_key"`
-	SID         string `json:"sid" validate:"required,sid,max=64"`
-	DisplayName string `json:"display_name" validate:"max=64"`
+	SID         string `json:"sid" validate:"required,sid,max=32"`
+	DisplayName string `json:"display_name" validate:"max=32"`
 	Color       string `json:"color" validate:"hexcolor"`
 }
 
@@ -87,10 +86,8 @@ func GetBySID(db *database.Database, sid string) (*Project, error) {
 func Set(db *database.Database, pj *Project) error {
 	var err error
 
-	validate := validator.New()
-	validate.RegisterValidation("sid", common.IsValidSID)
-	if err = validate.Struct(*pj); err != nil {
-		return common.TransformValidationError(err)
+	if err = val.Validate(*pj); err != nil {
+		return err
 	}
 
 	if err := db.UpsertRowAsStruct(pj); err != nil {

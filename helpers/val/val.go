@@ -1,4 +1,4 @@
-package common
+package val
 
 import (
 	"regexp"
@@ -6,6 +6,18 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/mrusme/zeit/errs"
 )
+
+func Validate(s interface{}) error {
+	var err error
+
+	validate := validator.New()
+	validate.RegisterValidation("sid", IsValidSID)
+	if err = validate.Struct(s); err != nil {
+		return TransformValidationError(err)
+	}
+
+	return nil
+}
 
 func IsValidSID(fl validator.FieldLevel) bool {
 	value := fl.Field().String()

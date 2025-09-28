@@ -6,15 +6,16 @@ import (
 	"github.com/mrusme/zeit/database"
 	"github.com/mrusme/zeit/errs"
 	"github.com/mrusme/zeit/helpers/out"
+	"github.com/mrusme/zeit/helpers/val"
 )
 
 type Task struct {
 	key         string `json:"-"`
 	OwnerKey    string `json:"owner_key"`
-	SID         string `json:"sid"`
-	ProjectSID  string `json:"project_sid"`
-	DisplayName string `json:"display_name"`
-	Color       string `json:"color"`
+	SID         string `json:"sid" validate:"required,sid,max=32"`
+	ProjectSID  string `json:"project_sid" validate:"required,sid,max=32"`
+	DisplayName string `json:"display_name" validate:"max=32"`
+	Color       string `json:"color" validate:"hexcolor"`
 }
 
 func New(ownerKey string, projectSID string, sid string) (*Task, error) {
@@ -105,7 +106,12 @@ func GetBySID(db *database.Database, projectSID string, sid string) (*Task, erro
 }
 
 func Set(db *database.Database, tk *Task) error {
-	if err := db.UpsertRowAsStruct(tk); err != nil {
+	var err error
+
+	if err = val.Validate(*tk); err != nil {
+		return err
+	}
+	if err = db.UpsertRowAsStruct(tk); err != nil {
 		return err
 	}
 
