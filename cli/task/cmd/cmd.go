@@ -201,7 +201,7 @@ func outputCLI(
 					"%s", barchar,
 				),
 				rt.Out.Stylize(
-					out.Style{FG: out.ColorCyan},
+					out.Style{FG: out.ColorPrimary},
 					"%s", list[idx].Blocks[jdx].Key,
 				),
 				rt.Out.Stylize(
@@ -217,16 +217,20 @@ func outputCLI(
 					"%s", barcharsub,
 				),
 				rt.Out.Stylize(
-					out.Style{FG: out.ColorWhite},
-					"%s", list[idx].Blocks[jdx].TimestampStart.Format(time.DateTime),
+					out.Style{FG: out.OutputPrefixes[out.Start].Color},
+					"%s%s",
+					out.OutputPrefixes[out.Start].Char,
+					list[idx].Blocks[jdx].TimestampStart.Format(time.DateTime),
 				),
 				rt.Out.Stylize(
 					out.Style{FG: out.ColorSecondary},
 					"→",
 				),
 				rt.Out.Stylize(
-					out.Style{FG: out.ColorWhite},
-					"%s", list[idx].Blocks[jdx].TimestampEnd.Format(time.DateTime),
+					out.Style{FG: out.OutputPrefixes[out.End].Color},
+					"%s%s",
+					out.OutputPrefixes[out.End].Char,
+					list[idx].Blocks[jdx].TimestampEnd.Format(time.DateTime),
 				),
 				rt.Out.Stylize(
 					out.Style{FG: out.OutputPrefixes[out.Info].Color},
