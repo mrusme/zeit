@@ -5,9 +5,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	blockEditCmd "github.com/mrusme/zeit/cli/block/edit/cmd"
 	"github.com/mrusme/zeit/database"
+	"github.com/mrusme/zeit/errs"
 	"github.com/mrusme/zeit/helpers/out"
+	"github.com/mrusme/zeit/helpers/timestamp"
 	"github.com/mrusme/zeit/models/block"
 	"github.com/mrusme/zeit/runtime"
 	"github.com/spf13/cobra"
@@ -32,13 +35,16 @@ type BlockView struct {
 }
 
 var Cmd = &cobra.Command{
-	Use:     "block [flags] key",
+	Use:     "block [flags] [key | timeframe]",
 	Aliases: []string{"blocks", "blk", "b"},
 	Short:   "zeit block",
 	Long:    "View and manage zeit blocks",
 	Example: "zeit block 01998b32-7f89-7373-a192-56417e0bc89f",
-	Args:    cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
+		var timeframe string = ""
+		var tstamp *timestamp.Timestamp
+		var blockKey string = ""
+		var isBlockKey bool = false
 		var dump map[string]*block.Block
 		var bvs []BlockView
 		var err error
@@ -46,15 +52,29 @@ var Cmd = &cobra.Command{
 		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
 		defer rt.End()
 
-		var blockKey string = ""
 		if len(args) == 1 {
-			blockKey = args[0]
-			if strings.Index(blockKey, "block:") == -1 {
-				blockKey = "block:" + blockKey
+			if strings.Index(args[0], "block:") == -1 {
+				if _, err = uuid.Parse(args[0]); err == nil {
+					blockKey = "block:" + args[0]
+					isBlockKey = true
+				}
+			} else {
+				blockKey = args[0]
+				isBlockKey = true
 			}
 		}
 
-		if blockKey == "" {
+		if len(args) > 0 && isBlockKey == false {
+			timeframe = strings.Join(args, " ")
+			tstamp, err = timestamp.ParsePeriod(timeframe)
+			rt.NilOrDie(err)
+			if tstamp.IsRange == false {
+				rt.NilOrDie(errs.ErrNotATimeframe)
+			}
+		}
+
+		if (len(args) == 0 && blockKey == "") ||
+			(len(args) > 0 && isBlockKey == false) {
 			// List all blocks
 			dump, err = block.List(rt.Database)
 			rt.NilOrDie(err)
@@ -68,8 +88,19 @@ var Cmd = &cobra.Command{
 		}
 
 		order := database.GetOrderedKeys(dump)
+		var newOrder []string
 		for _, key := range order {
 			var duration time.Duration
+
+			if isBlockKey == false && tstamp.IsRange == true {
+				if (dump[key].TimestampStart.After(tstamp.Time) &&
+					dump[key].TimestampStart.Before(tstamp.ToTime)) ||
+					(dump[key].TimestampEnd.After(tstamp.Time) &&
+						dump[key].TimestampEnd.Before(tstamp.ToTime)) {
+				} else {
+					continue
+				}
+			}
 
 			if dump[key].TimestampStart.IsZero() == false &&
 				dump[key].TimestampEnd.IsZero() == false {
@@ -85,15 +116,16 @@ var Cmd = &cobra.Command{
 				TimestampEnd:   dump[key].TimestampEnd,
 				Duration:       duration,
 			})
+			newOrder = append(newOrder, key)
 		}
 
 		switch flagFormat {
 		case FormatUnspecified:
-			outputCLI(rt, bvs, order)
+			outputCLI(rt, bvs, newOrder)
 		case FormatCLI:
-			outputCLI(rt, bvs, order)
+			outputCLI(rt, bvs, newOrder)
 		case FormatJSON:
-			outputJSON(rt, bvs, order)
+			outputJSON(rt, bvs, newOrder)
 		}
 	},
 }

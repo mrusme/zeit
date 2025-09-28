@@ -77,6 +77,10 @@ var (
 	ErrDataConversion error = errors.New(
 		"The data conversion failed",
 	)
+
+	ErrNotATimeframe error = errors.New(
+		"Submitted value is not a timeframe",
+	)
 )
 
 type ErrParsingTimestamp struct {
