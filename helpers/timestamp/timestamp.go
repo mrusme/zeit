@@ -16,7 +16,9 @@ type Timestamp struct {
 	IsRange bool
 }
 
-var periodRegex = regexp.MustCompile(`(?m)(this|current|last|previous){0,1}\s*(week|month|quarter|year|decade|century)`)
+// We also match today with this regex, which in our case is good. However,
+// toweek or tomonth also works, which is kind of weird but eh.
+var periodRegex = regexp.MustCompile(`(?m)(this|current|last|previous){0,1}\s*(hour|day|week|month|quarter|year|decade|century)`)
 
 func ParsePeriod(str string) (*Timestamp, error) {
 	var frame string
@@ -44,6 +46,20 @@ func ParsePeriod(str string) (*Timestamp, error) {
 	}
 
 	switch period {
+	case "hour":
+		hour := now.Hour()
+		if previousPeriod {
+			hour -= 1
+		}
+		ts.Time = time.Date(now.Year(), now.Month(), now.Day(), hour, 0, 0, 0, now.Location())
+		ts.ToTime = ts.Time.Add(59 * time.Minute).Add(59 * time.Second)
+	case "day":
+		day := now.Day()
+		if previousPeriod {
+			day -= 1
+		}
+		ts.Time = time.Date(now.Year(), now.Month(), day, 0, 0, 0, 0, now.Location())
+		ts.ToTime = ts.Time.Add(23 * time.Hour).Add(59 * time.Minute).Add(59 * time.Second)
 	case "week":
 		weekday := now.Weekday()
 		daysToMonday := (weekday - time.Monday + 7) % 7
@@ -67,6 +83,8 @@ func ParsePeriod(str string) (*Timestamp, error) {
 		}
 		nextMonth := ts.Time.AddDate(0, 1, 0)
 		ts.ToTime = nextMonth.Add(-time.Second)
+	case "quarter":
+		ts.Time, ts.ToTime = getQuarterStartEnd(now, previousPeriod)
 	case "year":
 		if previousPeriod == false {
 			ts.Time = time.Date(now.Year(), time.January, 1, 0, 0, 0, 0, now.Location())
@@ -78,6 +96,41 @@ func ParsePeriod(str string) (*Timestamp, error) {
 	}
 
 	return ts, nil
+}
+
+func getQuarterStartEnd(now time.Time, last bool) (time.Time, time.Time) {
+	month := int(now.Month())
+	var quarterStartMonth int
+	var quarterEndMonth int
+
+	if last {
+		// If 'last' is true, work with the previous quarter
+		month -= 3
+		if month <= 0 {
+			month += 12
+		}
+	}
+
+	// "Wait, wat, what is this black sorcery?" you might be asking yourself.
+	// If you type e.g. (9-1)/3*3+1 into your calculator you'll be getting 9.
+	// However, if you run this calculation in Go, you'll be getting 7.
+	//
+	// The reason for this is Go's way of handling integer calculations when
+	// floats are involved. The formula used here ( (9-1)/3*3+1 ) could be
+	// (more transparently) expressed using float values like so:
+	//
+	// math.Floor((9.0-1.0)/3.0)*3.0 + 1.0
+	//
+	// This would return the desired result of 7(.0). However, by using integers
+	// we're saving ourselves having to explicitly pull in the math package and
+	// call the Floor function.
+	quarterStartMonth = (month-1)/3*3 + 1
+	quarterEndMonth = quarterStartMonth + 2
+
+	qStart := time.Date(now.Year(), time.Month(quarterStartMonth), 1, 0, 0, 0, 0, time.UTC)
+	qEnd := time.Date(now.Year(), time.Month(quarterEndMonth+1), 0, 23, 59, 59, 0, time.UTC)
+
+	return qStart, qEnd
 }
 
 func Parse(str string) (*Timestamp, error) {

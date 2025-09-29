@@ -71,6 +71,26 @@ var Cmd = &cobra.Command{
 			if tstamp.IsRange == false {
 				rt.NilOrDie(errs.ErrNotATimeframe)
 			}
+
+			rt.Out.Put(out.Opts{Type: out.Info},
+				"%s %s %s %s",
+				rt.Out.Stylize(
+					out.Style{FG: out.ColorSecondary},
+					"Timeframe:",
+				),
+				rt.Out.Stylize(out.Style{FG: out.OutputPrefixes[out.Start].Color},
+					"%s",
+					tstamp.Time.Format(time.DateTime),
+				),
+				rt.Out.Stylize(
+					out.Style{FG: out.ColorSecondary},
+					"→",
+				),
+				rt.Out.Stylize(out.Style{FG: out.OutputPrefixes[out.End].Color},
+					"%s",
+					tstamp.ToTime.Format(time.DateTime),
+				),
+			)
 		}
 
 		if (len(args) == 0 && blockKey == "") ||
