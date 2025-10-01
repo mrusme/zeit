@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	blockEditCmd "github.com/mrusme/zeit/cli/block/edit/cmd"
 	"github.com/mrusme/zeit/database"
-	"github.com/mrusme/zeit/errs"
+	"github.com/mrusme/zeit/helpers/argsparser"
 	"github.com/mrusme/zeit/helpers/out"
 	"github.com/mrusme/zeit/helpers/timestamp"
 	"github.com/mrusme/zeit/models/block"
@@ -22,7 +22,10 @@ const (
 	FormatJSON        = "json"
 )
 
-var flagFormat string
+var (
+	flagFormat string
+	flags      *argsparser.ParsedArgs
+)
 
 type BlockView struct {
 	Key            string        `json:"key"`
@@ -41,11 +44,9 @@ var Cmd = &cobra.Command{
 	Long:    "View and manage zeit blocks",
 	Example: "zeit block 01998b32-7f89-7373-a192-56417e0bc89f",
 	Run: func(cmd *cobra.Command, args []string) {
-		var timeframe string = ""
-		var tstamp *timestamp.Timestamp
 		var blockKey string = ""
-		var isBlockKey bool = false
-		var dump map[string]*block.Block
+		var pargs *argsparser.ParsedArgs
+		var blockMap map[string]*block.Block = make(map[string]*block.Block)
 		var bvs []BlockView
 		var err error
 
@@ -53,87 +54,50 @@ var Cmd = &cobra.Command{
 		defer rt.End()
 
 		if len(args) == 1 {
-			if strings.Index(args[0], "block:") == -1 {
-				if _, err = uuid.Parse(args[0]); err == nil {
-					blockKey = "block:" + args[0]
-					isBlockKey = true
-				}
-			} else {
+			if strings.Index(args[0], "block:") > -1 {
 				blockKey = args[0]
-				isBlockKey = true
+			} else if _, err = uuid.Parse(args[0]); err == nil {
+				blockKey = "block:" + args[0]
 			}
 		}
 
-		if len(args) > 0 && isBlockKey == false {
-			timeframe = strings.Join(args, " ")
-			tstamp, err = timestamp.ParsePeriod(timeframe)
-			rt.NilOrDie(err)
-			if tstamp.IsRange == false {
-				rt.NilOrDie(errs.ErrNotATimeframe)
-			}
-
-			rt.Out.Put(out.Opts{Type: out.Info},
-				"%s %s %s %s",
-				rt.Out.Stylize(
-					out.Style{FG: out.ColorSecondary},
-					"Timeframe:",
-				),
-				rt.Out.Stylize(out.Style{FG: out.OutputPrefixes[out.Start].Color},
-					"%s",
-					tstamp.Time.Format(time.DateTime),
-				),
-				rt.Out.Stylize(
-					out.Style{FG: out.ColorSecondary},
-					"→",
-				),
-				rt.Out.Stylize(out.Style{FG: out.OutputPrefixes[out.End].Color},
-					"%s",
-					tstamp.ToTime.Format(time.DateTime),
-				),
-			)
-		}
-
-		if (len(args) == 0 && blockKey == "") ||
-			(len(args) > 0 && isBlockKey == false) {
-			// List all blocks
-			dump, err = block.List(rt.Database)
-			rt.NilOrDie(err)
-		} else {
+		if blockKey != "" {
+			pargs = new(argsparser.ParsedArgs)
 			// Show specific block
-			tk, err := block.Get(rt.Database, blockKey)
+			b, err := block.Get(rt.Database, blockKey)
 			rt.NilOrDie(err)
 
-			dump = make(map[string]*block.Block)
-			dump[tk.GetKey()] = tk
+			blockMap = make(map[string]*block.Block)
+			blockMap[b.GetKey()] = b
+		} else {
+			pargs, err = argsparser.POP("block", flags, args, rt.Logger)
+			rt.NilOrDie(err)
+
+			blockMap, err = block.List(rt.Database)
+			rt.NilOrDie(err)
 		}
 
-		order := database.GetOrderedKeys(dump)
+		order := database.GetOrderedKeys(blockMap)
 		var newOrder []string
 		for _, key := range order {
 			var duration time.Duration
 
-			if isBlockKey == false && tstamp.IsRange == true {
-				if (dump[key].TimestampStart.After(tstamp.Time) &&
-					dump[key].TimestampStart.Before(tstamp.ToTime)) ||
-					(dump[key].TimestampEnd.After(tstamp.Time) &&
-						dump[key].TimestampEnd.Before(tstamp.ToTime)) {
-				} else {
-					continue
-				}
-			}
+			timestampStart := pargs.GetTimestampStart()
+			timestampEnd := pargs.GetTimestampEnd()
 
-			if dump[key].TimestampStart.IsZero() == false &&
-				dump[key].TimestampEnd.IsZero() == false {
-				duration = dump[key].TimestampEnd.Sub(dump[key].TimestampStart)
+			if timestamp.IsWithinTimeframe(
+				timestampStart, timestampEnd,
+				blockMap[key].TimestampStart, blockMap[key].TimestampEnd) == false {
+				continue
 			}
 
 			bvs = append(bvs, BlockView{
 				Key:            key,
-				ProjectSID:     dump[key].ProjectSID,
-				TaskSID:        dump[key].TaskSID,
-				Note:           dump[key].Note,
-				TimestampStart: dump[key].TimestampStart,
-				TimestampEnd:   dump[key].TimestampEnd,
+				ProjectSID:     blockMap[key].ProjectSID,
+				TaskSID:        blockMap[key].TaskSID,
+				Note:           blockMap[key].Note,
+				TimestampStart: blockMap[key].TimestampStart,
+				TimestampEnd:   blockMap[key].TimestampEnd,
 				Duration:       duration,
 			})
 			newOrder = append(newOrder, key)
@@ -141,9 +105,9 @@ var Cmd = &cobra.Command{
 
 		switch flagFormat {
 		case FormatUnspecified:
-			outputCLI(rt, bvs, newOrder)
+			outputCLI(rt, pargs, bvs, newOrder)
 		case FormatCLI:
-			outputCLI(rt, bvs, newOrder)
+			outputCLI(rt, pargs, bvs, newOrder)
 		case FormatJSON:
 			outputJSON(rt, bvs, newOrder)
 		}
@@ -152,9 +116,46 @@ var Cmd = &cobra.Command{
 
 func outputCLI(
 	rt *runtime.Runtime,
+	pargs *argsparser.ParsedArgs,
 	list []BlockView,
 	order []string,
 ) {
+	timestampStart := pargs.GetTimestampStart()
+	timestampEnd := pargs.GetTimestampEnd()
+	if timestampStart.IsZero() == false ||
+		timestampEnd.IsZero() == false {
+
+		formatStart := timestampStart.Format(time.DateTime)
+		if timestampStart.IsZero() {
+			formatStart = "*"
+		}
+
+		formatEnd := timestampEnd.Format(time.DateTime)
+		if timestampEnd.IsZero() {
+			formatEnd = "*"
+		}
+
+		rt.Out.Put(out.Opts{Type: out.Info},
+			"%s %s %s %s",
+			rt.Out.Stylize(
+				out.Style{FG: out.ColorSecondary},
+				"Timeframe:",
+			),
+			rt.Out.Stylize(out.Style{FG: out.OutputPrefixes[out.Start].Color},
+				"%s",
+				formatStart,
+			),
+			rt.Out.Stylize(
+				out.Style{FG: out.ColorSecondary},
+				"→",
+			),
+			rt.Out.Stylize(out.Style{FG: out.OutputPrefixes[out.End].Color},
+				"%s",
+				formatEnd,
+			),
+		)
+	}
+
 	for idx := range order {
 		rt.Out.Put(out.Opts{Type: out.Info},
 			"%s  %s %s\n  %s %s %s\n  tracked on %s/%s\n  %s",
@@ -221,6 +222,37 @@ func outputJSON(
 
 func init() {
 	Cmd.AddCommand(blockEditCmd.Cmd)
+
+	flags = new(argsparser.ParsedArgs)
+
+	Cmd.PersistentFlags().StringVarP(
+		&flags.ProjectSID,
+		"project",
+		"p",
+		"",
+		"Project Simplified-ID",
+	)
+	Cmd.PersistentFlags().StringVarP(
+		&flags.TaskSID,
+		"task",
+		"t",
+		"",
+		"Task Simplified-ID",
+	)
+	Cmd.PersistentFlags().StringVarP(
+		&flags.TimestampStart,
+		"start",
+		"s",
+		"",
+		"Start timestamp",
+	)
+	Cmd.PersistentFlags().StringVarP(
+		&flags.TimestampEnd,
+		"end",
+		"e",
+		"",
+		"End timestamp",
+	)
 
 	Cmd.PersistentFlags().StringVarP(
 		&flagFormat,

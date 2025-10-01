@@ -2,6 +2,7 @@ package timestamp
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -16,9 +17,7 @@ type Timestamp struct {
 	IsRange bool
 }
 
-// We also match today with this regex, which in our case is good. However,
-// toweek or tomonth also works, which is kind of weird but eh.
-var periodRegex = regexp.MustCompile(`(?m)(this|current|last|previous){0,1}\s*(hour|day|week|month|quarter|year|decade|century)`)
+var periodRegex = regexp.MustCompile(`(?m)^(this|current|last|previous){0,1}\s+(hour|day|week|month|quarter|year|decade|century)$`)
 
 func ParsePeriod(str string) (*Timestamp, error) {
 	var frame string
@@ -140,6 +139,7 @@ func Parse(str string) (*Timestamp, error) {
 	var ts *Timestamp
 	ts, err = ParsePeriod(str)
 	if err == nil {
+		fmt.Println("IS PERIOD")
 		return ts, nil
 	} else {
 		ts = new(Timestamp)
@@ -156,4 +156,21 @@ func Parse(str string) (*Timestamp, error) {
 	ts.Time = dt.Time
 
 	return ts, nil
+}
+
+func IsWithinTimeframe(
+	timeframeStart time.Time,
+	timeframeEnd time.Time,
+	vStart time.Time,
+	vEnd time.Time,
+) bool {
+	if timeframeStart.IsZero() == false && vStart.Before(timeframeStart) {
+		return false
+	}
+
+	if timeframeEnd.IsZero() == false && vEnd.After(timeframeEnd) {
+		return false
+	}
+
+	return true
 }
