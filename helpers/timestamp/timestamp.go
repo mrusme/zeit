@@ -17,7 +17,9 @@ type Timestamp struct {
 	IsRange bool
 }
 
-var periodRegex = regexp.MustCompile(`(?m)^(this|current|last|previous){0,1}\s+(hour|day|week|month|quarter|year|decade|century)$`)
+var periodRegex = regexp.MustCompile(
+	`(?m)^(this|current|last|previous){0,1}\s+(hour|day|week|month|quarter|year|decade|century)$`,
+)
 
 func ParsePeriod(str string) (*Timestamp, error) {
 	var frame string

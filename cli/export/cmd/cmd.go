@@ -213,7 +213,7 @@ func init() {
 		"format",
 		"f",
 		"",
-		"Export format (cli, json) (default \"cli\")",
+		"Output format (cli, json) (default \"cli\")",
 	)
 	Cmd.PersistentFlags().BoolVarP(
 		&flagBackup,
