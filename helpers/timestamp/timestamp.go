@@ -2,7 +2,6 @@ package timestamp
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -141,7 +140,6 @@ func Parse(str string) (*Timestamp, error) {
 	var ts *Timestamp
 	ts, err = ParsePeriod(str)
 	if err == nil {
-		fmt.Println("IS PERIOD")
 		return ts, nil
 	} else {
 		ts = new(Timestamp)
