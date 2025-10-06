@@ -91,6 +91,18 @@ var Cmd = &cobra.Command{
 				continue
 			}
 
+			if pargs.ProjectSID != "" {
+				if blockMap[key].ProjectSID != pargs.ProjectSID {
+					continue
+				}
+			}
+
+			if pargs.TaskSID != "" {
+				if blockMap[key].TaskSID != pargs.TaskSID {
+					continue
+				}
+			}
+
 			bvs = append(bvs, BlockView{
 				Key:            key,
 				ProjectSID:     blockMap[key].ProjectSID,
