@@ -38,7 +38,7 @@ type BlockView struct {
 }
 
 var Cmd = &cobra.Command{
-	Use:     "block [flags] [key | timeframe]",
+	Use:     "block [flags] [key | arguments]",
 	Aliases: []string{"blocks", "blk", "b"},
 	Short:   "zeit block",
 	Long:    "View and manage zeit blocks",
@@ -85,7 +85,7 @@ var Cmd = &cobra.Command{
 			timestampStart := pargs.GetTimestampStart()
 			timestampEnd := pargs.GetTimestampEnd()
 
-			if timestamp.IsWithinTimeframe(
+			if timestamp.IsPartiallyWithinTimeframe(
 				timestampStart, timestampEnd,
 				blockMap[key].TimestampStart, blockMap[key].TimestampEnd) == false {
 				continue

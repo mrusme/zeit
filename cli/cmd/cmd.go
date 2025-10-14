@@ -11,6 +11,7 @@ import (
 	importCmd "github.com/mrusme/zeit/cli/import/cmd"
 	projectCmd "github.com/mrusme/zeit/cli/project/cmd"
 	startCmd "github.com/mrusme/zeit/cli/start/cmd"
+	statCmd "github.com/mrusme/zeit/cli/stat/cmd"
 	taskCmd "github.com/mrusme/zeit/cli/task/cmd"
 	versionCmd "github.com/mrusme/zeit/cli/version/cmd"
 	"github.com/mrusme/zeit/helpers/out"
@@ -78,6 +79,7 @@ func init() {
 	rootCmd.AddCommand(blockCmd.Cmd)
 	rootCmd.AddCommand(importCmd.Cmd)
 	rootCmd.AddCommand(exportCmd.Cmd)
+	rootCmd.AddCommand(statCmd.Cmd)
 	rootCmd.AddCommand(versionCmd.Cmd)
 
 	rootCmd.PersistentFlags().BoolVar(

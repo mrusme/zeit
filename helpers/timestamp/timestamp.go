@@ -158,19 +158,66 @@ func Parse(str string) (*Timestamp, error) {
 	return ts, nil
 }
 
-func IsWithinTimeframe(
+func IsStartWithinTimeframe(
 	timeframeStart time.Time,
 	timeframeEnd time.Time,
 	vStart time.Time,
-	vEnd time.Time,
 ) bool {
 	if timeframeStart.IsZero() == false && vStart.Before(timeframeStart) {
 		return false
 	}
 
+	return true
+}
+
+func IsEndWithinTimeframe(
+	timeframeStart time.Time,
+	timeframeEnd time.Time,
+	vEnd time.Time,
+) bool {
 	if timeframeEnd.IsZero() == false && vEnd.After(timeframeEnd) {
 		return false
 	}
 
 	return true
+}
+
+func IsFullyWithinTimeframe(
+	timeframeStart time.Time,
+	timeframeEnd time.Time,
+	vStart time.Time,
+	vEnd time.Time,
+) bool {
+	if IsStartWithinTimeframe(
+		timeframeStart, timeframeEnd, vStart,
+	) == false {
+		return false
+	}
+	if IsEndWithinTimeframe(
+		timeframeStart, timeframeEnd, vEnd,
+	) == false {
+		return false
+	}
+
+	return true
+}
+
+func IsPartiallyWithinTimeframe(
+	timeframeStart time.Time,
+	timeframeEnd time.Time,
+	vStart time.Time,
+	vEnd time.Time,
+) bool {
+	if IsStartWithinTimeframe(
+		timeframeStart, timeframeEnd, vStart,
+	) == true {
+		return true
+	}
+	if IsEndWithinTimeframe(
+		timeframeStart, timeframeEnd, vEnd,
+	) == true {
+		return true
+	}
+
+	return false
 }
