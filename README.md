@@ -49,8 +49,19 @@ source <(zeit completion bash)
 To load completions for every new session, add them to your completions
 directory, e.g.:
 
+Bash:
 ```
 sudo zeit completion bash > /etc/bash_completion.d/zeit
+```
+
+Zsh:
+```
+sudo zeit completion zsh > (one of your completion dirs at $fpath)/_zeit
+```
+
+Fish:
+```
+sudo zeit completion fish > (one of your completion dirs at $fish_complete_path)/zeit.fish
 ```
 
 ### Projects
