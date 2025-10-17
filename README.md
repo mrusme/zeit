@@ -12,6 +12,13 @@ here](https://マリウス.com/zeit-erfassen-a-cli-activity-time-tracker/).
 [Download the latest version for macOS, Linux, FreeBSD, NetBSD, OpenBSD & Plan9
 here](https://github.com/mrusme/zeit/releases/latest).
 
+## NOTE
+
+Zeit [v1](https://github.com/mrusme/zeit/tree/v1) is currently being developed. 
+It is a full rewrite of Zeit and won't share any of the code of the previous 
+version(s). If you would like to contribute, please do so against the `v1` 
+branch.
+
 ## Build
 
 ```sh
