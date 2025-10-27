@@ -1,7 +1,7 @@
 Output zeit.gif
 
 Set FontSize 16
-Set Width 1280
+Set Width 960
 Set Height 960
 Set Padding 20
 Set TypingSpeed 100ms
@@ -14,7 +14,7 @@ Sleep 2s
 Type "zeit"
 Sleep 500ms
 Enter
-Sleep 1s
+Sleep 2s
 
 Type "zeit start work on project_one/task_one"
 Sleep 500ms
