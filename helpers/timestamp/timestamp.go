@@ -163,7 +163,8 @@ func IsStartWithinTimeframe(
 	timeframeEnd time.Time,
 	vStart time.Time,
 ) bool {
-	if timeframeStart.IsZero() == false && vStart.Before(timeframeStart) {
+	if timeframeStart.IsZero() == false &&
+		(vStart.Before(timeframeStart) || vStart.After(timeframeEnd)) {
 		return false
 	}
 
@@ -175,7 +176,8 @@ func IsEndWithinTimeframe(
 	timeframeEnd time.Time,
 	vEnd time.Time,
 ) bool {
-	if timeframeEnd.IsZero() == false && vEnd.After(timeframeEnd) {
+	if timeframeEnd.IsZero() == false &&
+		(vEnd.Before(timeframeStart) || vEnd.After(timeframeEnd)) {
 		return false
 	}
 
