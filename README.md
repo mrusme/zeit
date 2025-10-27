@@ -7,7 +7,8 @@ LICENSE](https://img.shields.io/static/v1?label=SEGV%20LICENSE&message=1.0&label
 
 [<img src="https://xn--gckvb8fzb.com/images/chatroom.png" width="275">](https://xn--gckvb8fzb.com/contact/)
 
-Zeit, erfassen. A command line tool for tracking time spent on tasks & projects.
+_Zeit, erfassen_. A command line tool for tracking time spent on tasks &
+projects.
 
 [Download the latest version for macOS, Linux, FreeBSD, NetBSD, OpenBSD & Plan9
 here](https://github.com/mrusme/zeit/releases/latest).
@@ -24,7 +25,7 @@ the version in `zeit --help` to be a different one.
 
 ## Understand
 
-_zeit_'s data structure contains of the following key entities:
+_Zeit_'s data structure contains of the following key entities:
 
 - `block`: A tracked time period that has a start and an end date/time
 - `project`: A top-level project
@@ -40,25 +41,45 @@ configured using the `zeit project` and the `zeit task` commands.
 
 ### Auto-Completion
 
-_zeit_ can generate auto-completion scripts for your shell of choice. You can
+_Zeit_ can generate auto-completion scripts for your shell of choice. You can
 load completions into your current session via:
 
 ```sh
-source <(zeit completion bash)
+source <(zeit completion $(basename "$SHELL"))
 ```
 
-(replace `bash` with your shell, e.g. `zsh`, `fish`, `powershell`)
+(supported shells are `bash`, `zsh`, and `fish`; For PowerShell see below)
 
 To load completions for every new session, add them to your completions
-directory, e.g.:
+directory.
 
+For Bash:
+
+```sh
+zeit completion bash > ~/.local/share/bash-completion/completions/zeit
 ```
-sudo zeit completion bash > /etc/bash_completion.d/zeit
+
+For Zsh:
+
+```sh
+zeit completion zsh > ~/.local/share/zsh/completions/zeit
+```
+
+For Fish:
+
+```sh
+zeit completion fish > ~/.config/fish/completions/zeit.fish
+```
+
+For PowerShell:
+
+```sh
+zeit completion powershell | Out-String | Invoke-Expression
 ```
 
 ## Integrations
 
-This is a list of integrations and extensions that work with _zeit_:
+This is a list of integrations and extensions that work with _Zeit_:
 
 | Integration | Description | Author |
 | ----------- | ----------- | ------ |
