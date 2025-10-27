@@ -35,6 +35,23 @@ A `block` consists of a `project` and a `task`. These don't have to pre-exist
 and can be created on-the-fly when starting to track a new `block`. They can be
 configured using the `zeit project` and the `zeit task` commands.
 
+### Migrate from v0 to v1
+
+**Warning**: The latest _Zeit_ version is incompatible with v0 releases
+(`0.*.*`)! If you're upgrading from _Zeit_ v0 to v1 or later, please first
+export your existing _Zeit_ v0 database via the following command:
+
+```sh
+zeit export --format zeit > ~/zeit_export.json
+```
+
+Only then upgrade _Zeit_ to the latest release and run the following command to
+import the previously exported v0 database:
+
+```sh
+zeit import -f v0 ~/zeit_export.json
+```
+
 ## Use
 
 ![zeit usage](.README.md/zeit.gif)
