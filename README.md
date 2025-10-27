@@ -94,6 +94,17 @@ For PowerShell:
 zeit completion powershell | Out-String | Invoke-Expression
 ```
 
+### Life hacks
+
+#### `dmenu` compatible project/task selector
+
+Requires `jq` to be installed and preferred `dmenu` launcher (e.g. `bemenu`,
+`rofi`, etc.) to be set as `DMENU_PROGRAM`:
+
+```sh
+zeit projects -f json | jq -r '.[] | .sid as $parent_sid | .tasks? // [] | .[] | "\($parent_sid)/\(.sid)"' | $DMENU_PROGRAM
+```
+
 ## Integrations
 
 This is a list of integrations and extensions that work with _Zeit_:
