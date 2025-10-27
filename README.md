@@ -3,7 +3,7 @@
 [![SEGV 
 LICENSE](https://img.shields.io/static/v1?label=SEGV%20LICENSE&message=1.0&labelColor=0060A8&color=ffffff)](https://xn--gckvb8fzb.com/segv/)
 
-![zeit](.README.md/zeit.png)
+![zeit](.README.md/zeit.webp)
 
 [<img src="https://xn--gckvb8fzb.com/images/chatroom.png" width="275">](https://xn--gckvb8fzb.com/contact/)
 
@@ -39,37 +39,7 @@ configured using the `zeit project` and the `zeit task` commands.
 
 ## Use
 
-_zeit_ will store all its data inside its own database, which is located at
-`$XDG_DATA_HOME/zeit/db/`. You can adjust this location by exporting
-`ZEIT_DATABASE=~/your/preferred/path`.
-
-### `start`/`switch`/`resume`
-
-```sh
-zeit start -p MyProject -t MyTask 5 minutes ago
-```
-
-```sh
-zeit start work on MyProject/MyTask in 5 minutes
-```
-
-```sh
-zeit switch to MyOtherProject/MyTask 5 minutes ago
-```
-
-```sh
-zeit switch -p MyOtherProject -t MyTask 5 minutes ago
-```
-
-When you don't specify the project/task at start, as soon as you stop _zeit_
-will ask you for the project and task. If you don't specify it at that point,
-_zeit_ will not assign any project/task to the block.
-
-### `end`/`pause`
-
-```sh
-zeit end 20 minutes ago
-```
+![zeit usage](.README.md/zeit.gif)
 
 ### Auto-Completion
 
