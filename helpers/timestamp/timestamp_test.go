@@ -36,31 +36,31 @@ func TestParse(t *testing.T) {
 		},
 		{
 			Parse:  "-1.5h",
-			Result: time.Now().Add(-(90 * time.Minute)).Format(testFmt),
+			Result: now.Add(-(90 * time.Minute)).Format(testFmt),
 		},
 		{
 			Parse:  "-0.25h",
-			Result: time.Now().Add(-(15 * time.Minute)).Format(testFmt),
+			Result: now.Add(-(15 * time.Minute)).Format(testFmt),
 		},
 		{
 			Parse:  "-15m",
-			Result: time.Now().Add(-(15 * time.Minute)).Format(testFmt),
+			Result: now.Add(-(15 * time.Minute)).Format(testFmt),
 		},
 		{
 			Parse:  "20 minutes ago",
-			Result: time.Now().Add(-(20 * time.Minute)).Format(testFmt),
+			Result: now.Add(-(20 * time.Minute)).Format(testFmt),
 		},
 		{
 			Parse:  "2 hours ago",
-			Result: time.Now().Add(-(2 * time.Hour)).Format(testFmt),
+			Result: now.Add(-(2 * time.Hour)).Format(testFmt),
 		},
 		{
 			Parse:  "2 days ago",
-			Result: time.Now().Add(-(2 * 24 * time.Hour)).Format(testFmt),
+			Result: now.Add(-(2 * 24 * time.Hour)).Format(testFmt),
 		},
 		{
 			Parse:  "Yesterday",
-			Result: time.Now().Add(-(1 * 24 * time.Hour)).Format(testFmt),
+			Result: now.Add(-(1 * 24 * time.Hour)).Format(testFmt),
 		},
 		{
 			Parse: "Yesterday 12:00",
