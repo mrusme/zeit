@@ -49,13 +49,13 @@ var rootCmd = &cobra.Command{
 				"Tracking on %s/%s for %s",
 				rt.Out.Stylize(
 					out.Style{FG: out.ColorPrimary},
-					b.ProjectSID),
+					"%s", b.ProjectSID),
 				rt.Out.Stylize(
 					out.Style{FG: out.ColorPrimary},
-					b.TaskSID),
+					"%s", b.TaskSID),
 				rt.Out.Stylize(
 					out.Style{FG: out.ColorCyan},
-					fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)),
+					"%02d:%02d:%02d", hours, minutes, seconds),
 			)
 		} else {
 			rt.Out.Put(out.Opts{Type: out.End}, "Not tracking")

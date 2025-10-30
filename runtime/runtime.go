@@ -91,7 +91,7 @@ func (rt *Runtime) Exit(code int) {
 
 func (rt *Runtime) NilOrDie(err error) {
 	if err != nil {
-		rt.Out.Put(out.Opts{Type: out.Error}, err.Error())
+		rt.Out.Put(out.Opts{Type: out.Error}, "%s", err.Error())
 		rt.Exit(1)
 	}
 }

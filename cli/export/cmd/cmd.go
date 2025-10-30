@@ -173,7 +173,7 @@ func outputJSON(
 	prettyJSON, err := json.MarshalIndent(dump, "", "  ")
 	rt.NilOrDie(err)
 
-	rt.Out.Put(out.Opts{Type: out.Plain}, string(prettyJSON))
+	rt.Out.Put(out.Opts{Type: out.Plain}, "%s", string(prettyJSON))
 }
 
 func init() {

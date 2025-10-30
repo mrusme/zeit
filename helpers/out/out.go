@@ -209,6 +209,6 @@ func (o *Out) Put(opts Opts, format string, a ...any) {
 		}
 		time.Sleep(time.Millisecond * opts.Typewrite * 2)
 	} else {
-		fmt.Printf(output)
+		fmt.Printf("%s", output)
 	}
 }
