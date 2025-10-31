@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -20,9 +21,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	FormatUnspecified = ""
+	FormatCLI         = "cli"
+	FormatJSON        = "json"
+)
+
 var (
-	flagDebug bool
-	flagColor string
+	flagDebug  bool
+	flagColor  string
+	flagFormat string
 )
 
 var rootCmd = &cobra.Command{
@@ -39,28 +47,69 @@ var rootCmd = &cobra.Command{
 		found, _, b, err := block.GetActive(rt.Database)
 		rt.NilOrDie(err)
 
-		if found == true {
-			duration := time.Now().Sub(b.TimestampStart)
-			hours := int(duration.Hours())
-			minutes := int(duration.Minutes()) % 60
-			seconds := int(duration.Seconds()) % 60
-
-			rt.Out.Put(out.Opts{Type: out.Start},
-				"Tracking on %s/%s for %s",
-				rt.Out.Stylize(
-					out.Style{FG: out.ColorPrimary},
-					"%s", b.ProjectSID),
-				rt.Out.Stylize(
-					out.Style{FG: out.ColorPrimary},
-					"%s", b.TaskSID),
-				rt.Out.Stylize(
-					out.Style{FG: out.ColorCyan},
-					"%02d:%02d:%02d", hours, minutes, seconds),
-			)
-		} else {
-			rt.Out.Put(out.Opts{Type: out.End}, "Not tracking")
+		switch flagFormat {
+		case FormatUnspecified:
+			outputCLI(rt, found, b)
+		case FormatCLI:
+			outputCLI(rt, found, b)
+		case FormatJSON:
+			outputJSON(rt, found, b)
 		}
 	},
+}
+
+func outputCLI(
+	rt *runtime.Runtime,
+	found bool,
+	b *block.Block,
+) {
+	if found == true {
+		duration := time.Now().Sub(b.TimestampStart)
+		hours := int(duration.Hours())
+		minutes := int(duration.Minutes()) % 60
+		seconds := int(duration.Seconds()) % 60
+
+		rt.Out.Put(out.Opts{Type: out.Start},
+			"Tracking on %s/%s for %s",
+			rt.Out.Stylize(
+				out.Style{FG: out.ColorPrimary},
+				"%s", b.ProjectSID),
+			rt.Out.Stylize(
+				out.Style{FG: out.ColorPrimary},
+				"%s", b.TaskSID),
+			rt.Out.Stylize(
+				out.Style{FG: out.ColorCyan},
+				"%02d:%02d:%02d", hours, minutes, seconds),
+		)
+	} else {
+		rt.Out.Put(out.Opts{Type: out.End}, "Not tracking")
+	}
+}
+
+func outputJSON(
+	rt *runtime.Runtime,
+	found bool,
+	b *block.Block,
+) {
+	var statusOut *out.StatusOut
+
+	statusOut = new(out.StatusOut)
+
+	if found == true {
+		statusOut.IsRunning = true
+		statusOut.ProjectSID = b.ProjectSID
+		statusOut.TaskSID = b.TaskSID
+		statusOut.Timer = int64(time.Now().Sub(b.TimestampStart).Seconds())
+		statusOut.Status = "tracking"
+	} else {
+		statusOut.IsRunning = false
+		statusOut.Status = "not tracking"
+	}
+
+	prettyJSON, err := json.MarshalIndent(statusOut, "", "  ")
+	rt.NilOrDie(err)
+
+	rt.Out.Put(out.Opts{Type: out.Plain}, "%s", string(prettyJSON))
 }
 
 func Execute() {
@@ -93,5 +142,13 @@ func init() {
 		"color",
 		"auto",
 		"When to display icons (always, auto, never)",
+	)
+
+	rootCmd.PersistentFlags().StringVarP(
+		&flagFormat,
+		"format",
+		"f",
+		"",
+		"Output format (cli, json) (default \"cli\")",
 	)
 }
