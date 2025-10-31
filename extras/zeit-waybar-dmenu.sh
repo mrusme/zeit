@@ -4,6 +4,7 @@
 #
 # "custom/zeit": {
 #   "format": "{}",
+#   "return-type": "json",
 #   "exec": "zeit-waybar-bemenu.sh",
 #   "on-click": "zeit-waybar-bemenu.sh click",
 #   "interval": 10
