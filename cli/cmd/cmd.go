@@ -99,7 +99,7 @@ func outputJSON(
 		statusOut.IsRunning = true
 		statusOut.ProjectSID = b.ProjectSID
 		statusOut.TaskSID = b.TaskSID
-		statusOut.Timer = int64(time.Now().Sub(b.TimestampStart).Seconds())
+		statusOut.Timer = int64(time.Now().Sub(b.TimestampStart))
 		statusOut.Status = "tracking"
 	} else {
 		statusOut.IsRunning = false

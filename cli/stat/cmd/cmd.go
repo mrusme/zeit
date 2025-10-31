@@ -135,6 +135,10 @@ func aggregateDurations(
 	aggregatedStats := make(map[string]map[string]map[string]time.Duration)
 	tfIndex := make(map[string]map[string][]string)
 
+	aggregatedStats["*"] = make(map[string]map[string]time.Duration)
+	aggregatedStats["*"]["*"] = make(map[string]time.Duration)
+	aggregatedStats["*"]["*"]["*"] = 0
+
 	for _, b := range bs {
 		duration := b.TimestampEnd.Sub(b.TimestampStart)
 
@@ -166,6 +170,7 @@ func aggregateDurations(
 		}
 
 		aggregatedStats[b.ProjectSID][b.TaskSID][key] += duration
+		aggregatedStats["*"]["*"]["*"] += duration
 		if i := slices.Index(tfIndex[key][b.ProjectSID], b.TaskSID); i == -1 {
 			tfIndex[key][b.ProjectSID] = append(tfIndex[key][b.ProjectSID], b.TaskSID)
 		}
@@ -217,6 +222,9 @@ func outputCLI(
 	}
 
 	for projectSID, taskStats := range aggregatedStats {
+		if projectSID == "*" {
+			continue
+		}
 		rt.Out.Put(out.Opts{Type: out.Info},
 			"%s",
 			projectSID,
@@ -235,6 +243,18 @@ func outputCLI(
 			}
 		}
 	}
+
+	rt.Out.Put(out.Opts{Type: out.Info},
+		"%s %s",
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorSecondary},
+			"Total:",
+		),
+		rt.Out.Stylize(out.Style{FG: out.OutputPrefixes[out.Start].Color},
+			"%v",
+			aggregatedStats["*"]["*"]["*"].Truncate(time.Second),
+		),
+	)
 }
 
 func outputJSON(

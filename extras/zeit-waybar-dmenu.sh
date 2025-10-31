@@ -13,15 +13,17 @@
 ZEIT_BIN=zeit
 
 as_hms() {
-  local total_seconds=$1
+  local nanoseconds=$1
 
-  hours=$((total_seconds / 3600))
+  seconds=$((nanoseconds / 1000000000))
 
-  minutes=$(((total_seconds % 3600) / 60))
+  hours=$((seconds / 3600))
 
-  seconds=$((total_seconds % 60))
+  minutes=$(((seconds % 3600) / 60))
 
-  printf "%02d:%02d:%02d" "$hours" "$minutes" "$seconds"
+  seconds_r=$((seconds % 60))
+
+  printf "%02d:%02d:%02d" "$hours" "$minutes" "$seconds_r"
 }
 
 statusOut=$($ZEIT_BIN --format json)
@@ -55,5 +57,6 @@ if [[ "$is_running" == "true" ]]; then
   timer_fmt=$(as_hms "$timer")
   printf "{\"text\": \"%s<span color='#ffffff'>/</span>%s <span color='#ffffff'>%s</span>\", \"class\": \"custom-zeit\", \"alt\": \"%s\" }\n" "$project_sid" "$task_sid" "$timer_fmt" "$status"
 else
-  printf "{\"text\": \"zeit %s\", \"class\": \"custom-zeit\", \"alt\": \"%s\" }\n" "$status" "$status"
+  total=$(as_hms $(zeit stats --format json today at 00:00 am | jq -r '."*"."*"."*"'))
+  printf "{\"text\": \"%s\", \"class\": \"custom-zeit\", \"alt\": \"%s\" }\n" "$total" "$status"
 fi
