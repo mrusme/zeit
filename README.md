@@ -179,9 +179,9 @@ zeit projects -f json | jq -r '.[] | .sid as $parent_sid | .tasks? // [] | .[] |
 
 This is a list of integrations and extensions that work with _Zeit_:
 
-| Integration | Description | Author |
-| ----------- | ----------- | ------ |
-| TODO        | TODO        | TODO   |
+| Integration                                         | Description                   | Author    |
+| --------------------------------------------------- | ----------------------------- | --------- |
+| [zeit-waybar-dmenu.sh](extras/zeit-waybar-dmenu.sh) | Custom Waybar module for Zeit | [@mrusme] |
 
 ## Development
 
