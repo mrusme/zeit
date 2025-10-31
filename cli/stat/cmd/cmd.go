@@ -230,7 +230,7 @@ func outputCLI(
 				rt.Out.Put(out.Opts{Type: out.Plain},
 					"      %s: %v",
 					timeframe,
-					totalDuration,
+					totalDuration.Truncate(time.Second),
 				)
 			}
 		}
