@@ -17,6 +17,9 @@ all: build
 help: ## print this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-40s\033[0m %s\n", $$1, $$2}'
 
+test: ## test
+	go test -v ./...
+
 build: ## build
 	@echo "Building with the following parameters:"
 	@echo "VERSION = $(VERSION)"
