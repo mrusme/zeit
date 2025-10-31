@@ -233,7 +233,7 @@ func Start(db *database.Database, b *Block) (*Block, error) {
 	// already running.
 	eb.ProjectSID = b.ProjectSID
 	eb.TaskSID = b.TaskSID
-	err = End(db, eb)
+	_, err = End(db, eb)
 	if err != nil && err != errs.ErrNothingToEnd {
 		return nil, err
 	}
@@ -295,21 +295,21 @@ func Resume(db *database.Database, b *Block) (*Block, error) {
 	return Start(db, b)
 }
 
-func End(db *database.Database, b *Block) error {
+func End(db *database.Database, b *Block) (*Block, error) {
 	var err error
 
 	found, ab, eb, err := GetActive(db)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if err == nil && found == false {
-		return errs.ErrNothingToEnd
+		return nil, errs.ErrNothingToEnd
 	}
 
 	if eb.ProjectSID == b.ProjectSID &&
 		eb.TaskSID == b.TaskSID {
-		return errs.ErrEndStartSIDsIdentical
+		return eb, errs.ErrEndStartSIDsIdentical
 	}
 
 	// We have found our Block, let's end it. However, we will only end the
@@ -321,7 +321,7 @@ func End(db *database.Database, b *Block) error {
 
 		// TODO: Is this obsolete due to the validator check in Set?
 		if b.TimestampEnd.Before(eb.TimestampStart) {
-			return errs.ErrInvalidTimestampEnd
+			return eb, errs.ErrInvalidTimestampEnd
 		}
 		eb.TimestampEnd = b.TimestampEnd
 
@@ -335,7 +335,7 @@ func End(db *database.Database, b *Block) error {
 
 		if err = Set(db, eb); err != nil {
 			// We couldn't persist the change, so we're keeping the ActiveBlock as it is
-			return err
+			return eb, err
 		}
 	}
 
@@ -343,8 +343,8 @@ func End(db *database.Database, b *Block) error {
 	// so let's clear the ActiveBlock
 	ab.ClearActiveBlockKey()
 	if err = activeblock.Set(db, ab); err != nil {
-		return err
+		return eb, err
 	}
 
-	return nil
+	return eb, nil
 }

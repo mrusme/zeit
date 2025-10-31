@@ -1,6 +1,8 @@
 package endCmd
 
 import (
+	"encoding/json"
+
 	"github.com/mrusme/zeit/helpers/argsparser"
 	"github.com/mrusme/zeit/helpers/out"
 	"github.com/mrusme/zeit/models/block"
@@ -8,7 +10,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var flags *argsparser.ParsedArgs = &argsparser.ParsedArgs{}
+const (
+	FormatUnspecified = ""
+	FormatCLI         = "cli"
+	FormatJSON        = "json"
+)
+
+var (
+	flagFormat string
+	flags      *argsparser.ParsedArgs
+)
 
 var aliasMap = runtime.AliasMap{
 	"end":   {"en", "e"},
@@ -26,6 +37,7 @@ var Cmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var pargs *argsparser.ParsedArgs
 		var err error
+		var eb *block.Block
 
 		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
 		defer rt.End()
@@ -42,19 +54,64 @@ var Cmd = &cobra.Command{
 		err = b.FromProcessedArgs(pargs)
 		rt.NilOrDie(err)
 
-		err = block.End(rt.Database, b)
+		eb, err = block.End(rt.Database, b)
 		rt.NilOrDie(err)
 
-		switch cmdName {
-		case "end":
-			rt.Out.Put(out.Opts{Type: out.End}, "Ended tracking")
-		case "stop":
-			rt.Out.Put(out.Opts{Type: out.End}, "Stopped tracking")
-		case "pause":
-			rt.Out.Put(out.Opts{Type: out.Pause}, "Paused tracking")
+		switch flagFormat {
+		case FormatUnspecified:
+			outputCLI(rt, pargs, cmdName, eb)
+		case FormatCLI:
+			outputCLI(rt, pargs, cmdName, eb)
+		case FormatJSON:
+			outputJSON(rt, pargs, cmdName, eb)
 		}
 		return
 	},
+}
+
+func outputCLI(
+	rt *runtime.Runtime,
+	pargs *argsparser.ParsedArgs,
+	cmdName string,
+	eb *block.Block,
+) {
+	switch cmdName {
+	case "end":
+		rt.Out.Put(out.Opts{Type: out.End}, "Ended tracking")
+	case "stop":
+		rt.Out.Put(out.Opts{Type: out.End}, "Stopped tracking")
+	case "pause":
+		rt.Out.Put(out.Opts{Type: out.Pause}, "Paused tracking")
+	}
+}
+
+func outputJSON(
+	rt *runtime.Runtime,
+	pargs *argsparser.ParsedArgs,
+	cmdName string,
+	eb *block.Block,
+) {
+	var statusOut *out.StatusOut
+
+	statusOut = new(out.StatusOut)
+	statusOut.IsRunning = false
+	statusOut.ProjectSID = eb.ProjectSID
+	statusOut.TaskSID = eb.TaskSID
+	statusOut.Timer = int64(eb.TimestampEnd.Sub(eb.TimestampStart).Seconds())
+
+	switch cmdName {
+	case "end":
+		statusOut.Status = "ended"
+	case "stop":
+		statusOut.Status = "stopped"
+	case "pause":
+		statusOut.Status = "paused"
+	}
+
+	prettyJSON, err := json.MarshalIndent(statusOut, "", "  ")
+	rt.NilOrDie(err)
+
+	rt.Out.Put(out.Opts{Type: out.Plain}, "%s", string(prettyJSON))
 }
 
 func init() {
@@ -80,5 +137,13 @@ func init() {
 		"e",
 		"",
 		"End timestamp",
+	)
+
+	Cmd.PersistentFlags().StringVarP(
+		&flagFormat,
+		"format",
+		"f",
+		"",
+		"Output format (cli, json) (default \"cli\")",
 	)
 }
