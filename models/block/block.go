@@ -227,6 +227,12 @@ func Start(db *database.Database, b *Block) (*Block, error) {
 	// We call End first to End any currently active Block
 	eb := new(Block)
 	eb.TimestampEnd = b.TimestampStart.Add(-1 * time.Second)
+	// We set ProjectSID & TaskSID so End() can check if we're trying to stop a
+	// block for the same project/task and fail if so, as it normally doesn't
+	// make sense to start a new block for the exact same project/task that is
+	// already running.
+	eb.ProjectSID = b.ProjectSID
+	eb.TaskSID = b.TaskSID
 	err = End(db, eb)
 	if err != nil && err != errs.ErrNothingToEnd {
 		return nil, err
@@ -299,6 +305,11 @@ func End(db *database.Database, b *Block) error {
 
 	if err == nil && found == false {
 		return errs.ErrNothingToEnd
+	}
+
+	if eb.ProjectSID == b.ProjectSID &&
+		eb.TaskSID == b.TaskSID {
+		return errs.ErrEndStartSIDsIdentical
 	}
 
 	// We have found our Block, let's end it. However, we will only end the

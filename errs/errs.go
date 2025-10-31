@@ -74,6 +74,11 @@ var (
 		"The end time/date must be after the start time/date",
 	)
 
+	ErrEndStartSIDsIdentical error = errors.New(
+		"The project/task SIDs for the new block are the same as for the " +
+			"currently running one",
+	)
+
 	ErrDataConversion error = errors.New(
 		"The data conversion failed",
 	)
