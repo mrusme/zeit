@@ -23,6 +23,48 @@ make
 command with `VERSION=x.y.z` and set `x`, `y` and `z` accordingly if you want
 the version in `zeit --help` to be a different one.
 
+## Use
+
+![zeit usage](.README.md/zeit.gif)
+
+### Auto-Completion
+
+_Zeit_ can generate auto-completion scripts for your shell of choice. You can
+load completions into your current session via:
+
+```sh
+source <(zeit completion $(basename "$SHELL"))
+```
+
+(supported shells are `bash`, `zsh`, and `fish`; For PowerShell see below)
+
+To load completions for every new session, add them to your completions
+directory.
+
+For Bash:
+
+```sh
+zeit completion bash > ~/.local/share/bash-completion/completions/zeit
+```
+
+For Zsh:
+
+```sh
+zeit completion zsh > ~/.local/share/zsh/completions/zeit
+```
+
+For Fish:
+
+```sh
+zeit completion fish > ~/.config/fish/completions/zeit.fish
+```
+
+For PowerShell:
+
+```sh
+zeit completion powershell | Out-String | Invoke-Expression
+```
+
 ## Understand
 
 ### Data structure
@@ -120,48 +162,6 @@ import the previously exported v0 database:
 
 ```sh
 zeit import -f v0 ~/zeit_export.json
-```
-
-## Use
-
-![zeit usage](.README.md/zeit.gif)
-
-### Auto-Completion
-
-_Zeit_ can generate auto-completion scripts for your shell of choice. You can
-load completions into your current session via:
-
-```sh
-source <(zeit completion $(basename "$SHELL"))
-```
-
-(supported shells are `bash`, `zsh`, and `fish`; For PowerShell see below)
-
-To load completions for every new session, add them to your completions
-directory.
-
-For Bash:
-
-```sh
-zeit completion bash > ~/.local/share/bash-completion/completions/zeit
-```
-
-For Zsh:
-
-```sh
-zeit completion zsh > ~/.local/share/zsh/completions/zeit
-```
-
-For Fish:
-
-```sh
-zeit completion fish > ~/.config/fish/completions/zeit.fish
-```
-
-For PowerShell:
-
-```sh
-zeit completion powershell | Out-String | Invoke-Expression
 ```
 
 ### Life hacks
