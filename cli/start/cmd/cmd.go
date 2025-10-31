@@ -1,6 +1,8 @@
 package startCmd
 
 import (
+	"encoding/json"
+
 	"github.com/mrusme/zeit/cli/start/shared"
 	"github.com/mrusme/zeit/helpers/argsparser"
 	"github.com/mrusme/zeit/helpers/out"
@@ -11,7 +13,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var flags *argsparser.ParsedArgs = &argsparser.ParsedArgs{}
+const (
+	FormatUnspecified = ""
+	FormatCLI         = "cli"
+	FormatJSON        = "json"
+)
+
+var (
+	flagFormat string
+	flags      *argsparser.ParsedArgs
+)
 
 var aliasMap = runtime.AliasMap{
 	"start":  {"started", "sta", "str", "s"},
@@ -73,33 +84,80 @@ var Cmd = &cobra.Command{
 		case "start":
 			nb, err = block.Start(rt.Database, b)
 			rt.NilOrDie(err)
-
-			rt.Out.Put(out.Opts{Type: out.Start},
-				"Started tracking on %s ...",
-				rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
-					"%s/%s", nb.ProjectSID, nb.TaskSID),
-			)
 		case "switch":
 			nb, err = block.Switch(rt.Database, b)
 			rt.NilOrDie(err)
-
-			rt.Out.Put(out.Opts{Type: out.Start},
-				"Switched tracking to %s ...",
-				rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
-					"%s/%s", nb.ProjectSID, nb.TaskSID),
-			)
 		case "resume":
 			nb, err = block.Resume(rt.Database, b)
 			rt.NilOrDie(err)
+		}
 
-			rt.Out.Put(out.Opts{Type: out.Resume},
-				"Resumed tracking on %s ...",
-				rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
-					"%s/%s", nb.ProjectSID, nb.TaskSID),
-			)
+		switch flagFormat {
+		case FormatUnspecified:
+			outputCLI(rt, pargs, cmdName, nb)
+		case FormatCLI:
+			outputCLI(rt, pargs, cmdName, nb)
+		case FormatJSON:
+			outputJSON(rt, pargs, cmdName, nb)
 		}
 		return
 	},
+}
+
+func outputCLI(
+	rt *runtime.Runtime,
+	pargs *argsparser.ParsedArgs,
+	cmdName string,
+	nb *block.Block,
+) {
+	switch cmdName {
+	case "start":
+		rt.Out.Put(out.Opts{Type: out.Start},
+			"Started tracking on %s ...",
+			rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
+				"%s/%s", nb.ProjectSID, nb.TaskSID),
+		)
+	case "switch":
+		rt.Out.Put(out.Opts{Type: out.Start},
+			"Switched tracking to %s ...",
+			rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
+				"%s/%s", nb.ProjectSID, nb.TaskSID),
+		)
+	case "resume":
+		rt.Out.Put(out.Opts{Type: out.Resume},
+			"Resumed tracking on %s ...",
+			rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
+				"%s/%s", nb.ProjectSID, nb.TaskSID),
+		)
+	}
+}
+
+func outputJSON(
+	rt *runtime.Runtime,
+	pargs *argsparser.ParsedArgs,
+	cmdName string,
+	nb *block.Block,
+) {
+	var statusOut *out.StatusOut
+
+	statusOut = new(out.StatusOut)
+	statusOut.IsRunning = true
+	statusOut.ProjectSID = nb.ProjectSID
+	statusOut.TaskSID = nb.TaskSID
+
+	switch cmdName {
+	case "start":
+		statusOut.Status = "started"
+	case "switch":
+		statusOut.Status = "switched"
+	case "resume":
+		statusOut.Status = "resumed"
+	}
+
+	prettyJSON, err := json.MarshalIndent(statusOut, "", "  ")
+	rt.NilOrDie(err)
+
+	rt.Out.Put(out.Opts{Type: out.Plain}, "%s", string(prettyJSON))
 }
 
 func init() {
@@ -139,5 +197,13 @@ func init() {
 		"e",
 		"",
 		"End timestamp",
+	)
+
+	Cmd.PersistentFlags().StringVarP(
+		&flagFormat,
+		"format",
+		"f",
+		"",
+		"Output format (cli, json) (default \"cli\")",
 	)
 }

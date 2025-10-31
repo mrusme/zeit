@@ -8,6 +8,14 @@ import (
 	"github.com/charmbracelet/lipgloss/v2"
 )
 
+type StatusOut struct {
+	Status     string `json:"status"`
+	IsRunning  bool   `json:"is_running"`
+	ProjectSID string `json:"project_sid,omitempty"`
+	TaskSID    string `json:"task_sid,omitempty"`
+	Timer      int64  `json:"timer,omitempty"`
+}
+
 func RandomVsibleHexColor() string {
 	// Randomize R, G, B values within a mid-range (64 and 191) for better
 	// contrast on light and dark backgrounds
