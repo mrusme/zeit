@@ -70,6 +70,9 @@ func (engine *V0) Import(
 			if projectSID, ok = projectMap[entry.Project]; !ok {
 				var pj *project.Project
 
+				if entry.Project == "" {
+					entry.Project = "undefined"
+				}
 				projectSID = val.ConvertTextToSID(entry.Project)
 				if pj, err = project.New("", projectSID); err != nil {
 					if err = cb(nil, err, v...); err != nil {
@@ -93,6 +96,9 @@ func (engine *V0) Import(
 			if taskSID, ok = taskMap[entry.Task]; !ok {
 				var tk *task.Task
 
+				if entry.Task == "" {
+					entry.Task = "undefined"
+				}
 				taskSID = val.ConvertTextToSID(entry.Task)
 				if tk, err = task.New("", projectSID, taskSID); err != nil {
 					if err = cb(nil, err, v...); err != nil {
