@@ -241,7 +241,15 @@ func Start(db *database.Database, b *Block) (*Block, error) {
 	// TODO: This should be one transaction
 	// {
 	ab, _ := activeblock.Get(db)
-	ab.SetActiveBlockKey(b.GetKey())
+	// If the TimestampEnd IsZero and hence wasn't supplied by the user, we mark
+	// the block as active.
+	// If TimestampEnd was supplied (by the user), we don't need to mark the block
+	// as active, as it is basically a finished time entry that the user inserts.
+	if b.TimestampEnd.IsZero() == true {
+		ab.SetActiveBlockKey(b.GetKey())
+	} else {
+		ab.ClearActiveBlockKey()
+	}
 	if err = activeblock.Set(db, ab); err != nil {
 		// We couldn't upsert the ActiveBlock, so we fail fully
 		return nil, err

@@ -112,11 +112,19 @@ func outputCLI(
 ) {
 	switch cmdName {
 	case "start":
-		rt.Out.Put(out.Opts{Type: out.Start},
-			"Started tracking on %s ...",
-			rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
-				"%s/%s", nb.ProjectSID, nb.TaskSID),
-		)
+		if nb.TimestampEnd.IsZero() == true {
+			rt.Out.Put(out.Opts{Type: out.Start},
+				"Started tracking on %s ...",
+				rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
+					"%s/%s", nb.ProjectSID, nb.TaskSID),
+			)
+		} else {
+			rt.Out.Put(out.Opts{Type: out.Start},
+				"Tracked on %s.",
+				rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
+					"%s/%s", nb.ProjectSID, nb.TaskSID),
+			)
+		}
 	case "switch":
 		rt.Out.Put(out.Opts{Type: out.Start},
 			"Switched tracking to %s ...",
