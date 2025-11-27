@@ -1,4 +1,4 @@
-.PHONY: build help
+.PHONY: test build help
 PWD := $(shell pwd)
 GOPATH := $(shell go env GOPATH)
 
