@@ -5,8 +5,7 @@
 *.dylib
 *.test
 *.out
-/zeit
-/0C
 /build/**
+!/build/.gitkeep
 /dist/**
 .DS_Store
