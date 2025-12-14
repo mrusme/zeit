@@ -5,8 +5,8 @@
 # "custom/zeit": {
 #   "format": "{}",
 #   "return-type": "json",
-#   "exec": "zeit-waybar-bemenu.sh",
-#   "on-click": "zeit-waybar-bemenu.sh click",
+#   "exec": "zeit-waybar-dmenu.sh",
+#   "on-click": "zeit-waybar-dmenu.sh click",
 #   "interval": 10
 # },
 #
@@ -43,8 +43,8 @@ if [[ "$1" == "click" ]]; then
     jq -r '.[] | .sid as $parent_sid | .tasks? // [] | .[] | "\($parent_sid)/\(.sid)"' |
     $DMENU_PROGRAM)
 
-  task=$(printf "%s" "$selection" | cut -d '/' -f1)
-  project=$(printf "%s" "$selection" | cut -d '/' -f2)
+  project=$(printf "%s" "$selection" | cut -d '/' -f1)
+  task=$(printf "%s" "$selection" | cut -d '/' -f2)
 
   if [[ "$task" == "" ]] || [[ "$project" == "" ]]; then
     exit 1
