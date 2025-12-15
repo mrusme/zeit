@@ -6,6 +6,8 @@ github.com/charmbracelet/colorprofile v0.3.2 h1:9J27WdztfJQVAQKX2WOlSSRB+5gaKqqI
 github.com/charmbracelet/colorprofile v0.3.2/go.mod h1:mTD5XzNeWHj8oqHb+S1bssQb7vIHbepiebQ2kPKVKbI=
 github.com/charmbracelet/colorprofile v0.4.1 h1:a1lO03qTrSIRaK8c3JRxJDZOvhvIeSco3ej+ngLk1kk=
 github.com/charmbracelet/colorprofile v0.4.1/go.mod h1:U1d9Dljmdf9DLegaJ0nGZNJvoXAhayhmidOdcBwAvKk=
+github.com/charmbracelet/lipgloss/v2 v2.0.0-beta.3 h1:W6DpZX6zSkZr0iFq6JVh1vItLoxfYtNlaxOJtWp8Kis=
+github.com/charmbracelet/lipgloss/v2 v2.0.0-beta.3/go.mod h1:65HTtKURcv/ict9ZQhr6zT84JqIjMcJbyrZYHHKNfKA=
 github.com/charmbracelet/lipgloss/v2 v2.0.0-beta1 h1:SOylT6+BQzPHEjn15TIzawBPVD0QmhKXbcb3jY0ZIKU=
 github.com/charmbracelet/lipgloss/v2 v2.0.0-beta1/go.mod h1:tRlx/Hu0lo/j9viunCN2H+Ze6JrmdjQlXUQvvArgaOc=
 github.com/charmbracelet/x/ansi v0.10.2 h1:ith2ArZS0CJG30cIUfID1LXN7ZFXRCww6RUvAPA+Pzw=

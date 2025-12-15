@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/adrg/xdg v0.5.3
-	github.com/charmbracelet/lipgloss/v2 v2.0.0-beta1
+	github.com/charmbracelet/lipgloss/v2 v2.0.0-beta.3
 	github.com/charmbracelet/x/ansi v0.11.3
 	github.com/dgraph-io/badger/v4 v4.8.0
 	github.com/go-playground/validator/v10 v10.29.0
