@@ -13,7 +13,7 @@ builds:
       - linux
       - netbsd
       - openbsd
-      # - plan9
+      - plan9
       - windows
     goarch:
       - 386
