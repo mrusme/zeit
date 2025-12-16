@@ -41,7 +41,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 
-		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), true)
 		defer rt.End()
 
 		found, _, b, err := block.GetActive(rt.Database)

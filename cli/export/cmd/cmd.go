@@ -42,7 +42,7 @@ var Cmd = &cobra.Command{
 		var keys []string
 		var err error
 
-		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), true)
 		defer rt.End()
 
 		flagFormat = strings.ToLower(flagFormat)

@@ -50,7 +50,7 @@ var Cmd = &cobra.Command{
 		var bvs []BlockView
 		var err error
 
-		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), true)
 		defer rt.End()
 
 		if len(args) == 1 {

@@ -48,7 +48,7 @@ var Cmd = &cobra.Command{
 		var blockMap map[string]*block.Block = make(map[string]*block.Block)
 		var err error
 
-		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), true)
 		defer rt.End()
 
 		pargs, err = argsparser.POP("block", flags, args, rt.Logger)

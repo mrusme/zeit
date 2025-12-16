@@ -18,7 +18,7 @@ func DynamicArgs(
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	}
 
-	rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+	rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), true)
 	defer rt.End()
 
 	list, err = task.List(rt.Database)

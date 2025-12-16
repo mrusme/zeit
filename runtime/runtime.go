@@ -36,7 +36,7 @@ type Runtime struct {
 	Config   *config.Config
 }
 
-func New(lvl slog.Level, oc out.OutputColor) *Runtime {
+func New(lvl slog.Level, oc out.OutputColor, readOnly bool) *Runtime {
 	var err error
 
 	rt := new(Runtime)
@@ -64,7 +64,7 @@ func New(lvl slog.Level, oc out.OutputColor) *Runtime {
 		)
 	}
 
-	rt.Database, err = database.New(rt.Logger, dbdir)
+	rt.Database, err = database.New(rt.Logger, dbdir, readOnly)
 	rt.Logger.NilOrDie(err, "Error initializing database")
 
 	rt.Logger.Debug("Loading runtime config ...")

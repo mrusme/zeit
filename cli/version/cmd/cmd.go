@@ -11,7 +11,7 @@ var Cmd = &cobra.Command{
 	Short: "zeit version",
 	Long:  "Display zeit version information",
 	Run: func(cmd *cobra.Command, args []string) {
-		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), true)
 		defer rt.End()
 
 		if rt.Out.InColor() {

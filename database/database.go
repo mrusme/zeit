@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"runtime"
 
 	"github.com/dgraph-io/badger/v4"
 )
@@ -16,11 +17,15 @@ type Model interface {
 	GetKey() string
 }
 
-func New(logger badger.Logger, dbpath string) (*Database, error) {
+func New(logger badger.Logger, dbpath string, readOnly bool) (*Database, error) {
 	var err error
 
+	// badger does not support the readOnly option on all platforms
+	const hasReadOnlySupport = runtime.GOOS != "windows" && runtime.GOOS != "plan9"
+
 	bopt := badger.DefaultOptions(dbpath).
-		WithLogger(logger)
+		WithLogger(logger).
+		WithReadOnly(readOnly && hasReadOnlySupport)
 		// WithChecksumVerificationMode(options.OnTableAndBlockRead)
 
 	// if encrypted {

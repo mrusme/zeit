@@ -23,7 +23,7 @@ func (td *TestData) GetKey() string {
 
 func TestGetPrefixedRowsAsStruct(t *testing.T) {
 	logger := log.New(slog.LevelDebug)
-	db, err := New(logger, "")
+	db, err := New(logger, "", false)
 	if err != nil {
 		t.Errorf("New database failed: %s\n", err)
 	}

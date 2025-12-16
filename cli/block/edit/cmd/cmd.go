@@ -24,7 +24,7 @@ var Cmd = &cobra.Command{
 		var b *block.Block
 		var err error
 
-		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), false)
 		defer rt.End()
 
 		var blockKey string = args[0]

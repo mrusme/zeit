@@ -27,7 +27,7 @@ var Cmd = &cobra.Command{
 		var pj *task.Task
 		var err error
 
-		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), false)
 		defer rt.End()
 
 		var projectSID string

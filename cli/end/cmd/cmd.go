@@ -39,7 +39,7 @@ var Cmd = &cobra.Command{
 		var err error
 		var eb *block.Block
 
-		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), false)
 		defer rt.End()
 
 		calledAs := rt.GetCommandCall(cmd)
