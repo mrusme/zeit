@@ -16,11 +16,12 @@ type Model interface {
 	GetKey() string
 }
 
-func New(logger badger.Logger, dbpath string) (*Database, error) {
+func New(logger badger.Logger, dbpath string, readOnly bool) (*Database, error) {
 	var err error
 
 	bopt := badger.DefaultOptions(dbpath).
-		WithLogger(logger)
+		WithLogger(logger).
+		WithReadOnly(readOnly)
 		// WithChecksumVerificationMode(options.OnTableAndBlockRead)
 
 	// if encrypted {
@@ -32,7 +33,11 @@ func New(logger badger.Logger, dbpath string) (*Database, error) {
 
 	db := new(Database)
 	db.logger = logger
-	if db.engine, err = badger.Open(bopt); err != nil {
+	if db.engine, err = badger.Open(bopt); err == badger.ErrWindowsNotSupported || err == badger.ErrPlan9NotSupported {
+		bopt = bopt.WithReadOnly(false)
+		db.engine, err = badger.Open(bopt)
+	}
+	if err != nil {
 		return db, err
 	}
 

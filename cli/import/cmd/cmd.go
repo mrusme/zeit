@@ -31,7 +31,7 @@ var Cmd = &cobra.Command{
 		var im *importer.Importer
 		var err error
 
-		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), false)
 		defer rt.End()
 
 		flagFormat = strings.ToLower(flagFormat)

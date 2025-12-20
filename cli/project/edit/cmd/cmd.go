@@ -25,7 +25,7 @@ var Cmd = &cobra.Command{
 		var pj *project.Project
 		var err error
 
-		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), false)
 		defer rt.End()
 
 		pj, err = project.GetBySID(rt.Database, args[0])

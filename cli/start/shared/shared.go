@@ -17,7 +17,7 @@ func DynamicArgs(
 	var tklist map[string]*task.Task
 	var err error
 
-	rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+	rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), true)
 	defer rt.End()
 
 	var keywords map[string][]string = make(map[string][]string)

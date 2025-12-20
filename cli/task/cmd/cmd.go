@@ -53,7 +53,7 @@ var Cmd = &cobra.Command{
 		var tkvs []TaskView
 		var err error
 
-		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd))
+		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), true)
 		defer rt.End()
 
 		var projectSID string
