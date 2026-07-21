@@ -6,7 +6,7 @@ GOOS := $(shell go env GOOS)
 GOARCH := $(shell go env GOARCH)
 
 NAME := zeit
-PREFIX := github.com/mrusme/
+PREFIX := xn--gckvb8fzb.com/
 PROJECT := $(PREFIX)$(NAME)
 VERSION := $(shell git describe --tags 2>/dev/null || echo "dev")
 COMMIT := $(shell git rev-parse --verify HEAD)

@@ -1,58 +1,42 @@
-# .goreleaser.yaml
 version: 2
 builds:
-  -
-    env:
+  - env:
       - CGO_ENABLED=0
     ldflags:
-      - -s -w -X github.com/mrusme/zeit/runtime.Version={{.Version}} -X github.com/mrusme/zeit/runtime.Commit={{.Commit}} -X github.com/mrusme/zeit/runtime.Date={{.Date}}
+      - -s -w
+      - -X xn--gckvb8fzb.com/zeit/runtime.Version={{.Version}}
+      - -X xn--gckvb8fzb.com/zeit/runtime.Commit={{.Commit}}
+      - -X xn--gckvb8fzb.com/zeit/runtime.Date={{.Date}}
     goos:
       - darwin
       - dragonfly
       - freebsd
+      - illumos
       - linux
       - netbsd
       - openbsd
-      # - plan9
+      - plan9
+      - solaris
       - windows
     goarch:
-      - 386
+      - "386"
       - amd64
       - arm
       - arm64
+      - loong64
+      - mips
+      - mips64
+      - mips64le
+      - mipsle
+      - ppc64
+      - ppc64le
       - riscv64
+      - s390x
     goarm:
       - "6"
       - "7"
-    ignore:
-      - goos: darwin
-        goarch: 386
-      - goos: darwin
-        goarch: arm
-      - goos: darwin
-        goarch: riscv64
-      - goos: netbsd
-        goarch: arm64
-      - goos: netbsd
-        goarch: riscv64
-      - goos: freebsd
-        goarch: arm64
-      - goos: plan9
-        goarch: arm
-      - goos: plan9
-        goarm: arm64
-      - goos: plan9
-        goarch: riscv64
-      - goos: windows
-        goarch: arm
-      - goos: windows
-        goarch: riscv64
 changelog:
-  disable: false
   use: github
   format: "{{.SHA}}: {{.Message}} (@{{.AuthorUsername}})"
   sort: asc
   abbrev: -1
-release:
-  footer: ""
-

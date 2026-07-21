@@ -10,7 +10,8 @@ LICENSE](https://img.shields.io/static/v1?label=SEGV%20LICENSE&message=1.0&label
 _Zeit, erfassen_. A command line tool for tracking time spent on tasks &
 projects.
 
-[Download the latest version for macOS, Linux, FreeBSD, NetBSD, OpenBSD & Plan9
+[Download the latest version for macOS, Windows, Linux, DragonFly BSD, FreeBSD,
+NetBSD, OpenBSD, illumos, Solaris & Plan 9
 here](https://xn--gckvb8fzb.com/zeit/releases/latest).
 
 ## Build
@@ -19,9 +20,9 @@ here](https://xn--gckvb8fzb.com/zeit/releases/latest).
 make
 ```
 
-**Info**: This will build using the version 0.0.0. You can prefix the `make`
-command with `VERSION=x.y.z` and set `x`, `y` and `z` accordingly if you want
-the version in `zeit --help` to be a different one.
+**Info**: `make` reads the version from `git describe --tags`, or uses `dev`
+when no tag is reachable. To set it explicitly, prefix the command with
+`VERSION=x.y.z`, then check the result with `zeit version`.
 
 ## Use
 
