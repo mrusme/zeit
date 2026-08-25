@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"xn--gckvb8fzb.com/zeit/database"
+	"xn--gckvb8fzb.com/zeit/errs"
 	v0 "xn--gckvb8fzb.com/zeit/helpers/importer/engines/v0"
 	v1 "xn--gckvb8fzb.com/zeit/helpers/importer/engines/v1"
 )
@@ -42,13 +43,16 @@ func New(ftype ImportFileType, file string) (*Importer, error) {
 
 	switch im.FileType {
 	case TypeZeitV0:
-		if im.Engine, err = v0.New(im.fd); err != nil {
-			return nil, err
-		}
+		im.Engine, err = v0.New(im.fd)
 	case TypeZeitV1:
-		if im.Engine, err = v1.New(im.fd); err != nil {
-			return nil, err
-		}
+		im.Engine, err = v1.New(im.fd)
+	default:
+		err = errs.ErrUnknownImportFormat
+	}
+
+	if err != nil {
+		im.fd.Close()
+		return nil, err
 	}
 
 	return im, nil

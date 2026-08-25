@@ -86,6 +86,10 @@ var (
 	ErrNotATimeframe error = errors.New(
 		"Submitted value is not a timeframe",
 	)
+
+	ErrUnknownImportFormat error = errors.New(
+		"Unknown import format, supported formats are: v0, v1",
+	)
 )
 
 type ErrParsingTimestamp struct {
