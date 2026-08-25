@@ -2,6 +2,8 @@ package v0
 
 import (
 	"encoding/json"
+	"errors"
+	"io"
 	"os"
 	"time"
 
@@ -46,13 +48,11 @@ func (engine *V0) Import(
 	for {
 		var entries []Entry
 		if err = decoder.Decode(&entries); err != nil {
-			if err.Error() == "EOF" {
+			if errors.Is(err, io.EOF) == true {
 				break
 			}
 
-			if err = cb(nil, err, v...); err != nil {
-				return err
-			}
+			return err
 		}
 
 		for i := range entries {
