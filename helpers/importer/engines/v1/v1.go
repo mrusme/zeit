@@ -55,45 +55,32 @@ func (engine *V1) Import(
 				modelName = key
 			}
 
+			var model database.Model
 			switch modelName {
 			case "activeblock":
-				var model activeblock.ActiveBlock
-				if err = json.Unmarshal(entry, &model); err != nil {
-					err = cb(nil, errs.ErrDataConversion, v...)
-				}
-				model.SetKey(key)
-				err = cb(&model, nil, v...)
+				model = new(activeblock.ActiveBlock)
 			case "block":
-				var model block.Block
-				if err = json.Unmarshal(entry, &model); err != nil {
-					err = cb(nil, errs.ErrDataConversion, v...)
-				}
-				model.SetKey(key)
-				err = cb(&model, nil, v...)
+				model = new(block.Block)
 			case "config":
-				var model config.Config
-				if err = json.Unmarshal(entry, &model); err != nil {
-					err = cb(nil, errs.ErrDataConversion, v...)
-				}
-				model.SetKey(key)
-				err = cb(&model, nil, v...)
+				model = new(config.Config)
 			case "project":
-				var model project.Project
-				if err = json.Unmarshal(entry, &model); err != nil {
-					err = cb(nil, errs.ErrDataConversion, v...)
-				}
-				model.SetKey(key)
-				err = cb(&model, nil, v...)
+				model = new(project.Project)
 			case "task":
-				var model task.Task
-				if err = json.Unmarshal(entry, &model); err != nil {
-					err = cb(nil, errs.ErrDataConversion, v...)
-				}
-				model.SetKey(key)
-				err = cb(&model, nil, v...)
+				model = new(task.Task)
+			default:
+				continue
 			}
 
-			if err != nil {
+			if err = json.Unmarshal(entry, model); err != nil {
+				if err = cb(nil, errs.ErrDataConversion, v...); err != nil {
+					return err
+				}
+				continue
+			}
+
+			model.SetKey(key)
+
+			if err = cb(model, nil, v...); err != nil {
 				return err
 			}
 		}
