@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"time"
 
@@ -113,9 +112,7 @@ func outputJSON(
 }
 
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		fmt.Errorf("%s\n", err.Error())
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }

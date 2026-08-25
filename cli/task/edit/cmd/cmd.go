@@ -37,8 +37,8 @@ var Cmd = &cobra.Command{
 		if len(args) == 1 {
 			projectSID, taskSID, found = strings.Cut(args[0], "/")
 			if found == false {
-				rt.Out.Put(out.Opts{Type: out.Error}, "Please provide a project and "+
-					"task SID in the format myproject/mytask or myproject mytask")
+				rt.Die("Please provide a project and task SID in the " +
+					"format myproject/mytask or myproject mytask")
 			}
 		} else if len(args) == 2 {
 			projectSID = args[0]

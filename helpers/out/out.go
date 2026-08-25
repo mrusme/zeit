@@ -3,6 +3,7 @@ package out
 import (
 	"fmt"
 	"image/color"
+	"io"
 	"os"
 	"time"
 
@@ -117,32 +118,54 @@ type Opts struct {
 	Typewrite time.Duration
 }
 
+type stream struct {
+	writer     io.Writer
+	isTerminal bool
+	inColor    bool
+}
+
+func newStream(file *os.File, oc OutputColor) *stream {
+	s := new(stream)
+
+	s.writer = file
+	s.isTerminal = isatty.IsTerminal(file.Fd()) == true ||
+		isatty.IsCygwinTerminal(file.Fd()) == true
+
+	switch oc {
+	case ColorNever:
+		s.inColor = false
+	case ColorAuto:
+		s.inColor = s.isTerminal
+	case ColorAlways:
+		s.inColor = true
+	}
+
+	return s
+}
+
 type Out struct {
-	oc OutputColor
+	stdout *stream
+	stderr *stream
 }
 
 func New(oc OutputColor) *Out {
 	o := new(Out)
 
-	if oc == ColorAuto {
-		if o.isPiped() == true {
-			o.oc = ColorNever
-		} else {
-			o.oc = ColorAlways
-		}
-	} else {
-		o.oc = oc
-	}
+	o.stdout = newStream(os.Stdout, oc)
+	o.stderr = newStream(os.Stderr, oc)
+
 	return o
 }
 
-func (o *Out) isPiped() bool {
-	return isatty.IsTerminal(os.Stdout.Fd()) == false &&
-		isatty.IsCygwinTerminal(os.Stdout.Fd()) == false
+func (o *Out) streamFor(ot OutputType) *stream {
+	if ot == Error {
+		return o.stderr
+	}
+	return o.stdout
 }
 
 func (o *Out) InColor() bool {
-	return o.oc == ColorAlways
+	return o.stdout.inColor
 }
 
 func (o *Out) FG(c color.Color, format string, a ...any) string {
@@ -175,9 +198,10 @@ func (o *Out) Stylize(
 }
 
 func (o *Out) Put(opts Opts, format string, a ...any) {
+	var s *stream = o.streamFor(opts.Type)
 	var formatted string = fmt.Sprintf(format, a...)
+	var prefix string = OutputPrefixes[opts.Type].Char
 	var nl string = "\n"
-	var output string = ""
 
 	if opts.NoNL == true {
 		nl = ""
@@ -187,28 +211,20 @@ func (o *Out) Put(opts Opts, format string, a ...any) {
 		}
 	}
 
-	if o.oc == ColorAlways {
+	if s.inColor == true {
 		style := lipgloss.NewStyle().Foreground(OutputPrefixes[opts.Type].Color)
-		output = fmt.Sprintf("%s%s%s",
-			style.Render(OutputPrefixes[opts.Type].Char),
-			formatted,
-			nl,
-		)
-	} else {
-		output = fmt.Sprintf("%s%s%s",
-			OutputPrefixes[opts.Type].Char,
-			formatted,
-			nl,
-		)
+		prefix = style.Render(prefix)
 	}
 
-	if o.isPiped() == false && opts.Typewrite > 0 {
+	var output string = fmt.Sprintf("%s%s%s", prefix, formatted, nl)
+
+	if s.isTerminal == true && opts.Typewrite > 0 {
 		for _, char := range output {
-			fmt.Printf("%c", char)
+			fmt.Fprintf(s.writer, "%c", char)
 			time.Sleep(time.Millisecond * opts.Typewrite)
 		}
 		time.Sleep(time.Millisecond * opts.Typewrite * 2)
 	} else {
-		fmt.Printf("%s", output)
+		fmt.Fprint(s.writer, output)
 	}
 }

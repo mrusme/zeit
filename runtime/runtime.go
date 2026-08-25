@@ -89,10 +89,14 @@ func (rt *Runtime) Exit(code int) {
 	os.Exit(code)
 }
 
+func (rt *Runtime) Die(format string, a ...any) {
+	rt.Out.Put(out.Opts{Type: out.Error}, format, a...)
+	rt.Exit(1)
+}
+
 func (rt *Runtime) NilOrDie(err error) {
 	if err != nil {
-		rt.Out.Put(out.Opts{Type: out.Error}, "%s", err.Error())
-		rt.Exit(1)
+		rt.Die("%s", err.Error())
 	}
 }
 
