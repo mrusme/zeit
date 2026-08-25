@@ -43,7 +43,7 @@ func GetLogLevel(cmd *cobra.Command) slog.Level {
 }
 
 func GetOutputColor(cmd *cobra.Command) out.OutputColor {
-	var oc out.OutputColor = out.ColorAlways
+	var oc out.OutputColor = out.ColorAuto
 	flagColor, _ := cmd.Flags().GetString("color")
 	switch strings.ToLower(flagColor) {
 	case "never":

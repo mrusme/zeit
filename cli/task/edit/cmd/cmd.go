@@ -72,9 +72,9 @@ func init() {
 	)
 	Cmd.PersistentFlags().StringVarP(
 		&flagColor,
-		"color",
+		"display-color",
 		"c",
 		"",
-		"Set the color",
+		"Set the display color",
 	)
 }
