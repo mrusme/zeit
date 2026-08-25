@@ -43,12 +43,12 @@ var Cmd = &cobra.Command{
 			rt.Build.Version,
 		)
 		rt.Out.Put(out.Opts{Type: out.Plain, Typewrite: 25},
-			" %s %s",
+			"  %s %s",
 			rt.Out.FG(out.ColorSecondary, "Commit:"),
 			rt.Build.Commit,
 		)
 		rt.Out.Put(out.Opts{Type: out.Plain, Typewrite: 25},
-			" %s %s",
+			"  %s %s",
 			rt.Out.FG(out.ColorSecondary, "Build date:"),
 			rt.Build.Date,
 		)
