@@ -68,7 +68,12 @@ func New(lvl slog.Level, oc out.OutputColor, readOnly bool) *Runtime {
 	rt.Logger.NilOrDie(err, "Error initializing database")
 
 	rt.Logger.Debug("Loading runtime config ...")
-	cfg, err := config.Get(rt.Database)
+	var cfg *config.Config
+	if readOnly == true {
+		cfg, err = config.Get(rt.Database)
+	} else {
+		cfg, err = config.InsertIfNone(rt.Database)
+	}
 	if err != nil {
 		rt.End()
 		rt.Logger.NilOrDie(err, "Error loading runtime config")

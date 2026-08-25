@@ -48,6 +48,28 @@ func Get(db *database.Database) (*Config, error) {
 		return nil, err
 	}
 
+	return cfg, nil
+}
+
+func InsertIfNone(db *database.Database) (*Config, error) {
+	var cfg *Config
+	var err error
+
+	cfg, err = New()
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.GetRowAsStruct(cfg.GetKey(), cfg)
+	if err != nil && db.IsErrKeyNotFound(err) == false {
+		// We encountered an error which is not KeyNotFound
+		return nil, err
+	} else if err != nil && db.IsErrKeyNotFound(err) == true {
+		if err = Set(db, cfg); err != nil {
+			return nil, err
+		}
+	}
+
 	// First time users won't have a Config, hence we will retrieve an error
 	// that is of type KeyNotFound. In that case we would return a New()
 	// Config, which just so happens to be in `cfg` anyway, hence we don't
