@@ -38,6 +38,7 @@ var Cmd = &cobra.Command{
 
 		im, err = importer.New(importer.ImportFileType(flagFormat), args[0])
 		rt.NilOrDie(err)
+		defer im.End()
 
 		err = im.Import(ImportCallback, rt)
 		rt.NilOrDie(err)
