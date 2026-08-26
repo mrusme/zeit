@@ -28,7 +28,7 @@ var Cmd = &cobra.Command{
 		defer rt.End()
 
 		var blockKey string = args[0]
-		if strings.Index(blockKey, "block:") == -1 {
+		if strings.HasPrefix(blockKey, "block:") == false {
 			blockKey = "block:" + blockKey
 		}
 

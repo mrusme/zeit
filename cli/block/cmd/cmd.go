@@ -54,7 +54,7 @@ var Cmd = &cobra.Command{
 		defer rt.End()
 
 		if len(args) == 1 {
-			if strings.Index(args[0], "block:") > -1 {
+			if strings.HasPrefix(args[0], "block:") == true {
 				blockKey = args[0]
 			} else if _, err = uuid.Parse(args[0]); err == nil {
 				blockKey = "block:" + args[0]
