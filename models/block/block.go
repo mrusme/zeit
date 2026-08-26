@@ -13,7 +13,7 @@ import (
 )
 
 type Block struct {
-	key            string    `json:"-"`
+	key            string
 	OwnerKey       string    `json:"owner_key"`
 	ProjectSID     string    `json:"project_sid" validate:"required,sid,max=32"`
 	TaskSID        string    `json:"task_sid" validate:"required,sid,max=32"`

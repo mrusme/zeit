@@ -7,7 +7,7 @@ import (
 const KEY string = "activeblock"
 
 type ActiveBlock struct {
-	key              string `json:"-"`
+	key              string
 	ActiveBlockKey   string `json:"active_block_key"`
 	PreviousBlockKey string `json:"previous_block_key"`
 }

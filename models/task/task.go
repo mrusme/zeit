@@ -8,7 +8,7 @@ import (
 )
 
 type Task struct {
-	key         string `json:"-"`
+	key         string
 	OwnerKey    string `json:"owner_key"`
 	SID         string `json:"sid" validate:"required,sid,max=32"`
 	ProjectSID  string `json:"project_sid" validate:"required,sid,max=32"`

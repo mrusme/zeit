@@ -8,7 +8,7 @@ import (
 )
 
 type Project struct {
-	key         string `json:"-"`
+	key         string
 	OwnerKey    string `json:"owner_key"`
 	SID         string `json:"sid" validate:"required,sid,max=32"`
 	DisplayName string `json:"display_name" validate:"max=32"`
