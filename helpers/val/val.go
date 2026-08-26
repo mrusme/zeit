@@ -3,6 +3,7 @@ package val
 import (
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 
@@ -15,21 +16,35 @@ const (
 	VALID_SID_REGEX_NEG = `[^a-zA-Z0-9\-\_\.]`
 )
 
-func Validate(s interface{}) error {
-	var err error
+var (
+	validSIDRegex        = regexp.MustCompile(VALID_SID_REGEX)
+	invalidSIDCharsRegex = regexp.MustCompile(VALID_SID_REGEX_NEG)
+	underscoreRunRegex   = regexp.MustCompile(`_+`)
+)
 
+var getValidator = sync.OnceValues(func() (*validator.Validate, error) {
 	validate := validator.New()
-	if err = validate.RegisterValidation("sid", IsValidSID); err != nil {
-		return err
+
+	if err := validate.RegisterValidation("sid", IsValidSID); err != nil {
+		return nil, err
 	}
-	if err = validate.RegisterValidation(
+	if err := validate.RegisterValidation(
 		"timestamp_start", IsValidTimestampStart,
 	); err != nil {
-		return err
+		return nil, err
 	}
-	if err = validate.RegisterValidation(
+	if err := validate.RegisterValidation(
 		"timestamp_end", IsValidTimestampEnd,
 	); err != nil {
+		return nil, err
+	}
+
+	return validate, nil
+})
+
+func Validate(s interface{}) error {
+	validate, err := getValidator()
+	if err != nil {
 		return err
 	}
 
@@ -52,24 +67,13 @@ func IsValidSID(fl validator.FieldLevel) bool {
 		return false
 	}
 
-	re := regexp.MustCompile(VALID_SID_REGEX)
-
-	return re.MatchString(value)
+	return validSIDRegex.MatchString(value)
 }
 
 func ConvertTextToSID(txt string) string {
-	re, err := regexp.Compile(VALID_SID_REGEX_NEG)
-	if err != nil {
-		panic(err)
-	}
-	tmp := strings.ToLower(re.ReplaceAllString(txt, "_"))
+	tmp := strings.ToLower(invalidSIDCharsRegex.ReplaceAllString(txt, "_"))
 
-	re, err = regexp.Compile(`_+`)
-	if err != nil {
-		panic(err)
-	}
-
-	tmp = re.ReplaceAllString(tmp, "_")
+	tmp = underscoreRunRegex.ReplaceAllString(tmp, "_")
 
 	if len(tmp) > 32 {
 		tmp = tmp[:32]
