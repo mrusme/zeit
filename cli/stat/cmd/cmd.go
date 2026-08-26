@@ -51,7 +51,7 @@ var Cmd = &cobra.Command{
 		rt := runtime.New(runtime.GetLogLevel(cmd), runtime.GetOutputColor(cmd), true)
 		defer rt.End()
 
-		pargs, err = argsparser.POP("block", flags, args, rt.Logger)
+		pargs, err = argsparser.POP("stat", flags, args, rt.Logger)
 		rt.NilOrDie(err)
 
 		blockMap, err = block.List(rt.Database)

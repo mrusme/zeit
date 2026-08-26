@@ -45,7 +45,7 @@ var Cmd = &cobra.Command{
 		calledAs := rt.GetCommandCall(cmd)
 		cmdName := aliasMap.GetCommandNameForAlias(calledAs)
 
-		pargs, err = argsparser.POP("end", flags, args, rt.Logger)
+		pargs, err = argsparser.POP(cmdName, flags, args, rt.Logger)
 		rt.NilOrDie(err)
 
 		b, err := block.New(rt.Config.UserKey)
