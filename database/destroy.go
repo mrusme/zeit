@@ -5,7 +5,7 @@ import (
 )
 
 func (db *Database) DestroyRow(key string) error {
-	err := db.engine.View(func(txn *badger.Txn) error {
+	err := db.engine.Update(func(txn *badger.Txn) error {
 		return txn.Delete([]byte(key))
 	})
 
