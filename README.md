@@ -169,8 +169,12 @@ zeit import -f v0 ~/zeit_export.json
 
 #### `dmenu` compatible project/task selector
 
-Requires `jq` to be installed and preferred `dmenu` launcher (e.g. `bemenu`,
-`rofi`, etc.) to be set as `DMENU_PROGRAM`:
+Requires `jq` to be installed and preferred
+[`dmenu`](https://tools.suckless.org/dmenu/) launcher (e.g.
+[`sysdeck --dmenu`](https://tty.fail/mrus/sysdeck),
+[`bemenu`](https://github.com/cloudef/bemenu),
+[`rofi`](https://github.com/davatorium/rofi), etc.) to be set as
+`DMENU_PROGRAM`:
 
 ```sh
 zeit projects -f json | jq -r '.[] | .sid as $parent_sid | .tasks? // [] | .[] | "\($parent_sid)/\(.sid)"' | $DMENU_PROGRAM
