@@ -74,6 +74,8 @@ func Parse(command string, args []string) (*ParsedArgs, error) {
 				switch attr {
 				case "note":
 					pa.Note = val
+				default:
+					return nil, errs.ErrUnknownAttr
 				}
 
 				i += 2

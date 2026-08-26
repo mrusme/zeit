@@ -36,6 +36,11 @@ var (
 			"e.g. 'with note \"Issue ID: 123\"'",
 	)
 
+	ErrUnknownAttr error = errors.New(
+		"'with' only supports the 'note' attribute, " +
+			"e.g. 'with note \"Issue ID: 123\"'",
+	)
+
 	ErrInvalidSID error = errors.New(
 		"The Simplified-ID (SID) may only contain letters, numbers, dashes, " +
 			"underscores, and periods. Certain reserved keywords like 'edit' are " +
