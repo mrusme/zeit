@@ -90,11 +90,14 @@ var Cmd = &cobra.Command{
 			dump[tk.GetKey()] = tk
 		}
 
+		blockMap, err := block.List(rt.Database)
+		rt.NilOrDie(err)
+
+		blocksByTask := block.GroupByProjectTaskSID(blockMap)
+
 		order := database.GetOrderedKeys(dump)
 		for _, key := range order {
-			bs, err := block.ListForProjectTaskSID(rt.Database,
-				dump[key].ProjectSID, dump[key].SID)
-			rt.NilOrDie(err)
+			bs := blocksByTask[dump[key].ProjectSID][dump[key].SID]
 
 			var bvs []TaskBlockView
 			var pTotalBlocks int

@@ -71,6 +71,22 @@ func ListForProjectSID(
 	return lst, nil
 }
 
+func GroupByProjectSID(rows map[string]*Task) map[string]map[string]*Task {
+	grouped := make(map[string]map[string]*Task)
+
+	for key := range rows {
+		projectSID := rows[key].ProjectSID
+
+		if grouped[projectSID] == nil {
+			grouped[projectSID] = make(map[string]*Task)
+		}
+
+		grouped[projectSID][key] = rows[key]
+	}
+
+	return grouped
+}
+
 func Get(db *database.Database, key string) (*Task, error) {
 	var err error
 

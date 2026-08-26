@@ -71,10 +71,18 @@ var Cmd = &cobra.Command{
 			dump[pj.GetKey()] = pj
 		}
 
+		taskMap, err := task.List(rt.Database)
+		rt.NilOrDie(err)
+
+		blockMap, err := block.List(rt.Database)
+		rt.NilOrDie(err)
+
+		tasksByProject := task.GroupByProjectSID(taskMap)
+		blocksByTask := block.GroupByProjectTaskSID(blockMap)
+
 		order := database.GetOrderedKeys(dump)
 		for _, key := range order {
-			tks, err := task.ListForProjectSID(rt.Database, dump[key].SID)
-			rt.NilOrDie(err)
+			tks := tasksByProject[dump[key].SID]
 
 			var tkvs []ProjectTaskView
 			var pTotalBlocks int
@@ -82,8 +90,7 @@ var Cmd = &cobra.Command{
 
 			torder := database.GetOrderedKeys(tks)
 			for _, tkey := range torder {
-				bs, err := block.ListForProjectTaskSID(rt.Database, dump[key].SID, tks[tkey].SID)
-				rt.NilOrDie(err)
+				bs := blocksByTask[dump[key].SID][tks[tkey].SID]
 
 				var totalAmount time.Duration
 				for bkey := range bs {

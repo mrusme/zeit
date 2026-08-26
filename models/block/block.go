@@ -138,6 +138,28 @@ func ListForProjectTaskSID(
 	return lst, nil
 }
 
+func GroupByProjectTaskSID(
+	rows map[string]*Block,
+) map[string]map[string]map[string]*Block {
+	grouped := make(map[string]map[string]map[string]*Block)
+
+	for key := range rows {
+		projectSID := rows[key].ProjectSID
+		taskSID := rows[key].TaskSID
+
+		if grouped[projectSID] == nil {
+			grouped[projectSID] = make(map[string]map[string]*Block)
+		}
+		if grouped[projectSID][taskSID] == nil {
+			grouped[projectSID][taskSID] = make(map[string]*Block)
+		}
+
+		grouped[projectSID][taskSID][key] = rows[key]
+	}
+
+	return grouped
+}
+
 func Get(db *database.Database, key string) (*Block, error) {
 	var err error
 
