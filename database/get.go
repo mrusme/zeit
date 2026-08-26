@@ -2,7 +2,6 @@ package database
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/dgraph-io/badger/v4"
 )
@@ -73,8 +72,6 @@ func (db *Database) GetAllRowsAsBytes() (map[string][]byte, error) {
 }
 
 func GetAllRowsAsStruct[T Model](db *Database, v map[string]T) error {
-	errstr := ""
-
 	rows, err := db.GetAllRowsAsBytes()
 	if err != nil {
 		return err
@@ -89,9 +86,6 @@ func GetAllRowsAsStruct[T Model](db *Database, v map[string]T) error {
 		v[key] = t
 	}
 
-	if errstr != "" {
-		return errors.New(errstr)
-	}
 	return nil
 }
 
@@ -118,8 +112,6 @@ func (db *Database) GetPrefixedRowsAsBytes(prefix string) (map[string][]byte, er
 }
 
 func GetPrefixedRowsAsStruct[T Model](db *Database, prefix string, v map[string]T) error {
-	errstr := ""
-
 	rows, err := db.GetPrefixedRowsAsBytes(prefix)
 	if err != nil {
 		return err
@@ -134,8 +126,5 @@ func GetPrefixedRowsAsStruct[T Model](db *Database, prefix string, v map[string]
 		v[key] = t
 	}
 
-	if errstr != "" {
-		return errors.New(errstr)
-	}
 	return nil
 }
