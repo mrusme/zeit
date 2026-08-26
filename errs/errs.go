@@ -55,6 +55,10 @@ var (
 		"The SID is too large",
 	)
 
+	ErrSIDRequired error = errors.New(
+		"A SID is required",
+	)
+
 	ErrProjectSIDRequired error = errors.New(
 		"A project SID is required",
 	)

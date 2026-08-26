@@ -146,6 +146,8 @@ func TransformValidationError(err error) error {
 			return errs.ErrInvalidTimestampEnd
 		case "required":
 			switch err.Field() {
+			case "SID":
+				return errs.ErrSIDRequired
 			case "ProjectSID":
 				return errs.ErrProjectSIDRequired
 			case "TaskSID":
@@ -157,7 +159,7 @@ func TransformValidationError(err error) error {
 			switch err.Field() {
 			case "Note":
 				return errs.ErrNoteTooLarge
-			case "ProjectSID", "TaskSID":
+			case "SID", "ProjectSID", "TaskSID":
 				return errs.ErrSIDTooLarge
 			case "DisplayName":
 				return errs.ErrDisplayNameTooLarge
