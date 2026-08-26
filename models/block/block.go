@@ -244,7 +244,10 @@ func Start(db *database.Database, b *Block) (*Block, error) {
 
 	// TODO: This should be one transaction
 	// {
-	ab, _ := activeblock.Get(db)
+	ab, err := activeblock.Get(db)
+	if err != nil {
+		return nil, err
+	}
 	// If the TimestampEnd IsZero and hence wasn't supplied by the user, we mark
 	// the block as active.
 	// If TimestampEnd was supplied (by the user), we don't need to mark the block

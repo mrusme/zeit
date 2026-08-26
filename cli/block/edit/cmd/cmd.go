@@ -39,6 +39,7 @@ var Cmd = &cobra.Command{
 		rt.NilOrDie(err)
 
 		err = b.FromProcessedArgs(pargs)
+		rt.NilOrDie(err)
 
 		err = block.Set(rt.Database, b)
 		rt.NilOrDie(err)

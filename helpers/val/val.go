@@ -19,9 +19,20 @@ func Validate(s interface{}) error {
 	var err error
 
 	validate := validator.New()
-	validate.RegisterValidation("sid", IsValidSID)
-	validate.RegisterValidation("timestamp_start", IsValidTimestampStart)
-	validate.RegisterValidation("timestamp_end", IsValidTimestampEnd)
+	if err = validate.RegisterValidation("sid", IsValidSID); err != nil {
+		return err
+	}
+	if err = validate.RegisterValidation(
+		"timestamp_start", IsValidTimestampStart,
+	); err != nil {
+		return err
+	}
+	if err = validate.RegisterValidation(
+		"timestamp_end", IsValidTimestampEnd,
+	); err != nil {
+		return err
+	}
+
 	if err = validate.Struct(s); err != nil {
 		return TransformValidationError(err)
 	}
@@ -118,7 +129,12 @@ func IsValidTimestampEnd(fl validator.FieldLevel) bool {
 }
 
 func TransformValidationError(err error) error {
-	for _, err := range err.(validator.ValidationErrors) {
+	verrs, ok := err.(validator.ValidationErrors)
+	if ok == false {
+		return err
+	}
+
+	for _, err := range verrs {
 		switch err.Tag() {
 		case "timestamp_start":
 			return errs.ErrInvalidTimestampStart
