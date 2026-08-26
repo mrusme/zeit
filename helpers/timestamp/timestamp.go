@@ -158,30 +158,28 @@ func Parse(str string) (*Timestamp, error) {
 	return ts, nil
 }
 
+func IsWithinTimeframe(
+	timeframeStart time.Time,
+	timeframeEnd time.Time,
+	v time.Time,
+) bool {
+	if timeframeStart.IsZero() == false && v.Before(timeframeStart) {
+		return false
+	}
+
+	if timeframeEnd.IsZero() == false && v.After(timeframeEnd) {
+		return false
+	}
+
+	return true
+}
+
 func IsStartWithinTimeframe(
 	timeframeStart time.Time,
 	timeframeEnd time.Time,
 	vStart time.Time,
 ) bool {
-	var ts, te time.Time
-
-	if timeframeStart.IsZero() == false {
-		ts = timeframeStart
-	} else {
-		ts = time.Now()
-	}
-
-	if timeframeEnd.IsZero() == false {
-		te = timeframeEnd
-	} else {
-		te = time.Now()
-	}
-
-	if vStart.Before(ts) || vStart.After(te) {
-		return false
-	}
-
-	return true
+	return IsWithinTimeframe(timeframeStart, timeframeEnd, vStart)
 }
 
 func IsEndWithinTimeframe(
@@ -189,25 +187,11 @@ func IsEndWithinTimeframe(
 	timeframeEnd time.Time,
 	vEnd time.Time,
 ) bool {
-	var ts, te time.Time
-
-	if timeframeStart.IsZero() == false {
-		ts = timeframeStart
-	} else {
-		ts = time.Now()
+	if vEnd.IsZero() == true {
+		return IsWithinTimeframe(timeframeStart, timeframeEnd, time.Now())
 	}
 
-	if timeframeEnd.IsZero() == false {
-		te = timeframeEnd
-	} else {
-		te = time.Now()
-	}
-
-	if vEnd.Before(ts) || vEnd.After(te) {
-		return false
-	}
-
-	return true
+	return IsWithinTimeframe(timeframeStart, timeframeEnd, vEnd)
 }
 
 func IsFullyWithinTimeframe(

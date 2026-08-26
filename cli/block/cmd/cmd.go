@@ -80,8 +80,6 @@ var Cmd = &cobra.Command{
 		order := database.GetOrderedKeys(blockMap)
 		var newOrder []string
 		for _, key := range order {
-			var duration time.Duration
-
 			timestampStart := pargs.GetTimestampStart()
 			timestampEnd := pargs.GetTimestampEnd()
 
@@ -101,6 +99,13 @@ var Cmd = &cobra.Command{
 				if blockMap[key].TaskSID != pargs.TaskSID {
 					continue
 				}
+			}
+
+			var duration time.Duration
+			if blockMap[key].TimestampStart.IsZero() == false &&
+				blockMap[key].TimestampEnd.IsZero() == false {
+				duration = blockMap[key].TimestampEnd.Sub(
+					blockMap[key].TimestampStart)
 			}
 
 			bvs = append(bvs, BlockView{
