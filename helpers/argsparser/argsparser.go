@@ -16,17 +16,44 @@ var (
 	projectWords   = []string{"on", "to", "of"}
 	attributeWords = []string{"with", "w"}
 	endWords       = []string{"end", "ends", "ended", "til", "until"}
+	endCommands    = []string{"end", "stop", "pause"}
 )
 
+type attribute struct {
+	TakesValue bool
+	Set        func(p *parser, value string) error
+}
+
+var attributes = map[string]attribute{
+	"note": {
+		TakesValue: true,
+		Set: func(p *parser, value string) error {
+			if p.pa.Note != "" {
+				return errs.ErrRepeatedNote
+			}
+
+			p.pa.Note = value
+
+			return nil
+		},
+	},
+}
+
 type ParsedArgs struct {
-	ProjectSID     string    `validate:"omitempty,required_with=TaskSID,sid,max=32"`
-	TaskSID        string    `validate:"omitempty,required_with=ProjectSID,sid,max=32"`
-	Note           string    `validate:"max=65536"`
-	TimestampStart string    `validate:""`
-	timestampStart time.Time `validate:""`
-	TimestampEnd   string    `validate:""`
-	timestampEnd   time.Time `validate:""`
+	ProjectSID     string `validate:"omitempty,sid,max=32"`
+	TaskSID        string `validate:"omitempty,sid,max=32"`
+	Note           string `validate:"max=65536"`
+	TimestampStart string
+	timestampStart time.Time
+	TimestampEnd   string
+	timestampEnd   time.Time
 	processed      bool
+}
+
+type parser struct {
+	pa        *ParsedArgs
+	args      []string
+	bareIsEnd bool
 }
 
 func isKeyword(word string) bool {
@@ -35,71 +62,162 @@ func isKeyword(word string) bool {
 		slices.Contains(endWords, word) == true
 }
 
-func timestampEndsAt(args []string, from int) int {
-	for j := from; j < len(args); j++ {
-		if isKeyword(strings.ToLower(args[j])) == true {
-			return j
-		}
-	}
-
-	return len(args)
+func endsByDefault(command string) bool {
+	return slices.Contains(endCommands, strings.ToLower(command))
 }
 
 func Parse(command string, args []string) (*ParsedArgs, error) {
-	pa := new(ParsedArgs)
+	p := &parser{
+		pa:        new(ParsedArgs),
+		args:      args,
+		bareIsEnd: endsByDefault(command),
+	}
 
-	for i := 0; i < len(args); i++ {
-		word := strings.ToLower(args[i])
-		if slices.Contains(noiseWords, word) == true {
-			continue
-		} else if slices.Contains(projectWords, word) == true {
-			if len(args) > i+1 {
-				pst := strings.ToLower(args[i+1])
-				found := false
-				pa.ProjectSID, pa.TaskSID, found = strings.Cut(pst, "/")
-				if found == false {
-					return nil, errs.ErrMissingProjectOrTaskSID
-				} else {
-					i += 1
-					continue
-				}
-			} else {
-				return nil, errs.ErrMissingProjectOrTaskSID
-			}
-		} else if slices.Contains(attributeWords, word) == true {
-			if len(args) > i+2 {
-				attr := strings.ToLower(args[i+1])
-				val := args[i+2]
+	for i := 0; i < len(args); {
+		next, err := p.step(i)
+		if err != nil {
+			return nil, err
+		}
 
-				switch attr {
-				case "note":
-					pa.Note = val
-				default:
-					return nil, errs.ErrUnknownAttr
-				}
+		i = next
+	}
 
-				i += 2
-				continue
-			} else {
-				return nil, errs.ErrMissingAttrOrVal
-			}
-		} else {
-			stop := timestampEndsAt(args, i)
-			pa.TimestampStart = strings.Join(args[i:stop], " ")
+	return p.pa, nil
+}
 
-			if stop < len(args) &&
-				slices.Contains(endWords, strings.ToLower(args[stop])) == true {
-				endStop := timestampEndsAt(args, stop+1)
-				pa.TimestampEnd = strings.Join(args[stop+1:endStop], " ")
-				stop = endStop
-			}
+func (p *parser) step(i int) (int, error) {
+	word := strings.ToLower(p.args[i])
 
-			i = stop - 1
-			continue
+	switch {
+	case slices.Contains(noiseWords, word) == true:
+		return i + 1, nil
+	case slices.Contains(projectWords, word) == true:
+		return p.parseProjectTask(i)
+	case slices.Contains(attributeWords, word) == true:
+		return p.parseAttribute(i)
+	default:
+		return p.parseTimestamps(i)
+	}
+}
+
+func (p *parser) parseProjectTask(i int) (int, error) {
+	if i+1 >= len(p.args) {
+		return 0, errs.ErrMissingProjectOrTaskSID
+	}
+
+	projectSID, taskSID, found := strings.Cut(strings.ToLower(p.args[i+1]), "/")
+	if found == false || projectSID == "" || taskSID == "" {
+		return 0, errs.ErrMissingProjectOrTaskSID
+	}
+
+	if p.pa.ProjectSID != "" || p.pa.TaskSID != "" {
+		return 0, errs.ErrRepeatedProjectOrTask
+	}
+
+	p.pa.ProjectSID = projectSID
+	p.pa.TaskSID = taskSID
+
+	return i + 2, nil
+}
+
+func (p *parser) parseAttribute(i int) (int, error) {
+	if i+1 >= len(p.args) {
+		return 0, errs.ErrMissingAttrOrVal
+	}
+
+	attr, known := attributes[strings.ToLower(p.args[i+1])]
+	if known == false {
+		return 0, errs.ErrUnknownAttr
+	}
+
+	if attr.TakesValue == false {
+		if err := attr.Set(p, ""); err != nil {
+			return 0, err
+		}
+
+		return i + 2, nil
+	}
+
+	if i+2 >= len(p.args) {
+		return 0, errs.ErrMissingAttrOrVal
+	}
+
+	if err := attr.Set(p, p.args[i+2]); err != nil {
+		return 0, err
+	}
+
+	return i + 3, nil
+}
+
+func (p *parser) parseTimestamps(i int) (int, error) {
+	stop := p.spanEndsAt(i)
+
+	if err := p.setBareTimestamp(
+		strings.Join(p.args[i:stop], " "),
+	); err != nil {
+		return 0, err
+	}
+
+	if stop >= len(p.args) ||
+		slices.Contains(endWords, strings.ToLower(p.args[stop])) == false {
+		return stop, nil
+	}
+
+	endStop := p.spanEndsAt(stop + 1)
+
+	if err := p.setTimestampEnd(
+		strings.Join(p.args[stop+1:endStop], " "),
+	); err != nil {
+		return 0, err
+	}
+
+	return endStop, nil
+}
+
+func (p *parser) spanEndsAt(from int) int {
+	for i := from; i < len(p.args); i++ {
+		if isKeyword(strings.ToLower(p.args[i])) == true {
+			return i
 		}
 	}
 
-	return pa, nil
+	return len(p.args)
+}
+
+func (p *parser) setBareTimestamp(span string) error {
+	if p.bareIsEnd == true {
+		return p.setTimestampEnd(span)
+	}
+
+	return p.setTimestampStart(span)
+}
+
+func (p *parser) setTimestampStart(span string) error {
+	if span == "" {
+		return nil
+	}
+
+	if p.pa.TimestampStart != "" {
+		return errs.ErrRepeatedTimestamp
+	}
+
+	p.pa.TimestampStart = span
+
+	return nil
+}
+
+func (p *parser) setTimestampEnd(span string) error {
+	if span == "" {
+		return nil
+	}
+
+	if p.pa.TimestampEnd != "" {
+		return errs.ErrRepeatedTimestamp
+	}
+
+	p.pa.TimestampEnd = span
+
+	return nil
 }
 
 func (pa *ParsedArgs) Process() error {

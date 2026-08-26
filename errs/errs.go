@@ -41,6 +41,18 @@ var (
 			"e.g. 'with note \"Issue ID: 123\"'",
 	)
 
+	ErrRepeatedProjectOrTask error = errors.New(
+		"A project/task can only be given once",
+	)
+
+	ErrRepeatedNote error = errors.New(
+		"A note can only be given once",
+	)
+
+	ErrRepeatedTimestamp error = errors.New(
+		"A start and an end time can each only be given once",
+	)
+
 	ErrInvalidSID error = errors.New(
 		"The Simplified-ID (SID) may only contain letters, numbers, dashes, " +
 			"underscores, and periods. Certain reserved keywords like 'edit' are " +
