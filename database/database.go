@@ -45,15 +45,24 @@ func New(logger badger.Logger, dbpath string, readOnly bool) (*Database, error) 
 }
 
 func (db *Database) Close() {
-	repeat := true
-
-	for repeat {
-		if err := db.engine.RunValueLogGC(0.7); err != nil {
-			db.logger.Warningf("GC error: %s\n", err)
-			repeat = false
+	for {
+		err := db.engine.RunValueLogGC(0.7)
+		if err == nil {
+			continue
 		}
+
+		if errors.Is(err, badger.ErrNoRewrite) == false &&
+			errors.Is(err, badger.ErrGCInMemoryMode) == false &&
+			errors.Is(err, badger.ErrGCInReadOnlyMode) == false {
+			db.logger.Warningf("Value log GC stopped: %s", err)
+		}
+
+		break
 	}
-	db.engine.Close()
+
+	if err := db.engine.Close(); err != nil {
+		db.logger.Errorf("Error closing database: %s", err)
+	}
 }
 
 func (db *Database) IsErrKeyNotFound(err error) bool {
