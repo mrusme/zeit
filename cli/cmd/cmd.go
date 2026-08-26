@@ -118,6 +118,8 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.Version = runtime.NewBuild().Version
+
 	rootCmd.AddCommand(startCmd.Cmd)
 	rootCmd.AddCommand(endCmd.Cmd)
 	rootCmd.AddCommand(projectCmd.Cmd)

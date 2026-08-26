@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 	"path"
+	"runtime/debug"
 	"strings"
 
 	"github.com/adrg/xdg"
@@ -28,6 +29,38 @@ type Build struct {
 	Date    string
 }
 
+func NewBuild() Build {
+	b := Build{
+		Version: Version,
+		Commit:  Commit,
+		Date:    Date,
+	}
+
+	info, ok := debug.ReadBuildInfo()
+	if ok == false {
+		return b
+	}
+
+	if b.Version == "" {
+		b.Version = info.Main.Version
+	}
+
+	for _, setting := range info.Settings {
+		switch setting.Key {
+		case "vcs.revision":
+			if b.Commit == "" {
+				b.Commit = setting.Value
+			}
+		case "vcs.time":
+			if b.Date == "" {
+				b.Date = setting.Value
+			}
+		}
+	}
+
+	return b
+}
+
 type Runtime struct {
 	Build    Build
 	Logger   *log.Logger
@@ -41,9 +74,7 @@ func New(lvl slog.Level, oc out.OutputColor, readOnly bool) *Runtime {
 
 	rt := new(Runtime)
 
-	rt.Build.Version = Version
-	rt.Build.Commit = Commit
-	rt.Build.Date = Date
+	rt.Build = NewBuild()
 
 	rt.Logger = log.New(lvl)
 
@@ -169,8 +200,7 @@ func (rt *Runtime) GetDynamicSuggestions(
 	var suggestions []string
 
 	for _, name := range possibleArgs {
-		if len(prefix) == 0 ||
-			(len(name) >= len(prefix) && name[:len(prefix)] == prefix) {
+		if strings.HasPrefix(name, prefix) == true {
 			suggestions = append(suggestions, name)
 		}
 	}
