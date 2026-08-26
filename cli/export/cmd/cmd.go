@@ -3,6 +3,7 @@ package exportCmd
 import (
 	"encoding/json"
 	"strings"
+	"time"
 
 	"xn--gckvb8fzb.com/zeit/database"
 	"xn--gckvb8fzb.com/zeit/helpers/argsparser"
@@ -155,14 +156,156 @@ func outputCLI(
 	dump map[string]interface{},
 	sorting []string,
 ) {
-	for _, key := range sorting {
-		rt.Out.Put(out.Opts{Type: out.Info},
-			"%s %s",
-			rt.Out.Stylize(out.Style{FG: out.ColorPrimary},
-				"%s", key),
-			dump[key],
-		)
+	for idx, key := range sorting {
+		switch model := dump[key].(type) {
+		case *block.Block:
+			outputBlockCLI(rt, key, model)
+		case *project.Project:
+			outputProjectCLI(rt, key, model)
+		case *task.Task:
+			outputTaskCLI(rt, key, model)
+		case *config.Config:
+			outputConfigCLI(rt, key, model)
+		case *activeblock.ActiveBlock:
+			outputActiveBlockCLI(rt, key, model)
+		}
+
+		if idx < len(sorting)-1 {
+			rt.Out.Put(out.Opts{Type: out.Plain}, "")
+		}
 	}
+}
+
+func outputBlockCLI(rt *runtime.Runtime, key string, b *block.Block) {
+	var duration time.Duration
+	if b.TimestampStart.IsZero() == false &&
+		b.TimestampEnd.IsZero() == false {
+		duration = b.TimestampEnd.Sub(b.TimestampStart)
+	}
+
+	rt.Out.Put(out.Opts{Type: out.Info},
+		"%s\n  %s %s %s  %s %s\n  tracked on %s\n  %s",
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorPrimary},
+			"%s", key,
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.OutputPrefixes[out.Start].Color},
+			"%s%s",
+			out.OutputPrefixes[out.Start].Char,
+			b.TimestampStart.Format(time.DateTime),
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorSecondary},
+			"→",
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.OutputPrefixes[out.End].Color},
+			"%s%s",
+			out.OutputPrefixes[out.End].Char,
+			out.EndTimestamp(b.TimestampEnd),
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorSecondary},
+			"⭘",
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorWhite},
+			"%s", out.Seconds(duration),
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorPrimary},
+			"%s/%s", b.ProjectSID, b.TaskSID,
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorBrightBlack},
+			"%s", block.GetNotePreview(b.Note, 0),
+		),
+	)
+}
+
+func outputProjectCLI(rt *runtime.Runtime, key string, pj *project.Project) {
+	rt.Out.Put(out.Opts{Type: out.Info},
+		"%s\n  %s%s",
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorPrimary},
+			"%s", key,
+		),
+		rt.Out.Stylize(
+			out.Style{BG: out.Color(pj.Color), FG: out.ColorBrightWhite, PX: 1},
+			"%s", pj.DisplayName,
+		),
+		rt.Out.Stylize(
+			out.Style{BG: out.Color(pj.Color), FG: out.ColorBlack, PX: 1},
+			"[%s]", pj.SID,
+		),
+	)
+}
+
+func outputTaskCLI(rt *runtime.Runtime, key string, tk *task.Task) {
+	rt.Out.Put(out.Opts{Type: out.Info},
+		"%s\n  %s%s",
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorPrimary},
+			"%s", key,
+		),
+		rt.Out.Stylize(
+			out.Style{BG: out.Color(tk.Color), FG: out.ColorBrightWhite, PX: 1},
+			"%s", tk.DisplayName,
+		),
+		rt.Out.Stylize(
+			out.Style{BG: out.Color(tk.Color), FG: out.ColorBlack, PX: 1},
+			"[%s/%s]", tk.ProjectSID, tk.SID,
+		),
+	)
+}
+
+func outputConfigCLI(rt *runtime.Runtime, key string, cfg *config.Config) {
+	rt.Out.Put(out.Opts{Type: out.Info},
+		"%s\n  %s %s",
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorPrimary},
+			"%s", key,
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorSecondary},
+			"user key",
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorWhite},
+			"%s", cfg.UserKey,
+		),
+	)
+}
+
+func outputActiveBlockCLI(
+	rt *runtime.Runtime,
+	key string,
+	ab *activeblock.ActiveBlock,
+) {
+	rt.Out.Put(out.Opts{Type: out.Info},
+		"%s\n  %s %s\n  %s %s",
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorPrimary},
+			"%s", key,
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorSecondary},
+			"active  ",
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorWhite},
+			"%s", ab.GetActiveBlockKey(),
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorSecondary},
+			"previous",
+		),
+		rt.Out.Stylize(
+			out.Style{FG: out.ColorWhite},
+			"%s", ab.GetPreviousBlockKey(),
+		),
+	)
 }
 
 func outputJSON(

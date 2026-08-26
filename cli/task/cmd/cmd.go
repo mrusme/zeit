@@ -30,24 +30,24 @@ type TaskView struct {
 	Color       string          `json:"color"`
 	Blocks      []TaskBlockView `json:"blocks"`
 	TotalBlocks int             `json:"total_blocks"`
-	TotalAmount time.Duration   `json:"total_amount"`
+	TotalAmount out.Seconds     `json:"total_amount"`
 }
 
 type TaskBlockView struct {
-	Key            string        `json:"key"`
-	Note           string        `json:"note"`
-	TimestampStart time.Time     `json:"start"`
-	TimestampEnd   time.Time     `json:"end"`
-	Duration       time.Duration `json:"duration"`
+	Key            string           `json:"key"`
+	Note           string           `json:"note"`
+	TimestampStart time.Time        `json:"start"`
+	TimestampEnd   out.EndTimestamp `json:"end"`
+	Duration       out.Seconds      `json:"duration"`
 }
 
 var Cmd = &cobra.Command{
-	Use:     "task [flags] [project-sid[/]task-sid]",
-	Aliases: []string{"tasks", "tsk", "tk"},
-	Short:   "zeit task",
-	Long:    "View and manage zeit tasks",
-	Example: "zeit task myproject mytask",
-	Args:    cobra.RangeArgs(0, 2),
+	Use:               "task [flags] [project-sid[/]task-sid]",
+	Aliases:           []string{"tasks", "tsk", "tk"},
+	Short:             "zeit task",
+	Long:              "View and manage zeit tasks",
+	Example:           "zeit task myproject mytask",
+	Args:              cobra.RangeArgs(0, 2),
 	ValidArgsFunction: shared.DynamicArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var dump map[string]*task.Task
@@ -113,8 +113,8 @@ var Cmd = &cobra.Command{
 					Key:            bkey,
 					Note:           bs[bkey].Note,
 					TimestampStart: bs[bkey].TimestampStart,
-					TimestampEnd:   bs[bkey].TimestampEnd,
-					Duration:       duration,
+					TimestampEnd:   out.EndTimestamp(bs[bkey].TimestampEnd),
+					Duration:       out.Seconds(duration),
 				})
 
 				pTotalBlocks += 1
@@ -128,7 +128,7 @@ var Cmd = &cobra.Command{
 				Color:       dump[key].Color,
 				Blocks:      bvs,
 				TotalBlocks: pTotalBlocks,
-				TotalAmount: pTotalAmount,
+				TotalAmount: out.Seconds(pTotalAmount),
 			})
 		}
 
@@ -181,7 +181,7 @@ func outputCLI(
 			),
 			rt.Out.Stylize(
 				out.Style{FG: out.ColorWhite},
-				"%-12s", list[idx].TotalAmount.Round(time.Second).String(),
+				"%-12s", list[idx].TotalAmount,
 			),
 		)
 
@@ -209,7 +209,7 @@ func outputCLI(
 				),
 				rt.Out.Stylize(
 					out.Style{FG: out.ColorWhite},
-					"%s", list[idx].Blocks[jdx].Duration.Round(time.Second).String(),
+					"%s", list[idx].Blocks[jdx].Duration,
 				),
 				rt.Out.Stylize(
 					out.Style{FG: out.OutputPrefixes[out.Info].Color},
@@ -229,7 +229,7 @@ func outputCLI(
 					out.Style{FG: out.OutputPrefixes[out.End].Color},
 					"%s%s",
 					out.OutputPrefixes[out.End].Char,
-					list[idx].Blocks[jdx].TimestampEnd.Format(time.DateTime),
+					list[idx].Blocks[jdx].TimestampEnd,
 				),
 				rt.Out.Stylize(
 					out.Style{FG: out.OutputPrefixes[out.Info].Color},

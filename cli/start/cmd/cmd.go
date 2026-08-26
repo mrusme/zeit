@@ -2,6 +2,7 @@ package startCmd
 
 import (
 	"encoding/json"
+	"time"
 
 	"xn--gckvb8fzb.com/zeit/cli/start/shared"
 	"xn--gckvb8fzb.com/zeit/helpers/argsparser"
@@ -149,9 +150,16 @@ func outputJSON(
 	var statusOut *out.StatusOut
 
 	statusOut = new(out.StatusOut)
-	statusOut.IsRunning = true
 	statusOut.ProjectSID = nb.ProjectSID
 	statusOut.TaskSID = nb.TaskSID
+
+	if nb.TimestampEnd.IsZero() == true {
+		statusOut.IsRunning = true
+		statusOut.Timer = int64(time.Since(nb.TimestampStart).Seconds())
+	} else {
+		statusOut.IsRunning = false
+		statusOut.Timer = int64(nb.TimestampEnd.Sub(nb.TimestampStart).Seconds())
+	}
 
 	switch cmdName {
 	case "start":

@@ -29,15 +29,15 @@ type ProjectView struct {
 	Color       string            `json:"color"`
 	Tasks       []ProjectTaskView `json:"tasks"`
 	TotalBlocks int               `json:"total_blocks"`
-	TotalAmount time.Duration     `json:"total_amount"`
+	TotalAmount out.Seconds       `json:"total_amount"`
 }
 
 type ProjectTaskView struct {
-	SID         string        `json:"sid"`
-	DisplayName string        `json:"display_name"`
-	Color       string        `json:"color"`
-	TotalBlocks int           `json:"total_blocks"`
-	TotalAmount time.Duration `json:"total_amount"`
+	SID         string      `json:"sid"`
+	DisplayName string      `json:"display_name"`
+	Color       string      `json:"color"`
+	TotalBlocks int         `json:"total_blocks"`
+	TotalAmount out.Seconds `json:"total_amount"`
 }
 
 var Cmd = &cobra.Command{
@@ -101,7 +101,7 @@ var Cmd = &cobra.Command{
 					DisplayName: tks[tkey].DisplayName,
 					Color:       tks[tkey].Color,
 					TotalBlocks: totalBlocks,
-					TotalAmount: totalAmount,
+					TotalAmount: out.Seconds(totalAmount),
 				})
 
 				pTotalBlocks += totalBlocks
@@ -114,7 +114,7 @@ var Cmd = &cobra.Command{
 				Color:       dump[key].Color,
 				Tasks:       tkvs,
 				TotalBlocks: pTotalBlocks,
-				TotalAmount: pTotalAmount,
+				TotalAmount: out.Seconds(pTotalAmount),
 			})
 		}
 
@@ -167,7 +167,7 @@ func outputCLI(
 			),
 			rt.Out.Stylize(
 				out.Style{FG: out.ColorWhite},
-				"%-12s", list[idx].TotalAmount.Round(time.Second).String(),
+				"%-12s", list[idx].TotalAmount,
 			),
 		)
 
@@ -210,7 +210,7 @@ func outputCLI(
 				),
 				rt.Out.Stylize(
 					out.Style{FG: out.ColorWhite},
-					"%-12s", list[idx].Tasks[jdx].TotalAmount.Round(time.Second).String(),
+					"%-12s", list[idx].Tasks[jdx].TotalAmount,
 				),
 			)
 		}

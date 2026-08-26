@@ -1,19 +1,49 @@
 package out
 
 import (
+	"encoding/json"
 	"fmt"
 	"image/color"
 	"math/rand"
+	"time"
 
 	"charm.land/lipgloss/v2"
 )
 
+type EndTimestamp time.Time
+
+func (ts EndTimestamp) MarshalJSON() ([]byte, error) {
+	if time.Time(ts).IsZero() == true {
+		return []byte("null"), nil
+	}
+
+	return json.Marshal(time.Time(ts))
+}
+
+func (ts EndTimestamp) String() string {
+	if time.Time(ts).IsZero() == true {
+		return "not ended"
+	}
+
+	return time.Time(ts).Format(time.DateTime)
+}
+
+type Seconds time.Duration
+
+func (s Seconds) MarshalJSON() ([]byte, error) {
+	return json.Marshal(int64(time.Duration(s).Seconds()))
+}
+
+func (s Seconds) String() string {
+	return time.Duration(s).Round(time.Second).String()
+}
+
 type StatusOut struct {
 	Status     string `json:"status"`
 	IsRunning  bool   `json:"is_running"`
-	ProjectSID string `json:"project_sid,omitempty"`
-	TaskSID    string `json:"task_sid,omitempty"`
-	Timer      int64  `json:"timer,omitempty"`
+	ProjectSID string `json:"project_sid"`
+	TaskSID    string `json:"task_sid"`
+	Timer      int64  `json:"timer"`
 }
 
 func RandomVsibleHexColor() string {

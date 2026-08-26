@@ -28,13 +28,13 @@ var (
 )
 
 type BlockView struct {
-	Key            string        `json:"key"`
-	ProjectSID     string        `json:"project_sid"`
-	TaskSID        string        `json:"task_sid"`
-	Note           string        `json:"note"`
-	TimestampStart time.Time     `json:"start"`
-	TimestampEnd   time.Time     `json:"end"`
-	Duration       time.Duration `json:"duration"`
+	Key            string           `json:"key"`
+	ProjectSID     string           `json:"project_sid"`
+	TaskSID        string           `json:"task_sid"`
+	Note           string           `json:"note"`
+	TimestampStart time.Time        `json:"start"`
+	TimestampEnd   out.EndTimestamp `json:"end"`
+	Duration       out.Seconds      `json:"duration"`
 }
 
 var Cmd = &cobra.Command{
@@ -114,8 +114,8 @@ var Cmd = &cobra.Command{
 				TaskSID:        blockMap[key].TaskSID,
 				Note:           blockMap[key].Note,
 				TimestampStart: blockMap[key].TimestampStart,
-				TimestampEnd:   blockMap[key].TimestampEnd,
-				Duration:       duration,
+				TimestampEnd:   out.EndTimestamp(blockMap[key].TimestampEnd),
+				Duration:       out.Seconds(duration),
 			})
 			newOrder = append(newOrder, key)
 		}
@@ -186,7 +186,7 @@ func outputCLI(
 			),
 			rt.Out.Stylize(
 				out.Style{FG: out.ColorWhite},
-				"%s", list[idx].Duration.Round(time.Second).String(),
+				"%s", list[idx].Duration,
 			),
 			rt.Out.Stylize(
 				out.Style{FG: out.OutputPrefixes[out.Start].Color},
@@ -202,7 +202,7 @@ func outputCLI(
 				out.Style{FG: out.OutputPrefixes[out.End].Color},
 				"%s%s",
 				out.OutputPrefixes[out.End].Char,
-				list[idx].TimestampEnd.Format(time.DateTime),
+				list[idx].TimestampEnd,
 			),
 			rt.Out.Stylize(
 				out.Style{FG: out.ColorPrimary},
