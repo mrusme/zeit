@@ -25,6 +25,7 @@ var flagFormat string
 
 type TaskView struct {
 	SID         string          `json:"sid"`
+	ProjectSID  string          `json:"project_sid"`
 	DisplayName string          `json:"display_name"`
 	Color       string          `json:"color"`
 	Blocks      []TaskBlockView `json:"blocks"`
@@ -41,12 +42,12 @@ type TaskBlockView struct {
 }
 
 var Cmd = &cobra.Command{
-	Use:     "task [flags] project-sid[/]task-sid",
+	Use:     "task [flags] [project-sid[/]task-sid]",
 	Aliases: []string{"tasks", "tsk", "tk"},
 	Short:   "zeit task",
 	Long:    "View and manage zeit tasks",
 	Example: "zeit task myproject mytask",
-	Args:    cobra.RangeArgs(0, 1),
+	Args:    cobra.RangeArgs(0, 2),
 	ValidArgsFunction: shared.DynamicArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var dump map[string]*task.Task
@@ -74,7 +75,11 @@ var Cmd = &cobra.Command{
 		if taskSID == "" {
 			// List all tasks
 
-			dump, err = task.ListForProjectSID(rt.Database, projectSID)
+			if projectSID == "" {
+				dump, err = task.List(rt.Database)
+			} else {
+				dump, err = task.ListForProjectSID(rt.Database, projectSID)
+			}
 			rt.NilOrDie(err)
 		} else {
 			// Show specific task
@@ -118,6 +123,7 @@ var Cmd = &cobra.Command{
 
 			tkvs = append(tkvs, TaskView{
 				SID:         dump[key].SID,
+				ProjectSID:  dump[key].ProjectSID,
 				DisplayName: dump[key].DisplayName,
 				Color:       dump[key].Color,
 				Blocks:      bvs,
@@ -155,7 +161,7 @@ func outputCLI(
 			),
 			rt.Out.Stylize(
 				out.Style{BG: out.Color(list[idx].Color), FG: out.ColorBlack, PX: 1},
-				"[%s]", list[idx].SID,
+				"[%s/%s]", list[idx].ProjectSID, list[idx].SID,
 			),
 			rt.Out.Stylize(
 				out.Style{FG: out.OutputPrefixes[out.Info].Color},
