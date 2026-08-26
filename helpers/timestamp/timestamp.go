@@ -29,14 +29,12 @@ func ParsePeriod(str string) (*Timestamp, error) {
 
 	matches := periodRegex.FindStringSubmatch(str)
 
-	if len(matches) == 2 {
-		period = strings.ToLower(matches[1])
-	} else if len(matches) == 3 {
-		frame = strings.ToLower(matches[1])
-		period = strings.ToLower(matches[2])
-	} else {
+	if len(matches) != 3 {
 		return nil, errors.New("No period found")
 	}
+
+	frame = strings.ToLower(matches[1])
+	period = strings.ToLower(matches[2])
 
 	ts.IsRange = true
 
