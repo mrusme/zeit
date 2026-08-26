@@ -2,12 +2,14 @@ package timestamp
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/markusmobius/go-dateparser"
 	"github.com/markusmobius/go-dateparser/date"
+	"xn--gckvb8fzb.com/zeit/errs"
 )
 
 type Timestamp struct {
@@ -20,79 +22,111 @@ var periodRegex = regexp.MustCompile(
 	`(?m)^(?:(this|current|last|previous)\s+)?(hour|day|week|month|quarter|year|decade|century)$`,
 )
 
-func ParsePeriod(str string) (*Timestamp, error) {
-	var frame string
-	var period string
-	var now time.Time = time.Now()
-
-	ts := new(Timestamp)
-
-	matches := periodRegex.FindStringSubmatch(str)
-
-	if len(matches) != 3 {
-		return nil, errors.New("No period found")
-	}
-
-	frame = strings.ToLower(matches[1])
-	period = strings.ToLower(matches[2])
-
-	ts.IsRange = true
-
-	previousPeriod := false
-	if frame == "last" || frame == "previous" {
-		previousPeriod = true
-	}
-
-	switch period {
-	case "hour":
-		hour := now.Hour()
-		if previousPeriod {
-			hour -= 1
-		}
-		ts.Time = time.Date(now.Year(), now.Month(), now.Day(), hour, 0, 0, 0, now.Location())
-		ts.ToTime = ts.Time.Add(59 * time.Minute).Add(59 * time.Second)
-	case "day":
-		day := now.Day()
-		if previousPeriod {
-			day -= 1
-		}
-		ts.Time = time.Date(now.Year(), now.Month(), day, 0, 0, 0, 0, now.Location())
-		ts.ToTime = ts.Time.AddDate(0, 0, 1).Add(-time.Second)
-	case "week":
-		daysToMonday := int(now.Weekday()-time.Monday+7) % 7
-		ts.Time = time.Date(now.Year(), now.Month(), now.Day()-daysToMonday,
-			0, 0, 0, 0, now.Location())
-		if previousPeriod {
-			ts.Time = ts.Time.AddDate(0, 0, -7)
-		}
-		ts.ToTime = ts.Time.AddDate(0, 0, 7).Add(-time.Second)
-	case "month":
-		if previousPeriod == false {
-			ts.Time = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-		} else {
-			ts.Time = time.Date(now.Year(), now.Month()-1, 1, 0, 0, 0, 0, now.Location())
-		}
-		nextMonth := ts.Time.AddDate(0, 1, 0)
-		ts.ToTime = nextMonth.Add(-time.Second)
-	case "quarter":
-		ts.Time, ts.ToTime = getQuarterStartEnd(now, previousPeriod)
-	case "year":
-		if previousPeriod == false {
-			ts.Time = time.Date(now.Year(), time.January, 1, 0, 0, 0, 0, now.Location())
-			ts.ToTime = time.Date(now.Year(), time.December, 31, 23, 59, 59, 0, now.Location())
-		} else {
-			ts.Time = time.Date(now.Year()-1, time.January, 1, 0, 0, 0, 0, now.Location())
-			ts.ToTime = time.Date(now.Year()-1, time.December, 31, 23, 59, 59, 0, now.Location())
-		}
-	}
-
-	return ts, nil
+type Period struct {
+	start func(t time.Time) time.Time
+	step  func(t time.Time, n int) time.Time
+	key   func(t time.Time) string
 }
 
-func getQuarterStartEnd(now time.Time, last bool) (time.Time, time.Time) {
-	month := int(now.Month())
-	var quarterStartMonth int
+func (p Period) Start(t time.Time) time.Time {
+	return p.start(t)
+}
 
+func (p Period) Next(t time.Time) time.Time {
+	return p.step(t, 1)
+}
+
+func (p Period) Previous(t time.Time) time.Time {
+	return p.step(t, -1)
+}
+
+func (p Period) Key(t time.Time) string {
+	return p.key(t)
+}
+
+var periods = map[string]Period{
+	"hour": {
+		start: func(t time.Time) time.Time {
+			return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(),
+				0, 0, 0, t.Location())
+		},
+		step: func(t time.Time, n int) time.Time {
+			return t.Add(time.Duration(n) * time.Hour)
+		},
+		key: func(t time.Time) string {
+			return t.Format("2006-01-02T15")
+		},
+	},
+	"day": {
+		start: func(t time.Time) time.Time {
+			return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+		},
+		step: func(t time.Time, n int) time.Time {
+			return t.AddDate(0, 0, n)
+		},
+		key: func(t time.Time) string {
+			return t.Format(time.DateOnly)
+		},
+	},
+	"week": {
+		start: func(t time.Time) time.Time {
+			daysToMonday := int(t.Weekday()-time.Monday+7) % 7
+
+			return time.Date(t.Year(), t.Month(), t.Day()-daysToMonday,
+				0, 0, 0, 0, t.Location())
+		},
+		step: func(t time.Time, n int) time.Time {
+			return t.AddDate(0, 0, 7*n)
+		},
+		key: func(t time.Time) string {
+			year, week := t.ISOWeek()
+
+			return fmt.Sprintf("%d-W%02d", year, week)
+		},
+	},
+	"month": {
+		start: func(t time.Time) time.Time {
+			return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, t.Location())
+		},
+		step: func(t time.Time, n int) time.Time {
+			return t.AddDate(0, n, 0)
+		},
+		key: func(t time.Time) string {
+			return t.Format("2006-01")
+		},
+	},
+	"quarter": {
+		start: quarterStart,
+		step: func(t time.Time, n int) time.Time {
+			return t.AddDate(0, 3*n, 0)
+		},
+		key: func(t time.Time) string {
+			return fmt.Sprintf("%d-Q%d", t.Year(), quarterOf(t))
+		},
+	},
+	"year": {
+		start: func(t time.Time) time.Time {
+			return time.Date(t.Year(), time.January, 1, 0, 0, 0, 0, t.Location())
+		},
+		step: func(t time.Time, n int) time.Time {
+			return t.AddDate(n, 0, 0)
+		},
+		key: func(t time.Time) string {
+			return t.Format("2006")
+		},
+	},
+}
+
+func GetPeriod(name string) (Period, error) {
+	period, ok := periods[strings.ToLower(name)]
+	if ok == false {
+		return Period{}, errs.ErrNotATimeframe
+	}
+
+	return period, nil
+}
+
+func quarterOf(t time.Time) int {
 	// "Wait, wat, what is this black sorcery?" you might be asking yourself.
 	// If you type e.g. (9-1)/3*3+1 into your calculator you'll be getting 9.
 	// However, if you run this calculation in Go, you'll be getting 7.
@@ -106,16 +140,41 @@ func getQuarterStartEnd(now time.Time, last bool) (time.Time, time.Time) {
 	// This would return the desired result of 7(.0). However, by using integers
 	// we're saving ourselves having to explicitly pull in the math package and
 	// call the Floor function.
-	quarterStartMonth = (month-1)/3*3 + 1
+	return (int(t.Month())-1)/3 + 1
+}
 
-	qStart := time.Date(now.Year(), time.Month(quarterStartMonth), 1,
-		0, 0, 0, 0, now.Location())
-	if last {
-		qStart = qStart.AddDate(0, -3, 0)
+func quarterStart(t time.Time) time.Time {
+	month := (quarterOf(t)-1)*3 + 1
+
+	return time.Date(t.Year(), time.Month(month), 1, 0, 0, 0, 0, t.Location())
+}
+
+func ParsePeriod(str string) (*Timestamp, error) {
+	matches := periodRegex.FindStringSubmatch(str)
+	if len(matches) != 3 {
+		return nil, errors.New("No period found")
 	}
-	qEnd := qStart.AddDate(0, 3, 0).Add(-time.Second)
 
-	return qStart, qEnd
+	frame := strings.ToLower(matches[1])
+	name := strings.ToLower(matches[2])
+
+	ts := new(Timestamp)
+	ts.IsRange = true
+
+	period, ok := periods[name]
+	if ok == false {
+		return ts, nil
+	}
+
+	start := period.Start(time.Now())
+	if frame == "last" || frame == "previous" {
+		start = period.Previous(start)
+	}
+
+	ts.Time = start
+	ts.ToTime = period.Next(start).Add(-time.Second)
+
+	return ts, nil
 }
 
 func Parse(str string) (*Timestamp, error) {
@@ -203,12 +262,12 @@ func IsFullyWithinTimeframe(
 	return true
 }
 
-func DurationWithinTimeframe(
+func ClipToTimeframe(
 	timeframeStart time.Time,
 	timeframeEnd time.Time,
 	vStart time.Time,
 	vEnd time.Time,
-) time.Duration {
+) (time.Time, time.Time) {
 	start := vStart
 	if timeframeStart.IsZero() == false && start.Before(timeframeStart) == true {
 		start = timeframeStart
@@ -218,6 +277,17 @@ func DurationWithinTimeframe(
 	if timeframeEnd.IsZero() == false && end.After(timeframeEnd) == true {
 		end = timeframeEnd
 	}
+
+	return start, end
+}
+
+func DurationWithinTimeframe(
+	timeframeStart time.Time,
+	timeframeEnd time.Time,
+	vStart time.Time,
+	vEnd time.Time,
+) time.Duration {
+	start, end := ClipToTimeframe(timeframeStart, timeframeEnd, vStart, vEnd)
 
 	if end.After(start) == false {
 		return 0

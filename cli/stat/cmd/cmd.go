@@ -2,12 +2,11 @@ package statCmd
 
 import (
 	"encoding/json"
-	"fmt"
+	"maps"
 	"slices"
 	"time"
 
 	"xn--gckvb8fzb.com/zeit/database"
-	"xn--gckvb8fzb.com/zeit/errs"
 	"xn--gckvb8fzb.com/zeit/helpers/argsparser"
 	"xn--gckvb8fzb.com/zeit/helpers/out"
 	"xn--gckvb8fzb.com/zeit/helpers/timestamp"
@@ -105,7 +104,7 @@ var Cmd = &cobra.Command{
 			activeBlockKey = &k
 		}
 
-		_, aggregatedStats, err := aggregateDurations(
+		aggregatedStats, err := aggregateDurations(
 			bs, period, timestampStart, timestampEnd, activeBlockKey)
 		rt.NilOrDie(err)
 
@@ -120,81 +119,65 @@ var Cmd = &cobra.Command{
 	},
 }
 
-func getDayKey(timestamp time.Time) string {
-	return timestamp.Format("2006-01-02") // YYYY-MM-DD format
-}
-
-func getWeekKey(timestamp time.Time) string {
-	year, week := timestamp.ISOWeek()
-	return fmt.Sprintf("%d-W%02d", year, week)
-}
-
-func getMonthKey(timestamp time.Time) string {
-	return timestamp.Format("2006-01") // YYYY-MM format
-}
-
 func aggregateDurations(
 	bs []*block.Block,
 	timeframe string,
 	timeframeStart time.Time,
 	timeframeEnd time.Time,
 	activeBlockKey *string,
-) (
-	map[string]map[string][]string,
-	map[string]map[string]map[string]time.Duration,
-	error,
-) {
+) (map[string]map[string]map[string]time.Duration, error) {
+	period, err := timestamp.GetPeriod(timeframe)
+	if err != nil {
+		return nil, err
+	}
+
 	aggregatedStats := make(map[string]map[string]map[string]time.Duration)
-	tfIndex := make(map[string]map[string][]string)
 
 	aggregatedStats["*"] = make(map[string]map[string]time.Duration)
 	aggregatedStats["*"]["*"] = make(map[string]time.Duration)
 	aggregatedStats["*"]["*"]["*"] = 0
 
 	for _, b := range bs {
-		end := b.TimestampEnd
+		blockEnd := b.TimestampEnd
 		if activeBlockKey != nil && b.GetKey() == *activeBlockKey {
-			end = time.Now()
+			blockEnd = time.Now()
 		}
 
-		duration := timestamp.DurationWithinTimeframe(
-			timeframeStart, timeframeEnd, b.TimestampStart, end)
+		start, end := timestamp.ClipToTimeframe(
+			timeframeStart, timeframeEnd, b.TimestampStart, blockEnd)
 
-		var key string
-		switch timeframe {
-		case "day":
-			key = getDayKey(b.TimestampStart)
-		case "week":
-			key = getWeekKey(b.TimestampStart)
-		case "month":
-			key = getMonthKey(b.TimestampStart)
-		default:
-			return nil, nil, errs.ErrNotATimeframe
-		}
+		for bucket := period.Start(start); bucket.Before(end); {
+			next := period.Next(bucket)
 
-		if _, ok := tfIndex[key]; !ok {
-			tfIndex[key] = make(map[string][]string)
-		}
-		if _, ok := tfIndex[key][b.ProjectSID]; !ok {
-			tfIndex[key][b.ProjectSID] = make([]string, 0)
-		}
+			duration := timestamp.DurationWithinTimeframe(bucket, next, start, end)
+			if duration > 0 {
+				addDuration(aggregatedStats, b.ProjectSID, b.TaskSID,
+					period.Key(bucket), duration)
+			}
 
-		if _, ok := aggregatedStats[b.ProjectSID]; !ok {
-			aggregatedStats[b.ProjectSID] = make(map[string]map[string]time.Duration)
-		}
-
-		if _, ok := aggregatedStats[b.ProjectSID][b.TaskSID]; !ok {
-			aggregatedStats[b.ProjectSID][b.TaskSID] = make(map[string]time.Duration)
-		}
-
-		aggregatedStats[b.ProjectSID][b.TaskSID][key] += duration
-		aggregatedStats["*"]["*"]["*"] += duration
-		if i := slices.Index(tfIndex[key][b.ProjectSID], b.TaskSID); i == -1 {
-			tfIndex[key][b.ProjectSID] = append(tfIndex[key][b.ProjectSID], b.TaskSID)
+			bucket = next
 		}
 	}
 
-	return tfIndex, aggregatedStats, nil
+	return aggregatedStats, nil
+}
+
+func addDuration(
+	aggregatedStats map[string]map[string]map[string]time.Duration,
+	projectSID string,
+	taskSID string,
+	key string,
+	duration time.Duration,
+) {
+	if _, ok := aggregatedStats[projectSID]; !ok {
+		aggregatedStats[projectSID] = make(map[string]map[string]time.Duration)
+	}
+	if _, ok := aggregatedStats[projectSID][taskSID]; !ok {
+		aggregatedStats[projectSID][taskSID] = make(map[string]time.Duration)
+	}
+
+	aggregatedStats[projectSID][taskSID][key] += duration
+	aggregatedStats["*"]["*"]["*"] += duration
 }
 
 func outputCLI(
@@ -239,24 +222,29 @@ func outputCLI(
 		)
 	}
 
-	for projectSID, taskStats := range aggregatedStats {
+	for _, projectSID := range slices.Sorted(maps.Keys(aggregatedStats)) {
 		if projectSID == "*" {
 			continue
 		}
+
+		taskStats := aggregatedStats[projectSID]
+
 		rt.Out.Put(out.Opts{Type: out.Info},
 			"%s",
 			projectSID,
 		)
-		for taskSID, timeframeStats := range taskStats {
+		for _, taskSID := range slices.Sorted(maps.Keys(taskStats)) {
+			timeframeStats := taskStats[taskSID]
+
 			rt.Out.Put(out.Opts{Type: out.Plain},
 				"    %s",
 				taskSID,
 			)
-			for timeframe, totalDuration := range timeframeStats {
+			for _, timeframe := range slices.Sorted(maps.Keys(timeframeStats)) {
 				rt.Out.Put(out.Opts{Type: out.Plain},
 					"      %s: %v",
 					timeframe,
-					totalDuration.Truncate(time.Second),
+					timeframeStats[timeframe].Truncate(time.Second),
 				)
 			}
 		}
