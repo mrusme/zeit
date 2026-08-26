@@ -2,6 +2,7 @@ package block
 
 import (
 	"errors"
+	"slices"
 	"strings"
 	"time"
 
@@ -136,6 +137,66 @@ func ListForProjectTaskSID(
 	}
 
 	return lst, nil
+}
+
+type Unfinished struct {
+	Block          *Block
+	RecommendedEnd time.Time
+}
+
+func ListUnfinished(rows map[string]*Block, activeBlockKey string) []Unfinished {
+	keys := make([]string, 0, len(rows))
+	for key := range rows {
+		keys = append(keys, key)
+	}
+
+	slices.SortFunc(keys, func(a string, b string) int {
+		if order := rows[a].TimestampStart.Compare(
+			rows[b].TimestampStart,
+		); order != 0 {
+			return order
+		}
+
+		return strings.Compare(a, b)
+	})
+
+	var unfinished []Unfinished
+
+	for i, key := range keys {
+		b := rows[key]
+
+		if b.TimestampEnd.IsZero() == false || key == activeBlockKey {
+			continue
+		}
+
+		unfinished = append(unfinished, Unfinished{
+			Block:          b,
+			RecommendedEnd: recommendedEnd(rows, keys[i+1:], b),
+		})
+	}
+
+	return unfinished
+}
+
+func recommendedEnd(
+	rows map[string]*Block,
+	following []string,
+	b *Block,
+) time.Time {
+	for _, key := range following {
+		if rows[key].TimestampStart.After(b.TimestampStart) == false {
+			continue
+		}
+
+		recommended := rows[key].TimestampStart.Add(-1 * time.Second)
+		if recommended.After(b.TimestampStart) == false {
+			return time.Time{}
+		}
+
+		return recommended
+	}
+
+	return time.Time{}
 }
 
 func GroupByProjectTaskSID(

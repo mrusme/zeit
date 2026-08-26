@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	blockEditCmd "xn--gckvb8fzb.com/zeit/cli/block/edit/cmd"
+	blockFixCmd "xn--gckvb8fzb.com/zeit/cli/block/fix/cmd"
 	"xn--gckvb8fzb.com/zeit/database"
 	"xn--gckvb8fzb.com/zeit/helpers/argsparser"
 	"xn--gckvb8fzb.com/zeit/helpers/out"
@@ -239,6 +240,7 @@ func outputJSON(
 
 func init() {
 	Cmd.AddCommand(blockEditCmd.Cmd)
+	Cmd.AddCommand(blockFixCmd.Cmd)
 
 	flags = new(argsparser.ParsedArgs)
 
