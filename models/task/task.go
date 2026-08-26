@@ -23,7 +23,7 @@ func New(ownerKey string, projectSID string, sid string) (*Task, error) {
 	tk.SID = sid
 	tk.ProjectSID = projectSID
 	tk.DisplayName = val.ConvertSIDToDisplayName(sid)
-	tk.Color = out.RandomVsibleHexColor()
+	tk.Color = out.RandomVisibleHexColor()
 	return tk, nil
 }
 

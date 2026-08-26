@@ -21,7 +21,7 @@ func New(ownerKey string, sid string) (*Project, error) {
 	pj.OwnerKey = ownerKey
 	pj.SID = sid
 	pj.DisplayName = val.ConvertSIDToDisplayName(sid)
-	pj.Color = out.RandomVsibleHexColor()
+	pj.Color = out.RandomVisibleHexColor()
 	return pj, nil
 }
 

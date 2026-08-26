@@ -46,7 +46,7 @@ type StatusOut struct {
 	Timer      int64  `json:"timer"`
 }
 
-func RandomVsibleHexColor() string {
+func RandomVisibleHexColor() string {
 	// Randomize R, G, B values within a mid-range (64 and 191) for better
 	// contrast on light and dark backgrounds
 	r := rand.Intn(128) + 64
