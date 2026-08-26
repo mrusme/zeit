@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/go-playground/validator/v10"
 	"xn--gckvb8fzb.com/zeit/errs"
@@ -69,10 +70,21 @@ func ConvertTextToSID(txt string) string {
 }
 
 func FitDisplayName(dn string) string {
-	if len(dn) > 32 {
-		return dn[:32]
+	if runes := []rune(dn); len(runes) > 32 {
+		return string(runes[:32])
 	}
 	return dn
+}
+
+func ConvertSIDToDisplayName(sid string) string {
+	runes := []rune(sid)
+	if len(runes) == 0 {
+		return sid
+	}
+
+	runes[0] = unicode.ToUpper(runes[0])
+
+	return string(runes)
 }
 
 func IsValidTimestampStart(fl validator.FieldLevel) bool {

@@ -1,8 +1,6 @@
 package task
 
 import (
-	"strings"
-
 	"xn--gckvb8fzb.com/zeit/database"
 	"xn--gckvb8fzb.com/zeit/errs"
 	"xn--gckvb8fzb.com/zeit/helpers/out"
@@ -24,7 +22,7 @@ func New(ownerKey string, projectSID string, sid string) (*Task, error) {
 	tk.OwnerKey = ownerKey
 	tk.SID = sid
 	tk.ProjectSID = projectSID
-	tk.DisplayName = strings.ToTitle(sid)
+	tk.DisplayName = val.ConvertSIDToDisplayName(sid)
 	tk.Color = out.RandomVsibleHexColor()
 	return tk, nil
 }

@@ -1,8 +1,6 @@
 package project
 
 import (
-	"strings"
-
 	"xn--gckvb8fzb.com/zeit/database"
 	"xn--gckvb8fzb.com/zeit/errs"
 	"xn--gckvb8fzb.com/zeit/helpers/out"
@@ -22,7 +20,7 @@ func New(ownerKey string, sid string) (*Project, error) {
 	pj.key = database.NewKey(pj)
 	pj.OwnerKey = ownerKey
 	pj.SID = sid
-	pj.DisplayName = strings.ToTitle(sid)
+	pj.DisplayName = val.ConvertSIDToDisplayName(sid)
 	pj.Color = out.RandomVsibleHexColor()
 	return pj, nil
 }

@@ -74,8 +74,8 @@ func GetNotePreview(note string, length int) string {
 		note = "// no note added"
 	}
 	note = strings.ReplaceAll(note, "\n", "⏎")
-	if len(note) > length {
-		note = note[0:length] + "..."
+	if runes := []rune(note); len(runes) > length {
+		note = string(runes[0:length]) + "..."
 	}
 
 	return note
