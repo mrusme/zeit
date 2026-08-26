@@ -1,6 +1,7 @@
 package argsparser
 
 import (
+	"slices"
 	"strings"
 	"time"
 
@@ -8,6 +9,13 @@ import (
 	"xn--gckvb8fzb.com/zeit/helpers/log"
 	"xn--gckvb8fzb.com/zeit/helpers/timestamp"
 	"xn--gckvb8fzb.com/zeit/helpers/val"
+)
+
+var (
+	noiseWords     = []string{"block", "working", "work", "wrk", "all", "at", "from"}
+	projectWords   = []string{"on", "to", "of"}
+	attributeWords = []string{"with", "w"}
+	endWords       = []string{"end", "ends", "ended", "til", "until"}
 )
 
 type ParsedArgs struct {
@@ -21,16 +29,30 @@ type ParsedArgs struct {
 	processed      bool
 }
 
+func isKeyword(word string) bool {
+	return slices.Contains(projectWords, word) == true ||
+		slices.Contains(attributeWords, word) == true ||
+		slices.Contains(endWords, word) == true
+}
+
+func timestampEndsAt(args []string, from int) int {
+	for j := from; j < len(args); j++ {
+		if isKeyword(strings.ToLower(args[j])) == true {
+			return j
+		}
+	}
+
+	return len(args)
+}
+
 func Parse(command string, args []string) (*ParsedArgs, error) {
 	pa := new(ParsedArgs)
 
 	for i := 0; i < len(args); i++ {
 		word := strings.ToLower(args[i])
-		if word == "block" ||
-			word == "working" || word == "work" || word == "wrk" ||
-			word == "all" {
+		if slices.Contains(noiseWords, word) == true {
 			continue
-		} else if word == "on" || word == "to" || word == "of" {
+		} else if slices.Contains(projectWords, word) == true {
 			if len(args) > i+1 {
 				pst := strings.ToLower(args[i+1])
 				found := false
@@ -44,7 +66,7 @@ func Parse(command string, args []string) (*ParsedArgs, error) {
 			} else {
 				return nil, errs.ErrMissingProjectOrTaskSID
 			}
-		} else if word == "with" || word == "w" {
+		} else if slices.Contains(attributeWords, word) == true {
 			if len(args) > i+2 {
 				attr := strings.ToLower(args[i+1])
 				val := args[i+2]
@@ -60,28 +82,18 @@ func Parse(command string, args []string) (*ParsedArgs, error) {
 				return nil, errs.ErrMissingAttrOrVal
 			}
 		} else {
-			if word == "at" || word == "from" {
-				continue
+			stop := timestampEndsAt(args, i)
+			pa.TimestampStart = strings.Join(args[i:stop], " ")
+
+			if stop < len(args) &&
+				slices.Contains(endWords, strings.ToLower(args[stop])) == true {
+				endStop := timestampEndsAt(args, stop+1)
+				pa.TimestampEnd = strings.Join(args[stop+1:endStop], " ")
+				stop = endStop
 			}
 
-			endMarker := -1
-			for j := i; j < len(args); j++ {
-				nextWord := strings.ToLower(args[j])
-				endMarker = -1
-				if nextWord == "end" || nextWord == "ends" || nextWord == "ended" ||
-					nextWord == "til" || nextWord == "until" {
-					endMarker = j
-					break
-				}
-			}
-
-			if endMarker > -1 {
-				pa.TimestampStart = strings.Join(args[i:endMarker], " ")
-				pa.TimestampEnd = strings.Join(args[endMarker+1:], " ")
-			} else {
-				pa.TimestampStart = strings.Join(args[i:], " ")
-			}
-			break
+			i = stop - 1
+			continue
 		}
 	}
 

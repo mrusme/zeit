@@ -17,7 +17,7 @@ type Timestamp struct {
 }
 
 var periodRegex = regexp.MustCompile(
-	`(?m)^(this|current|last|previous){0,1}\s+(hour|day|week|month|quarter|year|decade|century)$`,
+	`(?m)^(?:(this|current|last|previous)\s+)?(hour|day|week|month|quarter|year|decade|century)$`,
 )
 
 func ParsePeriod(str string) (*Timestamp, error) {
@@ -59,22 +59,15 @@ func ParsePeriod(str string) (*Timestamp, error) {
 			day -= 1
 		}
 		ts.Time = time.Date(now.Year(), now.Month(), day, 0, 0, 0, 0, now.Location())
-		ts.ToTime = ts.Time.Add(23 * time.Hour).Add(59 * time.Minute).Add(59 * time.Second)
+		ts.ToTime = ts.Time.AddDate(0, 0, 1).Add(-time.Second)
 	case "week":
-		weekday := now.Weekday()
-		daysToMonday := (weekday - time.Monday + 7) % 7
-		ts.Time = now.
-			Add(-time.Duration(daysToMonday) * 24 * time.Hour).
-			Truncate(24 * time.Hour)
+		daysToMonday := int(now.Weekday()-time.Monday+7) % 7
+		ts.Time = time.Date(now.Year(), now.Month(), now.Day()-daysToMonday,
+			0, 0, 0, 0, now.Location())
 		if previousPeriod {
-			ts.Time = ts.Time.
-				Add(-7 * 24 * time.Hour)
+			ts.Time = ts.Time.AddDate(0, 0, -7)
 		}
-		ts.ToTime = ts.Time.
-			Add(6 * 24 * time.Hour).
-			Add(23 * time.Hour).
-			Add(59 * time.Minute).
-			Add(59 * time.Second)
+		ts.ToTime = ts.Time.AddDate(0, 0, 7).Add(-time.Second)
 	case "month":
 		if previousPeriod == false {
 			ts.Time = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
@@ -101,15 +94,6 @@ func ParsePeriod(str string) (*Timestamp, error) {
 func getQuarterStartEnd(now time.Time, last bool) (time.Time, time.Time) {
 	month := int(now.Month())
 	var quarterStartMonth int
-	var quarterEndMonth int
-
-	if last {
-		// If 'last' is true, work with the previous quarter
-		month -= 3
-		if month <= 0 {
-			month += 12
-		}
-	}
 
 	// "Wait, wat, what is this black sorcery?" you might be asking yourself.
 	// If you type e.g. (9-1)/3*3+1 into your calculator you'll be getting 9.
@@ -125,10 +109,13 @@ func getQuarterStartEnd(now time.Time, last bool) (time.Time, time.Time) {
 	// we're saving ourselves having to explicitly pull in the math package and
 	// call the Floor function.
 	quarterStartMonth = (month-1)/3*3 + 1
-	quarterEndMonth = quarterStartMonth + 2
 
-	qStart := time.Date(now.Year(), time.Month(quarterStartMonth), 1, 0, 0, 0, 0, time.UTC)
-	qEnd := time.Date(now.Year(), time.Month(quarterEndMonth+1), 0, 23, 59, 59, 0, time.UTC)
+	qStart := time.Date(now.Year(), time.Month(quarterStartMonth), 1,
+		0, 0, 0, 0, now.Location())
+	if last {
+		qStart = qStart.AddDate(0, -3, 0)
+	}
+	qEnd := qStart.AddDate(0, 3, 0).Add(-time.Second)
 
 	return qStart, qEnd
 }
