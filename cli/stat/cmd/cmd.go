@@ -125,9 +125,8 @@ func getDayKey(timestamp time.Time) string {
 }
 
 func getWeekKey(timestamp time.Time) string {
-	_, week := timestamp.ISOWeek()
-	year := timestamp.Year()
-	return fmt.Sprintf("%d-W%d", year, week)
+	year, week := timestamp.ISOWeek()
+	return fmt.Sprintf("%d-W%02d", year, week)
 }
 
 func getMonthKey(timestamp time.Time) string {
