@@ -167,16 +167,20 @@ func IsStartWithinTimeframe(
 	return IsWithinTimeframe(timeframeStart, timeframeEnd, vStart)
 }
 
+func endOrNow(vEnd time.Time) time.Time {
+	if vEnd.IsZero() == true {
+		return time.Now()
+	}
+
+	return vEnd
+}
+
 func IsEndWithinTimeframe(
 	timeframeStart time.Time,
 	timeframeEnd time.Time,
 	vEnd time.Time,
 ) bool {
-	if vEnd.IsZero() == true {
-		return IsWithinTimeframe(timeframeStart, timeframeEnd, time.Now())
-	}
-
-	return IsWithinTimeframe(timeframeStart, timeframeEnd, vEnd)
+	return IsWithinTimeframe(timeframeStart, timeframeEnd, endOrNow(vEnd))
 }
 
 func IsFullyWithinTimeframe(
@@ -199,22 +203,43 @@ func IsFullyWithinTimeframe(
 	return true
 }
 
+func DurationWithinTimeframe(
+	timeframeStart time.Time,
+	timeframeEnd time.Time,
+	vStart time.Time,
+	vEnd time.Time,
+) time.Duration {
+	start := vStart
+	if timeframeStart.IsZero() == false && start.Before(timeframeStart) == true {
+		start = timeframeStart
+	}
+
+	end := vEnd
+	if timeframeEnd.IsZero() == false && end.After(timeframeEnd) == true {
+		end = timeframeEnd
+	}
+
+	if end.After(start) == false {
+		return 0
+	}
+
+	return end.Sub(start)
+}
+
 func IsPartiallyWithinTimeframe(
 	timeframeStart time.Time,
 	timeframeEnd time.Time,
 	vStart time.Time,
 	vEnd time.Time,
 ) bool {
-	if IsStartWithinTimeframe(
-		timeframeStart, timeframeEnd, vStart,
-	) == true {
-		return true
-	}
-	if IsEndWithinTimeframe(
-		timeframeStart, timeframeEnd, vEnd,
-	) == true {
-		return true
+	if timeframeStart.IsZero() == false &&
+		endOrNow(vEnd).Before(timeframeStart) == true {
+		return false
 	}
 
-	return false
+	if timeframeEnd.IsZero() == false && vStart.After(timeframeEnd) == true {
+		return false
+	}
+
+	return true
 }
