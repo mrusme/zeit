@@ -10,10 +10,12 @@ type TestDate struct {
 	Result string
 }
 
-func TestParse(t *testing.T) {
-	var err error
-	var tm *Timestamp
+type TestOffset struct {
+	Parse  string
+	Offset time.Duration
+}
 
+func TestParse(t *testing.T) {
 	testFmt := "2006-01-02 15:04:05 -0700"
 
 	now := time.Now()
@@ -35,34 +37,6 @@ func TestParse(t *testing.T) {
 				12, 00, 00, 00, time.Local).Format(testFmt),
 		},
 		{
-			Parse:  "-1.5h",
-			Result: now.Add(-(90 * time.Minute)).Format(testFmt),
-		},
-		{
-			Parse:  "-0.25h",
-			Result: now.Add(-(15 * time.Minute)).Format(testFmt),
-		},
-		{
-			Parse:  "-15m",
-			Result: now.Add(-(15 * time.Minute)).Format(testFmt),
-		},
-		{
-			Parse:  "20 minutes ago",
-			Result: now.Add(-(20 * time.Minute)).Format(testFmt),
-		},
-		{
-			Parse:  "2 hours ago",
-			Result: now.Add(-(2 * time.Hour)).Format(testFmt),
-		},
-		{
-			Parse:  "2 days ago",
-			Result: now.Add(-(2 * 24 * time.Hour)).Format(testFmt),
-		},
-		{
-			Parse:  "Yesterday",
-			Result: now.Add(-(1 * 24 * time.Hour)).Format(testFmt),
-		},
-		{
 			Parse: "Yesterday 12:00",
 			Result: time.Date(now.Year(), now.Month(), now.Day(),
 				12, 00, 00, 00, time.Local).Add(-(1 * 24 * time.Hour)).Format(testFmt),
@@ -70,16 +44,48 @@ func TestParse(t *testing.T) {
 	}
 
 	for _, testdate := range testdates {
-		if tm, err = Parse(testdate.Parse); err != nil {
-			t.Errorf("Parsing failed: %s\n", err)
-			return
-		}
+		t.Run(testdate.Parse, func(t *testing.T) {
+			tm, err := Parse(testdate.Parse)
+			if err != nil {
+				t.Fatalf("Parsing failed: %s", err)
+			}
 
-		tmf := tm.Time.Format(testFmt)
-		if testdate.Result != tmf {
-			t.Errorf("Expected '%s', got '%s'\n", testdate.Result, tmf)
-			return
-		}
-		t.Logf("Expected and got '%s'\n", tmf)
+			tmf := tm.Time.Format(testFmt)
+			if testdate.Result != tmf {
+				t.Errorf("Expected '%s', got '%s'", testdate.Result, tmf)
+			}
+		})
+	}
+}
+
+func TestParseRelative(t *testing.T) {
+	testoffsets := []TestOffset{
+		{Parse: "-1.5h", Offset: -(90 * time.Minute)},
+		{Parse: "-0.25h", Offset: -(15 * time.Minute)},
+		{Parse: "-15m", Offset: -(15 * time.Minute)},
+		{Parse: "20 minutes ago", Offset: -(20 * time.Minute)},
+		{Parse: "2 hours ago", Offset: -(2 * time.Hour)},
+		{Parse: "2 days ago", Offset: -(2 * 24 * time.Hour)},
+		{Parse: "Yesterday", Offset: -(1 * 24 * time.Hour)},
+	}
+
+	for _, testoffset := range testoffsets {
+		t.Run(testoffset.Parse, func(t *testing.T) {
+			before := time.Now()
+			tm, err := Parse(testoffset.Parse)
+			after := time.Now()
+
+			if err != nil {
+				t.Fatalf("Parsing failed: %s", err)
+			}
+
+			earliest := before.Add(testoffset.Offset)
+			latest := after.Add(testoffset.Offset)
+
+			if tm.Time.Before(earliest) == true || tm.Time.After(latest) == true {
+				t.Errorf("Expected a time between '%s' and '%s', got '%s'",
+					earliest, latest, tm.Time)
+			}
+		})
 	}
 }
